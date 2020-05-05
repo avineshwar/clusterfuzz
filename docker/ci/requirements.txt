@@ -10,7 +10,7 @@ mox3==0.18.0
 parameterized==0.6.1
 pbr==1.10.0
 pyfakefs==3.4.3
-pylint==1.9.3
+pylint==2.5.0
 python-mimeparse==1.5.2
 PyYAML==5.2
 six==1.12.0

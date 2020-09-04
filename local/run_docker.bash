@@ -15,7 +15,7 @@
 # limitations under the License.
 
 if [ $# -eq 0 ]; then
-    echo "No arguments provided. Usage: <image path> [optional arguments to 'docker run']"
+  echo "No arguments provided. Usage: <image path> [optional arguments to 'docker run']"
 fi
 
 IMAGE=$1
@@ -41,9 +41,9 @@ else
 fi
 
 sudo docker run -e COMMAND_OVERRIDE="$COMMAND_OVERRIDE" -e SETUP_NFS= -e HOST_UID="$UID" \
-              -e LOCAL_METADATA_SERVER="$docker_ip" -e LOCAL_METADATA_PORT=8080 \
-              -e USE_LOCAL_DIR_FOR_NFS=1 "$MOUNT_ARGS" \
-              -e LOCAL_SRC="$LOCAL_SRC" \
-              -e CONFIG_DIR_OVERRIDE="$CONFIG_DIR_OVERRIDE" \
-              --hostname test-bot-"$USER" \
-              -ti --privileged --cap-add=all "$IMAGE" "$@"
+  -e LOCAL_METADATA_SERVER="$docker_ip" -e LOCAL_METADATA_PORT=8080 \
+  -e USE_LOCAL_DIR_FOR_NFS=1 "$MOUNT_ARGS" \
+  -e LOCAL_SRC="$LOCAL_SRC" \
+  -e CONFIG_DIR_OVERRIDE="$CONFIG_DIR_OVERRIDE" \
+  --hostname test-bot-"$USER" \
+  -ti --privileged --cap-add=all "$IMAGE" "$@"

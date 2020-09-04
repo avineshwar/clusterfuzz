@@ -35,15 +35,14 @@ declare -a afl_sources=(
   "hash.h"
   "Makefile"
 )
-for source_file in "${afl_sources[@]}"
-do
+for source_file in "${afl_sources[@]}"; do
   curl -O "https://raw.githubusercontent.com/google/AFL/master/$source_file"
 done
 make afl-fuzz afl-showmap
 
 # Build AFL runtime sources needed to link against the fuzz target.
 mkdir -p llvm_mode
-curl "https://raw.githubusercontent.com/google/AFL/master/llvm_mode/afl-llvm-rt.o.c" > "llvm_mode/afl-llvm-rt.o.c"
+curl "https://raw.githubusercontent.com/google/AFL/master/llvm_mode/afl-llvm-rt.o.c" >"llvm_mode/afl-llvm-rt.o.c"
 "$CC" -c llvm_mode/afl-llvm-rt.o.c -Wno-pointer-sign -O3
 curl -O "https://raw.githubusercontent.com/llvm/llvm-project/master/compiler-rt/lib/fuzzer/afl/afl_driver.cpp"
 "$CXX" -c afl_driver.cpp -fsanitize=address -O3

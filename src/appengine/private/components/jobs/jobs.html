@@ -48,7 +48,7 @@
         font-size: 12px;
         color: var(--paper-input-container-color);
       }
-      
+
       .paginatedList {
         margin-bottom: 10px;
       }
@@ -273,7 +273,7 @@
                 <div class="container flex">
                   <div class="left">
                     <paper-input label="Name" name="name" value="[[item.name]]" readonly></paper-input>
-        
+
                     <paper-dropdown-menu label="Platform" name="platform" no-animations="true" noink>
                       <paper-listbox selected="[[item.platform]]" attr-for-selected="value" slot="dropdown-content" class="dropdown-content">
                         <template is="dom-repeat" items="[[fieldValues.queues]]">
@@ -317,12 +317,12 @@
                         </multi-listbox>
                       </paper-menu-button>
                     </div>
-        
+
                     <paper-input label="Description (optional)" name="description" value="[[item.description]]"></paper-input>
-        
+
                     <paper-textarea label="Templates (optional)" name="templates" value="[[getTemplatesString(item.templates)]]"></paper-textarea>
                     <br/>
-        
+
                     <div class="label">
                       Custom Build (optional)
                     </div>
@@ -331,11 +331,11 @@
                     </template>
                     <paper-input type="file" id="file_[[index]]" label="File" no-label-float always-float-label$="false"></paper-input>
                     <br/>
-        
+
                     <paper-button raised on-tap="submitForm" data-index$="[[index]]">Save</paper-button>
                     <paper-button class="info" job="[[item]]" raised on-tap="deleteJobTapped">Delete</paper-button>
                   </div>
-        
+
                   <div class="right">
                     <paper-textarea label="Environment String" name="environment_string" value="[[item.environment_string]]" spellcheck="false"></paper-textarea>
                   </div>
@@ -421,7 +421,7 @@
         }
         xhr.send(uploadData);
       }
-      
+
       paramsModified(ev) {
         this.search();
       }
@@ -442,7 +442,7 @@
         this.$.deleteJobDialog.opened = true;
         this.toDelete = e.target.job;
       }
-      
+
       handleRequest() {
         var reqs = this.$.ajax.activeRequests;
         for (let i=0;i<reqs.length;i++) {
@@ -497,7 +497,7 @@
             return true;
         };
       }
-      
+
       searchInputTimeout(ev) {
         let self = this;
         let thisId = ++self.submitId;
@@ -517,7 +517,7 @@
           self.resetPageAndSearch();
         }
       }
-      
+
       resetPageAndSearch() {
         this.params.page = '';
         this.set('result.page', 1);
@@ -531,7 +531,7 @@
       shouldShowEmpty(result, items) {
         return items && items.length == 0;
       }
-      
+
       shouldShowItems(result, items) {
         return items && items.length > 0;
       }

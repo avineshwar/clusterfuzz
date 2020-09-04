@@ -77,7 +77,7 @@ sudo apt-get install -y \
     unzip \
     xvfb
 
-if [ ! $only_reproduce ]; then
+if [ ! "$only_reproduce" ]; then
   # Prerequisite for add-apt-repository.
   sudo apt-get install -y apt-transport-https software-properties-common
 
@@ -85,7 +85,7 @@ if [ ! $only_reproduce ]; then
     glogin
     sudo glinux-add-repo docker-ce-"$distro_codename"
   else
-    curl -fsSL https://download.docker.com/linux/${distro_id,,}/gpg | \
+    curl -fsSL https://download.docker.com/linux/"${distro_id,,}"/gpg | \
         sudo apt-key add -
     sudo add-apt-repository -y \
         "deb [arch=amd64] https://download.docker.com/linux/${distro_id,,} \
@@ -112,7 +112,7 @@ if [ ! $only_reproduce ]; then
   sudo apt-get install -y \
       docker-ce \
       google-cloud-sdk \
-      $java_package    \
+      "$java_package"    \
       liblzma-dev
 
   # Install patchelf - latest version not available on some older distros so we
@@ -155,12 +155,12 @@ else
 fi
 
 # Setup pipenv and install python dependencies.
-$PYTHON -m pip install --user pipenv
-$PYTHON -m pipenv --python $PYTHON_VERSION
-$PYTHON -m pipenv sync --dev
-source "$(${PYTHON} -m pipenv --venv)/bin/activate"
+"$PYTHON" -m pip install --user pipenv
+"$PYTHON" -m pipenv --python "$PYTHON_VERSION"
+"$PYTHON" -m pipenv sync --dev
+source "$("$PYTHON" -m pipenv --venv)/bin/activate"
 
-if [ $install_android_emulator ]; then
+if [ "$install_android_emulator" ]; then
   ANDROID_SDK_INSTALL_DIR=local/bin/android-sdk
   ANDROID_SDK_REVISION=4333796
   ANDROID_VERSION=28
@@ -168,20 +168,20 @@ if [ $install_android_emulator ]; then
 
   # Install the Android emulator and its dependencies. Used in tests and as an
   # option during Android test case reproduction.
-  rm -rf $ANDROID_SDK_INSTALL_DIR
-  mkdir $ANDROID_SDK_INSTALL_DIR
-  curl https://dl.google.com/android/repository/sdk-tools-linux-$ANDROID_SDK_REVISION.zip \
-      --output $ANDROID_SDK_INSTALL_DIR/sdk-tools-linux.zip
-  unzip -d $ANDROID_SDK_INSTALL_DIR $ANDROID_SDK_INSTALL_DIR/sdk-tools-linux.zip
+  rm -rf "$ANDROID_SDK_INSTALL_DIR"
+  mkdir "$ANDROID_SDK_INSTALL_DIR"
+  curl https://dl.google.com/android/repository/sdk-tools-linux-"$ANDROID_SDK_REVISION".zip \
+      --output "$ANDROID_SDK_INSTALL_DIR"/sdk-tools-linux.zip
+  unzip -d "$ANDROID_SDK_INSTALL_DIR" "$ANDROID_SDK_INSTALL_DIR"/sdk-tools-linux.zip
 
-  $ANDROID_TOOLS_BIN/sdkmanager "emulator"
-  $ANDROID_TOOLS_BIN/sdkmanager "platform-tools" "platforms;android-$ANDROID_VERSION"
-  $ANDROID_TOOLS_BIN/sdkmanager "system-images;android-$ANDROID_VERSION;google_apis;x86"
-  $ANDROID_TOOLS_BIN/sdkmanager --licenses
-  $ANDROID_TOOLS_BIN/avdmanager create avd --force -n TestImage -k "system-images;android-$ANDROID_VERSION;google_apis;x86"
+  "$ANDROID_TOOLS_BIN"/sdkmanager "emulator"
+  "$ANDROID_TOOLS_BIN"/sdkmanager "platform-tools" "platforms;android-$ANDROID_VERSION"
+  "$ANDROID_TOOLS_BIN"/sdkmanager "system-images;android-$ANDROID_VERSION;google_apis;x86"
+  "$ANDROID_TOOLS_BIN"/sdkmanager --licenses
+  "$ANDROID_TOOLS_BIN"/avdmanager create avd --force -n TestImage -k "system-images;android-$ANDROID_VERSION;google_apis;x86"
 fi
 
-if [ ! $only_reproduce ]; then
+if [ ! "$only_reproduce" ]; then
   # Install other dependencies (e.g. bower).
   nodeenv -p --prebuilt
   # Unsafe perm flag allows bower and polymer-bundler install for root users as well.
@@ -199,6 +199,6 @@ set +x
 echo "
 
 Installation succeeded!
-Please load environment by running "$PYTHON -m pipenv shell".
+Please load environment by running ""$PYTHON" -m pipenv shell".
 
 "

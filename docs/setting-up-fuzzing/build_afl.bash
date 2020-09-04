@@ -44,9 +44,9 @@ make afl-fuzz afl-showmap
 # Build AFL runtime sources needed to link against the fuzz target.
 mkdir -p llvm_mode
 curl "https://raw.githubusercontent.com/google/AFL/master/llvm_mode/afl-llvm-rt.o.c" > "llvm_mode/afl-llvm-rt.o.c"
-$CC -c llvm_mode/afl-llvm-rt.o.c -Wno-pointer-sign -O3
+"$CC" -c llvm_mode/afl-llvm-rt.o.c -Wno-pointer-sign -O3
 curl -O "https://raw.githubusercontent.com/llvm/llvm-project/master/compiler-rt/lib/fuzzer/afl/afl_driver.cpp"
-$CXX -c afl_driver.cpp -fsanitize=address -O3
+"$CXX" -c afl_driver.cpp -fsanitize=address -O3
 ar r FuzzingEngine.a afl-llvm-rt.o.o afl_driver.o
 
 mv FuzzingEngine.a afl-fuzz afl-showmap ../

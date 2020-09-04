@@ -27,49 +27,28 @@ from metrics import logs
 from system import environment
 
 NON_CRASH_TYPES = [
-    'Data race',
-    'Direct-leak',
-    'Float-cast-overflow',
-    'Incorrect-function-pointer-type',
-    'Integer-overflow',
-    'Non-positive-vla-bound-value',
-    'RUNTIME_ASSERT',
-    'Undefined-shift',
-    'Unsigned-integer-overflow',
+    "Data race",
+    "Direct-leak",
+    "Float-cast-overflow",
+    "Incorrect-function-pointer-type",
+    "Integer-overflow",
+    "Non-positive-vla-bound-value",
+    "RUNTIME_ASSERT",
+    "Undefined-shift",
+    "Unsigned-integer-overflow",
 ]
 
 MEMORY_TOOLS_LABELS = [
-    {
-        'token': 'AddressSanitizer',
-        'label': 'Memory-AddressSanitizer'
-    },
-    {
-        'token': 'LeakSanitizer',
-        'label': 'Memory-LeakSanitizer'
-    },
-    {
-        'token': 'MemorySanitizer',
-        'label': 'Memory-MemorySanitizer'
-    },
-    {
-        'token': 'ThreadSanitizer',
-        'label': 'ThreadSanitizer'
-    },
-    {
-        'token': 'UndefinedBehaviorSanitizer',
-        'label': 'UndefinedBehaviorSanitizer'
-    },
-    {
-        'token': 'afl',
-        'label': 'AFL'
-    },
-    {
-        'token': 'libfuzzer',
-        'label': 'LibFuzzer'
-    },
+    {"token": "AddressSanitizer", "label": "Memory-AddressSanitizer"},
+    {"token": "LeakSanitizer", "label": "Memory-LeakSanitizer"},
+    {"token": "MemorySanitizer", "label": "Memory-MemorySanitizer"},
+    {"token": "ThreadSanitizer", "label": "ThreadSanitizer"},
+    {"token": "UndefinedBehaviorSanitizer", "label": "UndefinedBehaviorSanitizer"},
+    {"token": "afl", "label": "AFL"},
+    {"token": "libfuzzer", "label": "LibFuzzer"},
 ]
 
-STACKFRAME_LINE_REGEX = re.compile(r'\s*#\d+\s+0x[0-9A-Fa-f]+\s*')
+STACKFRAME_LINE_REGEX = re.compile(r"\s*#\d+\s+0x[0-9A-Fa-f]+\s*")
 
 
 def platform_substitution(label, testcase, _):
@@ -78,14 +57,14 @@ def platform_substitution(label, testcase, _):
     if environment.is_chromeos_job(testcase.job_type):
         # ChromeOS fuzzers run on Linux platform, so use correct OS-Chrome for
         # tracking.
-        platform = 'Chrome'
+        platform = "Chrome"
     elif testcase.platform_id:
-        platform = testcase.platform_id.split(':')[0].capitalize()
+        platform = testcase.platform_id.split(":")[0].capitalize()
 
     if not platform:
         return []
 
-    return [label.replace('%PLATFORM%', platform)]
+    return [label.replace("%PLATFORM%", platform)]
 
 
 def current_date():
@@ -95,7 +74,7 @@ def current_date():
 
 def date_substitution(label, *_):
     """Date substitution."""
-    return [label.replace('%YYYY-MM-DD%', current_date())]
+    return [label.replace("%YYYY-MM-DD%", current_date())]
 
 
 def sanitizer_substitution(label, testcase, _):
@@ -104,8 +83,7 @@ def sanitizer_substitution(label, testcase, _):
     memory_tool_labels = get_memory_tool_labels(stacktrace)
 
     return [
-        label.replace('%SANITIZER%', memory_tool)
-        for memory_tool in memory_tool_labels
+        label.replace("%SANITIZER%", memory_tool) for memory_tool in memory_tool_labels
     ]
 
 
@@ -119,18 +97,17 @@ def severity_substitution(label, testcase, security_severity):
     if not data_types.SecuritySeverity.is_valid(security_severity):
         security_severity = data_types.SecuritySeverity.HIGH
 
-    security_severity_string = severity_analyzer.severity_to_string(
-        security_severity)
-    return [label.replace('%SEVERITY%', security_severity_string)]
+    security_severity_string = severity_analyzer.severity_to_string(security_severity)
+    return [label.replace("%SEVERITY%", security_severity_string)]
 
 
 def impact_to_string(impact):
     """Convert an impact value to a human-readable string."""
     impact_map = {
-        data_types.SecurityImpact.STABLE: 'Stable',
-        data_types.SecurityImpact.BETA: 'Beta',
-        data_types.SecurityImpact.HEAD: 'Head',
-        data_types.SecurityImpact.NONE: 'None',
+        data_types.SecurityImpact.STABLE: "Stable",
+        data_types.SecurityImpact.BETA: "Beta",
+        data_types.SecurityImpact.HEAD: "Head",
+        data_types.SecurityImpact.NONE: "None",
         data_types.SecurityImpact.MISSING: data_types.MISSING_VALUE_STRING,
     }
 
@@ -140,13 +117,13 @@ def impact_to_string(impact):
 def _get_impact_from_labels(labels):
     """Get the impact from the label list."""
     labels = [label.lower() for label in labels]
-    if 'security_impact-stable' in labels:
+    if "security_impact-stable" in labels:
         return data_types.SecurityImpact.STABLE
-    if 'security_impact-beta' in labels:
+    if "security_impact-beta" in labels:
         return data_types.SecurityImpact.BETA
-    if 'security_impact-head' in labels:
+    if "security_impact-head" in labels:
         return data_types.SecurityImpact.HEAD
-    if 'security_impact-none' in labels:
+    if "security_impact-none" in labels:
         return data_types.SecurityImpact.NONE
     return data_types.SecurityImpact.MISSING
 
@@ -158,7 +135,7 @@ def update_issue_impact_labels(testcase, issue):
 
     existing_impact = _get_impact_from_labels(issue.labels)
 
-    if testcase.regression.startswith('0:'):
+    if testcase.regression.startswith("0:"):
         # If the regression range starts from the start of time,
         # then we assume that the bug impacts stable.
         new_impact = data_types.SecurityImpact.STABLE
@@ -183,10 +160,9 @@ def update_issue_impact_labels(testcase, issue):
         return
 
     if existing_impact != data_types.SecurityImpact.MISSING:
-        issue.labels.remove('Security_Impact-' +
-                            impact_to_string(existing_impact))
+        issue.labels.remove("Security_Impact-" + impact_to_string(existing_impact))
 
-    issue.labels.add('Security_Impact-' + impact_to_string(new_impact))
+    issue.labels.add("Security_Impact-" + impact_to_string(new_impact))
 
 
 def apply_substitutions(policy, label, testcase, security_severity=None):
@@ -196,10 +172,10 @@ def apply_substitutions(policy, label, testcase, security_severity=None):
         return []
 
     label_substitutions = (
-        ('%PLATFORM%', platform_substitution),
-        ('%YYYY-MM-DD%', date_substitution),
-        ('%SANITIZER%', sanitizer_substitution),
-        ('%SEVERITY%', severity_substitution),
+        ("%PLATFORM%", platform_substitution),
+        ("%YYYY-MM-DD%", date_substitution),
+        ("%SANITIZER%", sanitizer_substitution),
+        ("%SEVERITY%", severity_substitution),
     )
 
     for marker, handler in label_substitutions:
@@ -215,101 +191,108 @@ def apply_substitutions(policy, label, testcase, security_severity=None):
 
 def get_label_pattern(label):
     """Get the label pattern regex."""
-    return re.compile('^' + re.sub(r'%.*?%', r'(.*)', label) + '$', re.IGNORECASE)
+    return re.compile("^" + re.sub(r"%.*?%", r"(.*)", label) + "$", re.IGNORECASE)
 
 
 def get_memory_tool_labels(stacktrace):
     """Distinguish memory tools used and return corresponding labels."""
     # Remove stack frames and paths to source code files. This helps to avoid
     # confusion when function names or source paths contain a memory tool token.
-    data = ''
-    for line in stacktrace.split('\n'):
+    data = ""
+    for line in stacktrace.split("\n"):
         if STACKFRAME_LINE_REGEX.match(line):
             continue
-        data += line + '\n'
+        data += line + "\n"
 
-    labels = [t['label'] for t in MEMORY_TOOLS_LABELS if t['token'] in data]
+    labels = [t["label"] for t in MEMORY_TOOLS_LABELS if t["token"] in data]
     return labels
 
 
 def _get_from_metadata(testcase, name):
     """Get values from testcase metadata."""
     return utils.parse_delimited(
-        testcase.get_metadata(name, ''),
-        delimiter=',',
-        strip=True,
-        remove_empty=True)
+        testcase.get_metadata(name, ""), delimiter=",", strip=True, remove_empty=True
+    )
 
 
-def file_issue(testcase,
-               issue_tracker,
-               security_severity=None,
-               user_email=None,
-               additional_ccs=None):
+def file_issue(
+    testcase,
+    issue_tracker,
+    security_severity=None,
+    user_email=None,
+    additional_ccs=None,
+):
     """File an issue for the given test case."""
-    logs.log('Filing new issue for testcase: %d' % testcase.key.id())
+    logs.log("Filing new issue for testcase: %d" % testcase.key.id())
 
     policy = issue_tracker_policy.get(issue_tracker.project)
-    is_crash = not utils.sub_string_exists_in(NON_CRASH_TYPES,
-                                              testcase.crash_type)
+    is_crash = not utils.sub_string_exists_in(NON_CRASH_TYPES, testcase.crash_type)
     properties = policy.get_new_issue_properties(
-        is_security=testcase.security_flag, is_crash=is_crash)
+        is_security=testcase.security_flag, is_crash=is_crash
+    )
 
     issue = issue_tracker.new_issue()
     issue.title = data_handler.get_issue_summary(testcase)
     issue.body = data_handler.get_issue_description(
-        testcase, reporter=user_email, show_reporter=True)
+        testcase, reporter=user_email, show_reporter=True
+    )
 
     # Add reproducibility flag label.
     if testcase.one_time_crasher_flag:
-        issue.labels.add(policy.label('unreproducible'))
+        issue.labels.add(policy.label("unreproducible"))
     else:
-        issue.labels.add(policy.label('reproducible'))
+        issue.labels.add(policy.label("reproducible"))
 
     # Chromium-specific labels.
-    if issue_tracker.project == 'chromium' and testcase.security_flag:
+    if issue_tracker.project == "chromium" and testcase.security_flag:
         # Add reward labels if this is from an external fuzzer contribution.
         fuzzer = data_types.Fuzzer.query(
-            data_types.Fuzzer.name == testcase.fuzzer_name).get()
+            data_types.Fuzzer.name == testcase.fuzzer_name
+        ).get()
         if fuzzer and fuzzer.external_contribution:
-            issue.labels.add('reward-topanel')
-            issue.labels.add('External-Fuzzer-Contribution')
+            issue.labels.add("reward-topanel")
+            issue.labels.add("External-Fuzzer-Contribution")
 
         update_issue_impact_labels(testcase, issue)
 
     # Add additional labels from the job definition and fuzzer.
     additional_labels = data_handler.get_additional_values_for_variable(
-        'AUTOMATIC_LABELS', testcase.job_type, testcase.fuzzer_name)
+        "AUTOMATIC_LABELS", testcase.job_type, testcase.fuzzer_name
+    )
     for label in additional_labels:
         issue.labels.add(label)
 
     # Add additional components from the job definition and fuzzer.
     automatic_components = data_handler.get_additional_values_for_variable(
-        'AUTOMATIC_COMPONENTS', testcase.job_type, testcase.fuzzer_name)
+        "AUTOMATIC_COMPONENTS", testcase.job_type, testcase.fuzzer_name
+    )
     for component in automatic_components:
         issue.components.add(component)
 
     # Add issue assignee from the job definition and fuzzer.
     automatic_assignee = data_handler.get_additional_values_for_variable(
-        'AUTOMATIC_ASSIGNEE', testcase.job_type, testcase.fuzzer_name)
+        "AUTOMATIC_ASSIGNEE", testcase.job_type, testcase.fuzzer_name
+    )
     if automatic_assignee:
-        issue.status = policy.status('assigned')
+        issue.status = policy.status("assigned")
         issue.assignee = automatic_assignee[0]
     else:
         issue.status = properties.status
 
     # Add additional ccs from the job definition and fuzzer.
     ccs = data_handler.get_additional_values_for_variable(
-        'AUTOMATIC_CCS', testcase.job_type, testcase.fuzzer_name)
+        "AUTOMATIC_CCS", testcase.job_type, testcase.fuzzer_name
+    )
 
     # For externally contributed fuzzers, potentially cc the author.
     # Use fully qualified fuzzer name if one is available.
     fully_qualified_fuzzer_name = (
-        testcase.overridden_fuzzer_name or testcase.fuzzer_name)
-    ccs += external_users.cc_users_for_fuzzer(fully_qualified_fuzzer_name,
-                                              testcase.security_flag)
-    ccs += external_users.cc_users_for_job(testcase.job_type,
-                                           testcase.security_flag)
+        testcase.overridden_fuzzer_name or testcase.fuzzer_name
+    )
+    ccs += external_users.cc_users_for_fuzzer(
+        fully_qualified_fuzzer_name, testcase.security_flag
+    )
+    ccs += external_users.cc_users_for_job(testcase.job_type, testcase.security_flag)
 
     # Add the user as a cc if requested, and any default ccs for this job.
     # Check for additional ccs or labels from the job definition.
@@ -324,47 +307,51 @@ def file_issue(testcase,
 
     # Get view restriction rules for the job.
     issue_restrictions = data_handler.get_value_from_job_definition(
-        testcase.job_type, 'ISSUE_VIEW_RESTRICTIONS', 'security')
-    should_restrict_issue = (
-        issue_restrictions == 'all' or
-        (issue_restrictions == 'security' and testcase.security_flag))
+        testcase.job_type, "ISSUE_VIEW_RESTRICTIONS", "security"
+    )
+    should_restrict_issue = issue_restrictions == "all" or (
+        issue_restrictions == "security" and testcase.security_flag
+    )
 
     has_accountable_people = bool(ccs)
 
     # Check for labels with special logic.
     additional_labels = []
     if should_restrict_issue:
-        additional_labels.append(policy.label('restrict_view'))
+        additional_labels.append(policy.label("restrict_view"))
 
     if has_accountable_people:
-        additional_labels.append(policy.label('reported'))
+        additional_labels.append(policy.label("reported"))
 
     if testcase.security_flag:
-        additional_labels.append(policy.label('security_severity'))
+        additional_labels.append(policy.label("security_severity"))
 
-    additional_labels.append(policy.label('os'))
+    additional_labels.append(policy.label("os"))
 
     # Apply label substitutions.
     for label in itertools.chain(properties.labels, additional_labels):
-        for result in apply_substitutions(policy, label, testcase,
-                                          security_severity):
+        for result in apply_substitutions(policy, label, testcase, security_severity):
             issue.labels.add(result)
 
     issue.body += data_handler.format_issue_information(
-        testcase, properties.issue_body_footer)
-    if (should_restrict_issue and has_accountable_people and
-            policy.deadline_policy_message):
-        issue.body += '\n\n' + policy.deadline_policy_message
+        testcase, properties.issue_body_footer
+    )
+    if (
+        should_restrict_issue
+        and has_accountable_people
+        and policy.deadline_policy_message
+    ):
+        issue.body += "\n\n" + policy.deadline_policy_message
 
     for cc in ccs:
         issue.ccs.add(cc)
 
     # Add additional labels and components from testcase metadata.
-    metadata_labels = _get_from_metadata(testcase, 'issue_labels')
+    metadata_labels = _get_from_metadata(testcase, "issue_labels")
     for label in metadata_labels:
         issue.labels.add(label)
 
-    metadata_components = _get_from_metadata(testcase, 'issue_components')
+    metadata_components = _get_from_metadata(testcase, "issue_components")
     for component in metadata_components:
         issue.components.add(component)
 

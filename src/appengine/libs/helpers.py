@@ -24,8 +24,8 @@ from datastore import data_handler
 from libs import auth
 from libs.issue_management import issue_tracker_utils
 
-VIEW_OPERATION = 'View'
-MODIFY_OPERATION = 'Modify'
+VIEW_OPERATION = "View"
+MODIFY_OPERATION = "Modify"
 TTL_IN_SECONDS = 15 * 60
 
 
@@ -44,31 +44,31 @@ class EarlyExitException(Exception):
             if sys.exc_info()[0] is not None:
                 self.trace_dump = traceback.format_exc()
             else:
-                self.trace_dump = ''.join(traceback.format_stack())
+                self.trace_dump = "".join(traceback.format_stack())
 
     def to_dict(self):
         """Build dict that is used for JSON serialisation."""
         return {
-            'traceDump': self.trace_dump,
-            'message': str(self),
-            'email': get_user_email(),
-            'status': self.status,
-            'type': self.__class__.__name__
+            "traceDump": self.trace_dump,
+            "message": str(self),
+            "email": get_user_email(),
+            "status": self.status,
+            "type": self.__class__.__name__,
         }
 
 
 class AccessDeniedException(EarlyExitException):
     """Serve as an exception for exiting a handler's method with 403."""
 
-    def __init__(self, message=''):
-        super(AccessDeniedException, self).__init__(message, 403, '')
+    def __init__(self, message=""):
+        super(AccessDeniedException, self).__init__(message, 403, "")
 
 
 class UnauthorizedException(EarlyExitException):
     """Serve as an exception for exiting a handler's method with 401."""
 
-    def __init__(self, message=''):
-        super(UnauthorizedException, self).__init__(message, 401, '')
+    def __init__(self, message=""):
+        super(UnauthorizedException, self).__init__(message, 401, "")
 
 
 def get_testcase(testcase_id):
@@ -80,18 +80,17 @@ def get_testcase(testcase_id):
         pass
 
     if not testcase:
-        raise EarlyExitException("Testcase (id=%s) doesn't exist" % testcase_id,
-                                 404)
+        raise EarlyExitException("Testcase (id=%s) doesn't exist" % testcase_id, 404)
     return testcase
 
 
 def get_issue_tracker_for_testcase(testcase):
     """Get an IssueTracker or raise EarlyExitException."""
-    issue_tracker = issue_tracker_utils.get_issue_tracker_for_testcase(
-        testcase)
+    issue_tracker = issue_tracker_utils.get_issue_tracker_for_testcase(testcase)
     if not issue_tracker:
         raise EarlyExitException(
-            "The testcase doesn't have a corresponding issue tracker", 404)
+            "The testcase doesn't have a corresponding issue tracker", 404
+        )
     return issue_tracker
 
 
@@ -105,7 +104,7 @@ def cast(value, fn, error_message):
 
 def should_render_json(accepts, content_type):
     """Check accepts and content_type to see if we should render JSON."""
-    return 'application/json' in accepts or content_type == 'application/json'
+    return "application/json" in accepts or content_type == "application/json"
 
 
 def _is_not_empty(value):
@@ -116,11 +115,13 @@ def _is_not_empty(value):
     return bool(value)
 
 
-def get_or_exit(fn,
-                not_found_message,
-                error_message,
-                not_found_exception=_DoNotCatchException,
-                non_empty_fn=_is_not_empty):
+def get_or_exit(
+    fn,
+    not_found_message,
+    error_message,
+    not_found_exception=_DoNotCatchException,
+    non_empty_fn=_is_not_empty,
+):
     """Get an entity using `fn`. If the returning entity is nothing (e.g. None or
       a tuple on Nones), it raises 404.
 
@@ -140,8 +141,9 @@ def get_or_exit(fn,
         pass
     except Exception:
         raise EarlyExitException(
-            '%s (%s: %s)' % (error_message, sys.exc_info()[0], str(
-                sys.exc_info()[1])), 500)
+            "%s (%s: %s)" % (error_message, sys.exc_info()[0], str(sys.exc_info()[1])),
+            500,
+        )
 
     if non_empty_fn(result):
         return result
@@ -153,19 +155,18 @@ def get_user_email():
     try:
         return auth.get_current_user().email
     except Exception:
-        return ''
+        return ""
 
 
 def get_integer_key(request):
     """Convenience function for getting an integer datastore key ID."""
-    key = request.get('key')
+    key = request.get("key")
     try:
         return int(key)
     except (ValueError, KeyError):
-        raise EarlyExitException('Invalid key format.', 400)
+        raise EarlyExitException("Invalid key format.", 400)
 
 
 def log(message, operation_type):
     """Logs operation being carried by current logged-in user."""
-    logging.info('ClusterFuzz: %s (%s): %s.', operation_type, get_user_email(),
-                 message)
+    logging.info("ClusterFuzz: %s (%s): %s.", operation_type, get_user_email(), message)

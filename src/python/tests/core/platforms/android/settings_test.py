@@ -19,8 +19,7 @@ import unittest
 from platforms.android import settings
 from tests.test_libs import helpers as test_helpers
 
-DATA_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), 'settings_data')
+DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings_data")
 
 
 def _read_data_file(filename):
@@ -31,18 +30,18 @@ class GetDeviceCodenameTest(unittest.TestCase):
     """Tests for get_device_codename."""
 
     def setUp(self):
-        test_helpers.patch(self, ['platforms.android.adb.run_command'])
+        test_helpers.patch(self, ["platforms.android.adb.run_command"])
         test_helpers.patch_environ(self)
 
-        output = _read_data_file('get_device_codename_output.txt')
+        output = _read_data_file("get_device_codename_output.txt")
         self.mock.run_command.return_value = output
 
     def test_by_serial(self):
         """Ensure that we report the correct codename for serial number."""
-        os.environ['ANDROID_SERIAL'] = '123456789012'
-        self.assertEqual(settings.get_device_codename(), 'device1')
+        os.environ["ANDROID_SERIAL"] = "123456789012"
+        self.assertEqual(settings.get_device_codename(), "device1")
 
     def test_by_usb(self):
         """Ensure that we report the correct codename for a usb device."""
-        os.environ['ANDROID_SERIAL'] = 'usb:2-4.2'
-        self.assertEqual(settings.get_device_codename(), 'device2')
+        os.environ["ANDROID_SERIAL"] = "usb:2-4.2"
+        self.assertEqual(settings.get_device_codename(), "device2")

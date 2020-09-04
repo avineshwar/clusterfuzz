@@ -31,27 +31,36 @@ class Handler(base_handler.Handler):
     @staticmethod
     def update_issue(testcase, issue_id, needs_summary_update):
         """Associate (or update) an existing issue with the testcase."""
-        issue_id = helpers.cast(issue_id, int,
-                                'Issue ID (%s) is not a number!' % issue_id)
+        issue_id = helpers.cast(
+            issue_id, int, "Issue ID (%s) is not a number!" % issue_id
+        )
         issue_tracker = helpers.get_issue_tracker_for_testcase(testcase)
 
-        issue = helpers.get_or_exit(lambda: issue_tracker.get_issue(issue_id),
-                                    'Issue (id=%d) is not found!' % issue_id,
-                                    'Failed to get the issue (id=%s).' % issue_id,
-                                    Exception)
+        issue = helpers.get_or_exit(
+            lambda: issue_tracker.get_issue(issue_id),
+            "Issue (id=%d) is not found!" % issue_id,
+            "Failed to get the issue (id=%s)." % issue_id,
+            Exception,
+        )
 
         if not issue.is_open:
             raise helpers.EarlyExitException(
-                ('The issue (%d) is already closed and further updates are not'
-                 ' allowed. Please file a new issue instead!') % issue_id, 400)
+                (
+                    "The issue (%d) is already closed and further updates are not"
+                    " allowed. Please file a new issue instead!"
+                )
+                % issue_id,
+                400,
+            )
 
         if not testcase.is_crash():
             raise helpers.EarlyExitException(
-                'This is not a crash testcase, so issue update is not applicable.',
-                400)
+                "This is not a crash testcase, so issue update is not applicable.", 400
+            )
 
-        issue_comment = data_handler.get_issue_description(testcase,
-                                                           helpers.get_user_email())
+        issue_comment = data_handler.get_issue_description(
+            testcase, helpers.get_user_email()
+        )
         if needs_summary_update:
             issue.title = data_handler.get_issue_summary(testcase)
 
@@ -68,7 +77,7 @@ class Handler(base_handler.Handler):
 
         data_handler.update_group_bug(testcase.group_id)
 
-        helpers.log('Updated issue %sd' % issue_id, helpers.MODIFY_OPERATION)
+        helpers.log("Updated issue %sd" % issue_id, helpers.MODIFY_OPERATION)
 
     @handler.post(handler.JSON, handler.JSON)
     @handler.require_csrf_token
@@ -76,8 +85,8 @@ class Handler(base_handler.Handler):
     @handler.check_testcase_access
     def post(self, testcase):
         """Update an issue."""
-        issue_id = request.get('issueId')
-        needs_summary_update = request.get('needsSummaryUpdate')
+        issue_id = request.get("issueId")
+        needs_summary_update = request.get("needsSummaryUpdate")
 
         self.update_issue(testcase, issue_id, needs_summary_update)
         return self.render_json(show.get_testcase_detail(testcase))

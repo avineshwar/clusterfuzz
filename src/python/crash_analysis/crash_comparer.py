@@ -50,8 +50,7 @@ def _similarity_ratio(string_1, string_2):
     if length_sum == 0:
         return 1.0
 
-    return (length_sum - _levenshtein_distance(string_1, string_2)) / (
-        1.0 * length_sum)
+    return (length_sum - _levenshtein_distance(string_1, string_2)) / (1.0 * length_sum)
 
 
 def longest_common_subsequence(first_frames, second_frames):
@@ -59,8 +58,7 @@ def longest_common_subsequence(first_frames, second_frames):
     first_len = len(first_frames)
     second_len = len(second_frames)
 
-    solution = [[0 for _ in range(second_len + 1)]
-                for _ in range(first_len + 1)]
+    solution = [[0 for _ in range(second_len + 1)] for _ in range(first_len + 1)]
 
     for i in range(1, first_len + 1):
         for j in range(1, second_len + 1):
@@ -74,6 +72,7 @@ def longest_common_subsequence(first_frames, second_frames):
 
 class CrashComparer(object):
     """Compares two crash results."""
+
     COMPARE_THRESHOLD = 0.8
     SAME_FRAMES_THRESHOLD = 2
 
@@ -94,7 +93,7 @@ class CrashComparer(object):
 
         # If there is a fuzzer hash string in state, then rely on exact comparison.
         # Since we failed the check above, our hashes don't match.
-        if 'FuzzerHash=' in self.crash_state_1:
+        if "FuzzerHash=" in self.crash_state_1:
             return False
 
         # TODO(aarya): Improve this algorithm and leverage other parts of
@@ -102,8 +101,10 @@ class CrashComparer(object):
         crash_state_lines_1 = self.crash_state_1.splitlines()
         crash_state_lines_2 = self.crash_state_2.splitlines()
 
-        if (longest_common_subsequence(crash_state_lines_1, crash_state_lines_2) >=
-                self.SAME_FRAMES_THRESHOLD):
+        if (
+            longest_common_subsequence(crash_state_lines_1, crash_state_lines_2)
+            >= self.SAME_FRAMES_THRESHOLD
+        ):
             return True
 
         lines_compared = 0
@@ -112,8 +113,9 @@ class CrashComparer(object):
             if i >= len(crash_state_lines_2):
                 break
 
-            similarity_ratio = _similarity_ratio(crash_state_lines_1[i],
-                                                 crash_state_lines_2[i])
+            similarity_ratio = _similarity_ratio(
+                crash_state_lines_1[i], crash_state_lines_2[i]
+            )
             lines_compared += 1
             similarity_ratio_sum += similarity_ratio
 

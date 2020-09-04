@@ -33,7 +33,8 @@ class Handler(base_handler.Handler):
 
         if severity is not None:
             severity = helpers.cast(
-                severity, int, 'Invalid value for security severity (%s).' % severity)
+                severity, int, "Invalid value for security severity (%s)." % severity
+            )
 
         additional_ccs = []
         if cc_me:
@@ -44,19 +45,19 @@ class Handler(base_handler.Handler):
             issue_tracker,
             security_severity=severity,
             user_email=user_email,
-            additional_ccs=additional_ccs)
+            additional_ccs=additional_ccs,
+        )
 
         if not issue_id:
-            raise helpers.EarlyExitException(
-                'Unable to create new issue.', 500)
+            raise helpers.EarlyExitException("Unable to create new issue.", 500)
 
     @handler.post(handler.JSON, handler.JSON)
     @handler.require_csrf_token
     @handler.check_testcase_access
     def post(self, testcase):
         """Create an issue."""
-        cc_me = request.get('ccMe')
-        severity = request.get('severity')
+        cc_me = request.get("ccMe")
+        severity = request.get("severity")
 
         self.create_issue(testcase, severity, cc_me)
         return self.render_json(show.get_testcase_detail(testcase))

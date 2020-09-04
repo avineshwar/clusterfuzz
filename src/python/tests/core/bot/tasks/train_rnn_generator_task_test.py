@@ -26,12 +26,12 @@ from system import shell
 from tests.test_libs import helpers as test_helpers
 from tests.test_libs import test_utils
 
-MODEL_DIR = '/fake/model_directory'
+MODEL_DIR = "/fake/model_directory"
 
 # The directory containing sample corpus.
 DATA_DIRECTORY = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__), os.pardir, 'fuzzers', 'ml', 'rnn', 'data'))
+    os.path.join(os.path.dirname(__file__), os.pardir, "fuzzers", "ml", "rnn", "data")
+)
 
 
 class GetLastSavedModelTest(fake_fs_unittest.TestCase):
@@ -47,9 +47,8 @@ class GetLastSavedModelTest(fake_fs_unittest.TestCase):
 
         # Create fake index file and data file.
         # Model_1 has two complete files.
-        self.model_1_data_path = os.path.join(MODEL_DIR,
-                                              'model_1.data-00000-of-00001')
-        self.model_1_index_path = os.path.join(MODEL_DIR, 'model_1.index')
+        self.model_1_data_path = os.path.join(MODEL_DIR, "model_1.data-00000-of-00001")
+        self.model_1_index_path = os.path.join(MODEL_DIR, "model_1.index")
 
         # Create two files for model_1.
         self.fs.create_file(self.model_1_data_path)
@@ -60,9 +59,8 @@ class GetLastSavedModelTest(fake_fs_unittest.TestCase):
         os.utime(self.model_1_index_path, (1330711140, 1330711160))
 
         # Model_2 has two complete files.
-        self.model_2_data_path = os.path.join(MODEL_DIR,
-                                              'model_2.data-00000-of-00001')
-        self.model_2_index_path = os.path.join(MODEL_DIR, 'model_2.index')
+        self.model_2_data_path = os.path.join(MODEL_DIR, "model_2.data-00000-of-00001")
+        self.model_2_index_path = os.path.join(MODEL_DIR, "model_2.index")
 
         # Create two files for model_2.
         self.fs.create_file(self.model_2_data_path)
@@ -76,10 +74,7 @@ class GetLastSavedModelTest(fake_fs_unittest.TestCase):
         """Test latest model is returned as a dictionary."""
         # Model_2 is newer than model_1, so we will get model_2.
         model_paths = train_rnn_generator_task.get_last_saved_model(MODEL_DIR)
-        expected = {
-            'data': self.model_2_data_path,
-            'index': self.model_2_index_path
-        }
+        expected = {"data": self.model_2_data_path, "index": self.model_2_index_path}
         self.assertDictEqual(model_paths, expected)
 
     def test_get_valid_model(self):
@@ -90,10 +85,7 @@ class GetLastSavedModelTest(fake_fs_unittest.TestCase):
 
         # Now we should get model_1.
         model_paths = train_rnn_generator_task.get_last_saved_model(MODEL_DIR)
-        expected = {
-            'data': self.model_1_data_path,
-            'index': self.model_1_index_path
-        }
+        expected = {"data": self.model_1_data_path, "index": self.model_1_index_path}
         self.assertDictEqual(model_paths, expected)
 
     def test_no_valid_model(self):
@@ -116,21 +108,23 @@ class ExecuteTaskTest(unittest.TestCase):
     def setUp(self):
         test_helpers.patch_environ(self)
 
-        self.fuzzer_name = 'fake_fuzzer'
-        self.job_type = 'fake_job'
+        self.fuzzer_name = "fake_fuzzer"
+        self.job_type = "fake_job"
         self.temp_dir = tempfile.mkdtemp()
 
-        os.environ['FUZZ_INPUTS_DISK'] = self.temp_dir
+        os.environ["FUZZ_INPUTS_DISK"] = self.temp_dir
 
-        test_helpers.patch(self, [
-            'bot.tasks.train_rnn_generator_task.get_corpus',
-            'bot.tasks.train_rnn_generator_task.train_rnn',
-            'bot.tasks.train_rnn_generator_task.upload_model_to_gcs',
-        ])
+        test_helpers.patch(
+            self,
+            [
+                "bot.tasks.train_rnn_generator_task.get_corpus",
+                "bot.tasks.train_rnn_generator_task.train_rnn",
+                "bot.tasks.train_rnn_generator_task.upload_model_to_gcs",
+            ],
+        )
 
         self.mock.get_corpus.return_value = True
-        self.mock.train_rnn.return_value = new_process.ProcessResult(
-            return_code=0)
+        self.mock.train_rnn.return_value = new_process.ProcessResult(return_code=0)
         self.mock.upload_model_to_gcs.return_value = True
 
     def tearDown(self):
@@ -139,19 +133,20 @@ class ExecuteTaskTest(unittest.TestCase):
     def test_execute(self):
         """Test execute task."""
         input_directory = os.path.join(
-            self.temp_dir,
-            self.fuzzer_name + train_rnn_generator_task.CORPUS_DIR_SUFFIX)
+            self.temp_dir, self.fuzzer_name + train_rnn_generator_task.CORPUS_DIR_SUFFIX
+        )
         model_directory = os.path.join(
-            self.temp_dir,
-            self.fuzzer_name + train_rnn_generator_task.MODEL_DIR_SUFFIX)
+            self.temp_dir, self.fuzzer_name + train_rnn_generator_task.MODEL_DIR_SUFFIX
+        )
         log_directory = os.path.join(
-            self.temp_dir,
-            self.fuzzer_name + train_rnn_generator_task.LOG_DIR_SUFFIX)
+            self.temp_dir, self.fuzzer_name + train_rnn_generator_task.LOG_DIR_SUFFIX
+        )
 
         train_rnn_generator_task.execute_task(self.fuzzer_name, self.job_type)
 
-        self.mock.train_rnn.assert_called_once_with(input_directory,
-                                                    model_directory, log_directory)
+        self.mock.train_rnn.assert_called_once_with(
+            input_directory, model_directory, log_directory
+        )
 
 
 @test_utils.integration
@@ -159,7 +154,7 @@ class MLRnnTrainTaskIntegrationTest(unittest.TestCase):
     """ML RNN training integration tests."""
 
     def setUp(self):
-        self.input_directory = os.path.join(DATA_DIRECTORY, 'input')
+        self.input_directory = os.path.join(DATA_DIRECTORY, "input")
         self.model_directory = tempfile.mkdtemp()
         self.log_directory = tempfile.mkdtemp()
 
@@ -175,20 +170,27 @@ class MLRnnTrainTaskIntegrationTest(unittest.TestCase):
         """Test train RNN model on a simple corpus."""
         # No model exists in model directory.
         self.assertFalse(
-            train_rnn_generator_task.get_last_saved_model(self.model_directory))
+            train_rnn_generator_task.get_last_saved_model(self.model_directory)
+        )
 
         # The training should be fast (a few seconds) since sample corpus is
         # extremely small.
         result = train_rnn_generator_task.train_rnn(
-            self.input_directory, self.model_directory, self.log_directory,
-            self.batch_size, self.hidden_state_size, self.hidden_layer_size)
+            self.input_directory,
+            self.model_directory,
+            self.log_directory,
+            self.batch_size,
+            self.hidden_state_size,
+            self.hidden_layer_size,
+        )
 
         self.assertEqual(result.return_code, constants.ExitCode.SUCCESS)
         self.assertFalse(result.timed_out)
 
         # At least one model exists.
         self.assertTrue(
-            train_rnn_generator_task.get_last_saved_model(self.model_directory))
+            train_rnn_generator_task.get_last_saved_model(self.model_directory)
+        )
 
     def test_small_corpus(self):
         """Test small corpus situation."""
@@ -196,13 +198,18 @@ class MLRnnTrainTaskIntegrationTest(unittest.TestCase):
         self.batch_size = 100
 
         result = train_rnn_generator_task.train_rnn(
-            self.input_directory, self.model_directory, self.log_directory,
-            self.batch_size, self.hidden_state_size, self.hidden_layer_size)
+            self.input_directory,
+            self.model_directory,
+            self.log_directory,
+            self.batch_size,
+            self.hidden_state_size,
+            self.hidden_layer_size,
+        )
 
-        self.assertEqual(result.return_code,
-                         constants.ExitCode.CORPUS_TOO_SMALL)
+        self.assertEqual(result.return_code, constants.ExitCode.CORPUS_TOO_SMALL)
         self.assertFalse(result.timed_out)
 
         # No model exsits after execution.
         self.assertFalse(
-            train_rnn_generator_task.get_last_saved_model(self.model_directory))
+            train_rnn_generator_task.get_last_saved_model(self.model_directory)
+        )

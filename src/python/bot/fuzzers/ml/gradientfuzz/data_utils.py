@@ -34,8 +34,7 @@ class ProgramDataset(keras.utils.Sequence):
       from loading entire dataset as a single Numpy array).
       """
 
-    def __init__(self, input_file_paths, label_file_paths, batch_size,
-                 is_rnn_dataset):
+    def __init__(self, input_file_paths, label_file_paths, batch_size, is_rnn_dataset):
         """
           ProgramDataset loads inputs from saved .npy files on the fly.
           """
@@ -49,11 +48,13 @@ class ProgramDataset(keras.utils.Sequence):
         return int(np.floor(len(self._input_file_paths) / self._batch_size))
 
     def __getitem__(self, idx):
-        batch_x_paths = self._input_file_paths[idx * self._batch_size:(idx + 1) *
-                                               self._batch_size]
+        batch_x_paths = self._input_file_paths[
+            idx * self._batch_size : (idx + 1) * self._batch_size
+        ]
         batch_x = np.stack([np.load(file_name) for file_name in batch_x_paths])
-        batch_y_paths = self._label_file_paths[idx * self._batch_size:(idx + 1) *
-                                               self._batch_size]
+        batch_y_paths = self._label_file_paths[
+            idx * self._batch_size : (idx + 1) * self._batch_size
+        ]
         batch_y = np.stack([np.load(file_name) for file_name in batch_y_paths])
 
         # RNN data shape is (B, T, D) -- batch_sz, timesteps, data_dim
@@ -96,50 +97,56 @@ def get_dataset_from(config):
       """
 
     # Grabs saved NumPy files.
-    dataset_path = os.path.join(constants.DATASET_DIR, config['dataset_name'])
+    dataset_path = os.path.join(constants.DATASET_DIR, config["dataset_name"])
 
     if not os.path.isdir(dataset_path):
-        print('Error: Dataset directory {} does not exist.'.format(dataset_path))
+        print("Error: Dataset directory {} does not exist.".format(dataset_path))
         return None
 
     train_dataset, val_dataset = None, None
 
     # Sorted for consistency in train/val split when re-loading datasets.
     input_file_paths = natsorted(
-        list(
-            glob.glob(
-                os.path.join(dataset_path, constants.STANDARD_INPUT_DIR, '*'))))
+        list(glob.glob(os.path.join(dataset_path, constants.STANDARD_INPUT_DIR, "*")))
+    )
     label_file_paths = natsorted(
-        list(
-            glob.glob(
-                os.path.join(dataset_path, constants.STANDARD_LABEL_DIR, '*'))))
+        list(glob.glob(os.path.join(dataset_path, constants.STANDARD_LABEL_DIR, "*")))
+    )
 
     # Check if we need an RNN dataset
-    is_rnn_dataset = constants.MODEL_TYPE_MAP[config[
-        'architecture']] == constants.ModelTypes.RNN
+    is_rnn_dataset = (
+        constants.MODEL_TYPE_MAP[config["architecture"]] == constants.ModelTypes.RNN
+    )
 
     # Perform val split if specified.
-    val_split = config['val_split']
+    val_split = config["val_split"]
     if 0 < val_split < 1:
-        print('Splitting data into {}/{} train/val.'.format(1 - val_split,
-                                                            val_split))
+        print("Splitting data into {}/{} train/val.".format(1 - val_split, val_split))
         split_idx = int(np.floor(len(input_file_paths) * val_split))
         train_input_file_paths = input_file_paths[split_idx:]
         train_label_file_paths = label_file_paths[split_idx:]
         val_input_file_paths = input_file_paths[:split_idx]
         val_label_file_paths = label_file_paths[:split_idx]
-        train_dataset = ProgramDataset(train_input_file_paths,
-                                       train_label_file_paths, config['batch_size'],
-                                       is_rnn_dataset)
-        val_dataset = ProgramDataset(val_input_file_paths, val_label_file_paths,
-                                     config['batch_size'], is_rnn_dataset)
+        train_dataset = ProgramDataset(
+            train_input_file_paths,
+            train_label_file_paths,
+            config["batch_size"],
+            is_rnn_dataset,
+        )
+        val_dataset = ProgramDataset(
+            val_input_file_paths,
+            val_label_file_paths,
+            config["batch_size"],
+            is_rnn_dataset,
+        )
     else:
-        print('Not using a validation set!')
-        train_dataset = ProgramDataset(input_file_paths, label_file_paths,
-                                       config['batch_size'], is_rnn_dataset)
+        print("Not using a validation set!")
+        train_dataset = ProgramDataset(
+            input_file_paths, label_file_paths, config["batch_size"], is_rnn_dataset
+        )
 
     # Populate config with dataset input/output shapes.
-    config['input_shape'] = train_dataset.get_input_shape()
-    config['output_dim'] = train_dataset.get_output_dim()
+    config["input_shape"] = train_dataset.get_input_shape()
+    config["output_dim"] = train_dataset.get_output_dim()
 
     return train_dataset, val_dataset

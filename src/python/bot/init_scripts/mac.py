@@ -22,19 +22,22 @@ from bot.init_scripts import init_runner
 
 # Example: ('Path: /var/folders/bg/tn9j_qb532s4fz11rzz7m6sc0000gm/0'
 #           '//com.apple.LaunchServices-134500.csstore')
-LAUNCH_SERVICE_PATH_REGEX = re.compile('^Path: (.+)$')
-LSREGISTER_CMD = ('/System/Library/Frameworks/CoreServices.framework'
-                  '/Frameworks/LaunchServices.framework/Versions/A/Support'
-                  '/lsregister -dump')
+LAUNCH_SERVICE_PATH_REGEX = re.compile("^Path: (.+)$")
+LSREGISTER_CMD = (
+    "/System/Library/Frameworks/CoreServices.framework"
+    "/Frameworks/LaunchServices.framework/Versions/A/Support"
+    "/lsregister -dump"
+)
 
 
 def _execute(cmd):
     """Execute command and return output as an iterator."""
     proc = subprocess.Popen(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    )
     try:
-        for line in iter(proc.stdout.readline, b''):
-            yield line.decode('utf-8')
+        for line in iter(proc.stdout.readline, b""):
+            yield line.decode("utf-8")
     finally:
         proc.kill()
 
@@ -46,7 +49,7 @@ def get_launch_service_path():
         if not m:
             continue
 
-        return '/'.join(m.group(1).split('/')[:5])
+        return "/".join(m.group(1).split("/")[:5])
 
     return None
 
@@ -58,8 +61,8 @@ def clear_launch_service_data():
         return
     # Best effort removal. We use shutil instead of shell.remove_directory since
     # it's too noisy and there are many files that cannot be removed.
-    shutil.rmtree(os.path.join(path, '0'), ignore_errors=True)
-    shutil.rmtree(os.path.join(path, 'T'), ignore_errors=True)
+    shutil.rmtree(os.path.join(path, "0"), ignore_errors=True)
+    shutil.rmtree(os.path.join(path, "T"), ignore_errors=True)
 
 
 def run():

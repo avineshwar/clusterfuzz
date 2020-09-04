@@ -29,11 +29,11 @@ def make_required_dirs():
 
 
 def get_full_path(run_name):
-    '''
+    """
       TODO(ryancao): Warning -- Assumes all runs (independent of architecture)
           have UNIQUE names!!!
-      '''
-    for full_model_path in glob.glob(os.path.join(constants.MODEL_DIR, '*', '*')):
+      """
+    for full_model_path in glob.glob(os.path.join(constants.MODEL_DIR, "*", "*")):
         model_run_name = os.path.split(full_model_path)[1]
         if model_run_name == run_name:
             return full_model_path
@@ -45,14 +45,14 @@ def run_exists(run_name):
 
 
 def pretty_print(config):
-    print('\n===== CONFIG =====')
+    print("\n===== CONFIG =====")
     for k, v in config.items():
-        print('{} : {}'.format(k, v))
-    print('==================\n')
+        print("{} : {}".format(k, v))
+    print("==================\n")
 
 
 def config_from_args(args):
-    '''
+    """
       Creates config file from command-line args.
 
       Args:
@@ -61,30 +61,30 @@ def config_from_args(args):
       Returns:
           config (dict): Run configuration settings dictionary.
           boolean: True if required args are present, and False otherwise.
-      '''
+      """
 
     # Load existing run.
     if run_exists(args.run_name):
-        print('Resuming training of run {}...'.format(args.run_name))
+        print("Resuming training of run {}...".format(args.run_name))
         config_filepath = os.path.join(
-            get_full_path(args.run_name), constants.CONFIG_FILENAME)
-        config = json.load(open(config_filepath, 'r'))
+            get_full_path(args.run_name), constants.CONFIG_FILENAME
+        )
+        config = json.load(open(config_filepath, "r"))
         return config, False
 
     # Otherwise, initialize with given arguments.
     config = vars(args)
-    config['cur_epoch'] = 0
+    config["cur_epoch"] = 0
 
     # Inittialize run name.
-    if config['run_name'] is None:
+    if config["run_name"] is None:
         default_run_name = constants.default_run_name()
-        print(
-            'No run name specified -- defaulting to {}...'.format(default_run_name))
-        config['run_name'] = default_run_name
+        print("No run name specified -- defaulting to {}...".format(default_run_name))
+        config["run_name"] = default_run_name
 
     # Create run using NEUZZ hyperparameters.
     if args.neuzz_config:
-        print('Creating new model with NEUZZ config...')
+        print("Creating new model with NEUZZ config...")
         constants.populate_with_neuzz(config)
 
     # All runs MUST have dataset_dir and architecture.
@@ -93,8 +93,8 @@ def config_from_args(args):
 
     # Run name and directories
     os.makedirs(
-        os.path.join(constants.MODEL_DIR, config['architecture'],
-                     config['run_name']))
+        os.path.join(constants.MODEL_DIR, config["architecture"], config["run_name"])
+    )
 
     save_model_config(config)
     return config, True
@@ -102,14 +102,15 @@ def config_from_args(args):
 
 def save_model_config(config):
     config_filepath = os.path.join(
-        get_full_path(config['run_name']), constants.CONFIG_FILENAME)
-    with open(config_filepath, 'w') as f:
+        get_full_path(config["run_name"]), constants.CONFIG_FILENAME
+    )
+    with open(config_filepath, "w") as f:
         json.dump(config, f)
 
 
 def get_latest_filename(config):
     model_filepath = os.path.join(
-        get_full_path(config['run_name']), constants.CHECKPOINT_HEADER + '*')
-    latest_filename = sorted(glob.glob(model_filepath),
-                             key=os.path.getmtime)[0]
+        get_full_path(config["run_name"]), constants.CHECKPOINT_HEADER + "*"
+    )
+    latest_filename = sorted(glob.glob(model_filepath), key=os.path.getmtime)[0]
     return latest_filename

@@ -28,9 +28,9 @@ class ReportCspFailureHandler(base_handler.Handler):
     @handler.check_user_access(need_privileged_access=False)
     def post(self):
         """Handle a POST request."""
-        report = request.get('csp-report')
+        report = request.get("csp-report")
         if not report:
-            raise helpers.EarlyExitException('No CSP report.', 400)
+            raise helpers.EarlyExitException("No CSP report.", 400)
 
-        logs.log_error('CSP violation: {}'.format(report))
-        return 'OK'
+        logs.log_error("CSP violation: {}".format(report))
+        return "OK"

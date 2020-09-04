@@ -31,17 +31,18 @@ class Handler(base_handler.Handler):
         # Don't delete testcases that have an associated issue.
         if testcase.bug_information:
             raise helpers.EarlyExitException(
-                'The testcase (id=%d) with an assigned issue cannot be deleted.' %
-                testcase_id, 400)
+                "The testcase (id=%d) with an assigned issue cannot be deleted."
+                % testcase_id,
+                400,
+            )
 
         testcase.key.delete()
-        helpers.log('Deleted testcase %s' %
-                    testcase_id, helpers.MODIFY_OPERATION)
+        helpers.log("Deleted testcase %s" % testcase_id, helpers.MODIFY_OPERATION)
 
     @handler.post(handler.JSON, handler.JSON)
     @handler.require_csrf_token
     @handler.check_admin_access
     def post(self):
         """Delete a testcase."""
-        testcase_id = request.get('testcaseId')
-        return self.render_json({'testcaseId': self.delete_testcase(testcase_id)})
+        testcase_id = request.get("testcaseId")
+        return self.render_json({"testcaseId": self.delete_testcase(testcase_id)})

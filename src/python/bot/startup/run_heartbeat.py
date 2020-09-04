@@ -28,20 +28,21 @@ from builtins import str
 # to be able to import dependencies directly, but we must store these in
 # subdirectories of common so that they are shared with App Engine.
 from python.base import modules
+
 modules.fix_module_search_paths()
 
 
-BEAT_SCRIPT = 'heartbeat.py'
+BEAT_SCRIPT = "heartbeat.py"
 
 
 def main():
     """Update the heartbeat if there is bot activity."""
     if len(sys.argv) < 2:
-        print('Usage: %s <log file>' % sys.argv[0])
+        print("Usage: %s <log file>" % sys.argv[0])
         return
 
     environment.set_bot_environment()
-    logs.configure('run_heartbeat')
+    logs.configure("run_heartbeat")
 
     log_filename = sys.argv[1]
     previous_state = None
@@ -54,23 +55,26 @@ def main():
 
     while True:
         beat_command = [
-            beat_interpreter, beat_script_path,
-            str(previous_state), log_filename
+            beat_interpreter,
+            beat_script_path,
+            str(previous_state),
+            log_filename,
         ]
 
         try:
             previous_state = subprocess.check_output(
-                beat_command, stderr=subprocess.STDOUT)
+                beat_command, stderr=subprocess.STDOUT
+            )
         except subprocess.CalledProcessError as e:
-            logs.log_error('Failed to beat.', output=e.output)
+            logs.log_error("Failed to beat.", output=e.output)
         except Exception:
-            logs.log_error('Failed to beat.')
+            logs.log_error("Failed to beat.")
 
         # See if our run timed out, if yes bail out.
         if data_handler.bot_run_timed_out():
             break
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     with ndb_init.context():
         main()

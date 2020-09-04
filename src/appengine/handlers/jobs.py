@@ -36,7 +36,7 @@ PAGE_SIZE = 10
 MORE_LIMIT = 50 - PAGE_SIZE  # exactly 5 pages
 
 FILTERS = [
-    filters.Keyword([], 'keywords', 'q'),
+    filters.Keyword([], "keywords", "q"),
 ]
 
 
@@ -45,22 +45,22 @@ def get_queues():
     queues = []
     for name, display_name in six.iteritems(tasks.TASK_QUEUE_DISPLAY_NAMES):
         queue = {
-            'name': name,
-            'display_name': display_name,
+            "name": name,
+            "display_name": display_name,
         }
         queues.append(queue)
 
-    queues.sort(key=lambda q: q['display_name'])
+    queues.sort(key=lambda q: q["display_name"])
     return queues
 
 
 def _job_to_dict(job):
     """Return a dict of job items along with associated fuzzers."""
     result = job.to_dict()
-    result['id'] = job.key.id()
+    result["id"] = job.key.id()
     # Adding all associated fuzzers with each job.
     fuzzers = data_types.Fuzzer.query().filter(data_types.Fuzzer.jobs == job.name)
-    result['fuzzers'] = [fuzzer.name for fuzzer in fuzzers]
+    result["fuzzers"] = [fuzzer.name for fuzzer in fuzzers]
     return result
 
 
@@ -69,22 +69,23 @@ def get_results():
 
     # Return jobs sorted alphabetically by name
     query = datastore_query.Query(data_types.Job)
-    query.order('name', is_desc=False)
+    query.order("name", is_desc=False)
     params = dict(request.iterparams())
     filters.add(query, params, FILTERS)
 
-    page = helpers.cast(request.get('page', 1), int, "'page' is not an int.")
+    page = helpers.cast(request.get("page", 1), int, "'page' is not an int.")
     items, total_pages, total_items, has_more = query.fetch_page(
-        page=page, page_size=PAGE_SIZE, projection=None, more_limit=MORE_LIMIT)
-    helpers.log('Jobs', helpers.VIEW_OPERATION)
+        page=page, page_size=PAGE_SIZE, projection=None, more_limit=MORE_LIMIT
+    )
+    helpers.log("Jobs", helpers.VIEW_OPERATION)
 
     result = {
-        'hasMore': has_more,
-        'items': [_job_to_dict(item) for item in items],
-        'page': page,
-        'pageSize': PAGE_SIZE,
-        'totalItems': total_items,
-        'totalPages': total_pages,
+        "hasMore": has_more,
+        "items": [_job_to_dict(item) for item in items],
+        "page": page,
+        "pageSize": PAGE_SIZE,
+        "totalItems": total_items,
+        "totalPages": total_pages,
     }
     return result, params
 
@@ -96,29 +97,31 @@ class Handler(base_handler.Handler):
     @handler.check_user_access(need_privileged_access=True)
     def get(self):
         """Handle a get request."""
-        templates = list(data_types.JobTemplate.query().order(
-            data_types.JobTemplate.name))
+        templates = list(
+            data_types.JobTemplate.query().order(data_types.JobTemplate.name)
+        )
         queues = get_queues()
         fuzzers = [
-            fuzzer.name for fuzzer in data_types.Fuzzer.query(projection=['name'])
+            fuzzer.name for fuzzer in data_types.Fuzzer.query(projection=["name"])
         ]
         result, params = get_results()
 
         return self.render(
-            'jobs.html',
+            "jobs.html",
             values={
-                'result': result,
-                'templates': templates,
-                'fieldValues': {
-                    'csrf_token': form.generate_csrf_token(),
-                    'fuzzers': fuzzers,
-                    'queues': queues,
-                    'update_job_url': '/update-job',
-                    'update_job_template_url': '/update-job-template',
-                    'upload_info': gcs.prepare_blob_upload()._asdict(),
+                "result": result,
+                "templates": templates,
+                "fieldValues": {
+                    "csrf_token": form.generate_csrf_token(),
+                    "fuzzers": fuzzers,
+                    "queues": queues,
+                    "update_job_url": "/update-job",
+                    "update_job_template_url": "/update-job-template",
+                    "upload_info": gcs.prepare_blob_upload()._asdict(),
                 },
-                'params': params,
-            })
+                "params": params,
+            },
+        )
 
 
 class UpdateJob(base_handler.GcsUploadHandler):
@@ -129,31 +132,32 @@ class UpdateJob(base_handler.GcsUploadHandler):
     @handler.require_csrf_token
     def post(self):
         """Handle a post request."""
-        name = request.form.get('name')
+        name = request.form.get("name")
         if not name:
-            raise helpers.EarlyExitException(
-                'Please give this job a name!', 400)
+            raise helpers.EarlyExitException("Please give this job a name!", 400)
 
         if not data_types.Job.VALID_NAME_REGEX.match(name):
             raise helpers.EarlyExitException(
-                'Job name can only contain letters, numbers, dashes and underscores.',
-                400)
+                "Job name can only contain letters, numbers, dashes and underscores.",
+                400,
+            )
 
-        fuzzers = request.form.get('fuzzers', []).split(',')
-        templates = request.form.get('templates', '').splitlines()
+        fuzzers = request.form.get("fuzzers", []).split(",")
+        templates = request.form.get("templates", "").splitlines()
         for template in templates:
             if not data_types.JobTemplate.query(
-                    data_types.JobTemplate.name == template).get():
-                raise helpers.EarlyExitException('Invalid template name(s) specified.',
-                                                 400)
+                data_types.JobTemplate.name == template
+            ).get():
+                raise helpers.EarlyExitException(
+                    "Invalid template name(s) specified.", 400
+                )
 
-        new_platform = request.form.get('platform')
-        if not new_platform or new_platform == 'undefined':
-            raise helpers.EarlyExitException(
-                'No platform provided for job.', 400)
+        new_platform = request.form.get("platform")
+        if not new_platform or new_platform == "undefined":
+            raise helpers.EarlyExitException("No platform provided for job.", 400)
 
-        description = request.form.get('description', '')
-        environment_string = request.form.get('environment_string', '')
+        description = request.form.get("description", "")
+        environment_string = request.form.get("environment_string", "")
         previous_custom_binary_revision = 0
 
         job = data_types.Job.query(data_types.Job.name == name).get()
@@ -183,8 +187,8 @@ class UpdateJob(base_handler.GcsUploadHandler):
             job.custom_binary_filename = blob_info.filename
             job.custom_binary_revision = previous_custom_binary_revision + 1
 
-        if job.custom_binary_key and 'CUSTOM_BINARY' not in job.environment_string:
-            job.environment_string += '\nCUSTOM_BINARY = True'
+        if job.custom_binary_key and "CUSTOM_BINARY" not in job.environment_string:
+            job.environment_string += "\nCUSTOM_BINARY = True"
 
         job.put()
 
@@ -195,16 +199,16 @@ class UpdateJob(base_handler.GcsUploadHandler):
         # pylint: disable=unexpected-keyword-arg
         _ = data_handler.get_all_job_type_names(__memoize_force__=True)
 
-        helpers.log('Job created %s' % name, helpers.MODIFY_OPERATION)
+        helpers.log("Job created %s" % name, helpers.MODIFY_OPERATION)
         template_values = {
-            'title':
-                'Success',
-            'message': ('Job %s is successfully updated. '
-                        'Redirecting back to jobs page...') % name,
-            'redirect_url':
-                '/jobs',
+            "title": "Success",
+            "message": (
+                "Job %s is successfully updated. " "Redirecting back to jobs page..."
+            )
+            % name,
+            "redirect_url": "/jobs",
         }
-        return self.render('message.html', template_values)
+        return self.render("message.html", template_values)
 
 
 class UpdateJobTemplate(base_handler.Handler):
@@ -215,23 +219,26 @@ class UpdateJobTemplate(base_handler.Handler):
     @handler.require_csrf_token
     def post(self):
         """Handle a post request."""
-        name = request.form.get('name')
+        name = request.form.get("name")
         if not name:
-            raise helpers.EarlyExitException(
-                'Please give this template a name!', 400)
+            raise helpers.EarlyExitException("Please give this template a name!", 400)
 
         if not data_types.Job.VALID_NAME_REGEX.match(name):
             raise helpers.EarlyExitException(
-                'Template name can only contain letters, numbers, dashes and '
-                'underscores.', 400)
+                "Template name can only contain letters, numbers, dashes and "
+                "underscores.",
+                400,
+            )
 
-        environment_string = request.form.get('environment_string')
+        environment_string = request.form.get("environment_string")
         if not environment_string:
             raise helpers.EarlyExitException(
-                'No environment string provided for job template.', 400)
+                "No environment string provided for job template.", 400
+            )
 
         template = data_types.JobTemplate.query(
-            data_types.JobTemplate.name == name).get()
+            data_types.JobTemplate.name == name
+        ).get()
         if not template:
             template = data_types.JobTemplate()
 
@@ -239,17 +246,18 @@ class UpdateJobTemplate(base_handler.Handler):
         template.environment_string = environment_string
         template.put()
 
-        helpers.log('Template created %s' % name, helpers.MODIFY_OPERATION)
+        helpers.log("Template created %s" % name, helpers.MODIFY_OPERATION)
 
         template_values = {
-            'title':
-                'Success',
-            'message': ('Template %s is successfully updated. '
-                        'Redirecting back to jobs page...') % name,
-            'redirect_url':
-                '/jobs',
+            "title": "Success",
+            "message": (
+                "Template %s is successfully updated. "
+                "Redirecting back to jobs page..."
+            )
+            % name,
+            "redirect_url": "/jobs",
         }
-        return self.render('message.html', template_values)
+        return self.render("message.html", template_values)
 
 
 class DeleteJobHandler(base_handler.Handler):
@@ -263,7 +271,7 @@ class DeleteJobHandler(base_handler.Handler):
         key = helpers.get_integer_key(request)
         job = ndb.Key(data_types.Job, key).get()
         if not job:
-            raise helpers.EarlyExitException('Job not found.', 400)
+            raise helpers.EarlyExitException("Job not found.", 400)
 
         # Delete from fuzzers' jobs' list.
         for fuzzer in ndb_utils.get_all_from_model(data_types.Fuzzer):
@@ -280,8 +288,8 @@ class DeleteJobHandler(base_handler.Handler):
         # Delete job.
         job.key.delete()
 
-        helpers.log('Deleted job %s' % job.name, helpers.MODIFY_OPERATION)
-        return self.redirect('/jobs')
+        helpers.log("Deleted job %s" % job.name, helpers.MODIFY_OPERATION)
+        return self.redirect("/jobs")
 
 
 class JsonHandler(base_handler.Handler):

@@ -24,31 +24,29 @@ from local.remote.handlers import linux
 from local.remote.handlers import mac
 from local.remote.handlers import windows
 
-paramiko.util.log_to_file('paramiko.log')
+paramiko.util.log_to_file("paramiko.log")
 api.env.connection_attempts = 3
 api.env.timeout = 3
 
 
 def _get_handler_ctor(args):
     """Get a Handler class given arguments."""
-    if 'linux' in args.instance_name:
+    if "linux" in args.instance_name:
         return linux.Handler
-    if 'windows' in args.instance_name:
+    if "windows" in args.instance_name:
         return windows.Handler
-    if 'golo' in args.instance_name:
+    if "golo" in args.instance_name:
         return mac.Handler
-    if 'android-build' in args.instance_name:
+    if "android-build" in args.instance_name:
         return android_chrome_lab.Handler
-    raise NotImplementedError('Unsupported platform.')
+    raise NotImplementedError("Unsupported platform.")
 
 
 def _args_to_dict(args, method):
     """Convert args to dict that is compatible with the method's argument."""
     arg_names = inspect.getfullargspec(method).args[1:]
     args_dict = {
-        k: v
-        for k, v in six.iteritems(vars(args))
-        if k in arg_names and v is not None
+        k: v for k, v in six.iteritems(vars(args)) if k in arg_names and v is not None
     }
     return args_dict
 

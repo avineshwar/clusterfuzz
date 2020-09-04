@@ -26,20 +26,20 @@ class Handler(base_handler.Handler):
         def _display_status(status):
             """Return status for display."""
             if status == data_types.TestcaseVariantStatus.PENDING:
-                return 'Pending'
+                return "Pending"
             if status == data_types.TestcaseVariantStatus.REPRODUCIBLE:
-                return 'Reproducible'
+                return "Reproducible"
             if status == data_types.TestcaseVariantStatus.FLAKY:
-                return 'Flaky'
+                return "Flaky"
             if status == data_types.TestcaseVariantStatus.UNREPRODUCIBLE:
-                return 'Unreproducible'
+                return "Unreproducible"
 
-            return 'Unknown'
+            return "Unknown"
 
         items = []
         variants = data_types.TestcaseVariant.query(
-            data_types.TestcaseVariant.testcase_id == testcase.key.id()).order(
-                data_types.TestcaseVariant.job_type)
+            data_types.TestcaseVariant.testcase_id == testcase.key.id()
+        ).order(data_types.TestcaseVariant.job_type)
         for variant in variants:
             if variant.status == data_types.TestcaseVariantStatus.UNREPRODUCIBLE:
                 # Avoid showing these to keep table small and minimize confusion with
@@ -48,24 +48,23 @@ class Handler(base_handler.Handler):
 
             is_pending = variant.status == data_types.TestcaseVariantStatus.PENDING
             item = {
-                'isPending': is_pending,
-                'status': _display_status(variant.status),
-                'job': variant.job_type,
+                "isPending": is_pending,
+                "status": _display_status(variant.status),
+                "job": variant.job_type,
             }
             if not is_pending:
-                item.update({
-                    'revision':
-                        variant.revision,
-                    'crashType':
-                        variant.crash_type,
-                    'crashStateLines': (variant.crash_state or '').strip().splitlines(),
-                    'securityFlag':
-                        variant.security_flag,
-                    'isSimilar':
-                        variant.is_similar,
-                    'reproducerKey':
-                        variant.reproducer_key,
-                })
+                item.update(
+                    {
+                        "revision": variant.revision,
+                        "crashType": variant.crash_type,
+                        "crashStateLines": (variant.crash_state or "")
+                        .strip()
+                        .splitlines(),
+                        "securityFlag": variant.security_flag,
+                        "isSimilar": variant.is_similar,
+                        "reproducerKey": variant.reproducer_key,
+                    }
+                )
             items.append(item)
 
         return items
@@ -77,14 +76,14 @@ class Handler(base_handler.Handler):
         items = []
         message = None
         if testcase.one_time_crasher_flag:
-            message = 'Not run for unreproducible testcases.'
+            message = "Not run for unreproducible testcases."
         elif not testcase.minimized_keys:
-            message = 'Pending, waiting for minimization to finish.'
+            message = "Pending, waiting for minimization to finish."
         else:
             items = self.get_variants(testcase)
 
         response = {
-            'items': items,
-            'message': message,
+            "items": items,
+            "message": message,
         }
         return self.render_json(response)

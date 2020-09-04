@@ -26,10 +26,12 @@ import bot.fuzzers.ml.gradientfuzz.constants as constants
 import bot.fuzzers.ml.gradientfuzz.plot_utils as plot_utils
 
 
-def plot_coverage_distribution(dataset_name,
-                               all_coverage,
-                               plot_name_prefix='',
-                               plot_title='Distribution of Branch Coverage'):
+def plot_coverage_distribution(
+    dataset_name,
+    all_coverage,
+    plot_name_prefix="",
+    plot_title="Distribution of Branch Coverage",
+):
     """
       Plots a single histogram and saves under data/[dataset_name].
 
@@ -55,12 +57,17 @@ def plot_coverage_distribution(dataset_name,
         total_branches += len(numpy_in)
         proportions_covered.append(total_covered / total_branches)
 
-    print('\nTotal covered/total branches: {}/{} ({}%)'.format(
-        total_covered, total_branches, 100 * total_covered / total_branches))
+    print(
+        "\nTotal covered/total branches: {}/{} ({}%)".format(
+            total_covered, total_branches, 100 * total_covered / total_branches
+        )
+    )
 
     save_path = os.path.join(
-        constants.DATASET_DIR, dataset_name,
-        plot_name_prefix + constants.BRANCH_COVERAGE_PLOT_FILENAME)
+        constants.DATASET_DIR,
+        dataset_name,
+        plot_name_prefix + constants.BRANCH_COVERAGE_PLOT_FILENAME,
+    )
 
     plot_utils.plot_histogram(
         proportions_covered,
@@ -68,7 +75,8 @@ def plot_coverage_distribution(dataset_name,
         plot_title,
         x_axis_title=constants.HIST_COVERAGE_X_TITLE,
         y_axis_title=constants.HIST_COVERAGE_Y_TITLE,
-        bins=constants.HIST_NUM_BINS_COVERAGE)
+        bins=constants.HIST_NUM_BINS_COVERAGE,
+    )
 
 
 def count_covered_branches_from(dataset_name, num_bins=None):
@@ -88,8 +96,10 @@ def count_covered_branches_from(dataset_name, num_bins=None):
           N/A
       """
     all_dataset_labels = glob.glob(
-        os.path.join(constants.DATASET_DIR, dataset_name,
-                     constants.STANDARD_LABEL_DIR, '*'))
+        os.path.join(
+            constants.DATASET_DIR, dataset_name, constants.STANDARD_LABEL_DIR, "*"
+        )
+    )
     total_covered = 0
     total_branches = 0
     proportions_covered = []
@@ -100,19 +110,24 @@ def count_covered_branches_from(dataset_name, num_bins=None):
         total_branches += len(numpy_in)
         proportions_covered.append(total_covered / total_branches)
 
-    print('Total covered/total branches: {}/{} ({}%)'.format(
-        total_covered, total_branches, 100 * total_covered / total_branches))
+    print(
+        "Total covered/total branches: {}/{} ({}%)".format(
+            total_covered, total_branches, 100 * total_covered / total_branches
+        )
+    )
 
-    save_path = os.path.join(constants.DATASET_DIR, dataset_name,
-                             constants.BRANCH_COVERAGE_PLOT_FILENAME)
+    save_path = os.path.join(
+        constants.DATASET_DIR, dataset_name, constants.BRANCH_COVERAGE_PLOT_FILENAME
+    )
 
     plot_utils.plot_histogram(
         proportions_covered,
         save_path,
-        'Distribution of Branch Coverage',
+        "Distribution of Branch Coverage",
         x_axis_title=constants.HIST_COVERAGE_X_TITLE,
         y_axis_title=constants.HIST_COVERAGE_Y_TITLE,
-        bins=num_bins)
+        bins=num_bins,
+    )
 
 
 def get_args():
@@ -128,11 +143,11 @@ def get_args():
       """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--dataset-name',
+        "--dataset-name",
         required=True,
-        help='Name of dataset (look under {}/).'.format(constants.DATASET_DIR))
-    parser.add_argument(
-        '--num-bins', help='Number of bins in histogram.', type=int)
+        help="Name of dataset (look under {}/).".format(constants.DATASET_DIR),
+    )
+    parser.add_argument("--num-bins", help="Number of bins in histogram.", type=int)
     return parser.parse_args()
 
 
@@ -145,5 +160,5 @@ def main():
     count_covered_branches_from(args.dataset_name, args.num_bins)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

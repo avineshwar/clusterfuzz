@@ -31,29 +31,25 @@ class Handler(base_handler.Handler):
     @handler.cron()
     def get(self):
         """Process a GET request."""
-        subscription = db_config.get_value('predator_result_topic')
+        subscription = db_config.get_value("predator_result_topic")
         if not subscription:
-            logs.log('No Predator subscription configured. Aborting.')
+            logs.log("No Predator subscription configured. Aborting.")
             return
 
         client = pubsub.PubSubClient()
-        messages = client.pull_from_subscription(
-            subscription, acknowledge=True)
+        messages = client.pull_from_subscription(subscription, acknowledge=True)
         for message in messages:
             message = json.loads(message.data)
-            testcase_id = message['crash_identifiers']
+            testcase_id = message["crash_identifiers"]
             try:
                 testcase = data_handler.get_testcase_by_id(testcase_id)
             except errors.InvalidTestcaseError:
-                logs.log('Testcase %s no longer exists.' % str(testcase_id))
+                logs.log("Testcase %s no longer exists." % str(testcase_id))
                 continue
 
-            testcase.set_metadata(
-                'predator_result', message, update_testcase=False)
-            testcase.delete_metadata('blame_pending', update_testcase=False)
+            testcase.set_metadata("predator_result", message, update_testcase=False)
+            testcase.delete_metadata("blame_pending", update_testcase=False)
             testcase.put()
-            logs.log('Set predator result for testcase %d.' %
-                     testcase.key.id())
+            logs.log("Set predator result for testcase %d." % testcase.key.id())
 
-        logs.log('Finished processing predator results. %d total.' %
-                 len(messages))
+        logs.log("Finished processing predator results. %d total." % len(messages))

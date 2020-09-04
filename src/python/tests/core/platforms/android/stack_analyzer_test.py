@@ -21,8 +21,8 @@ from crash_analysis.stack_parsing import stack_analyzer
 from system import environment
 from tests.test_libs import helpers as test_helpers
 
-DATA_DIRECTORY = os.path.join(os.path.dirname(__file__), 'stack_analyzer_data')
-TEST_JOB_NAME = 'test'
+DATA_DIRECTORY = os.path.join(os.path.dirname(__file__), "stack_analyzer_data")
+TEST_JOB_NAME = "test"
 
 KERNEL_REPRO = """kernel/build u'c059b39e1caf2b96aa376582eeb93062b43d69d5'
 kernel/manifest u'75a64986ab455f8b45087b8ad54db68bcb8988f4'
@@ -51,15 +51,12 @@ def _mock_symbolize_stacktrace(stacktrace, enable_inline_frames=True):
     return stacktrace
 
 
-def _mock_fetch_artifact_get(bid,
-                             target,
-                             regex,
-                             output_directory,
-                             output_filename_override=None):
+def _mock_fetch_artifact_get(
+    bid, target, regex, output_directory, output_filename_override=None
+):
     if output_filename_override:
-        artifact_path = os.path.join(
-            output_directory, output_filename_override)
-        with open(artifact_path, 'w') as artifact_file:
+        artifact_path = os.path.join(output_directory, output_filename_override)
+        with open(artifact_path, "w") as artifact_file:
             artifact_file.write(KERNEL_REPRO)
 
 
@@ -71,16 +68,19 @@ class AndroidStackAnalyzerTest(unittest.TestCase):
 
     def setUp(self):
         test_helpers.patch_environ(self)
-        test_helpers.patch(self, [
-            'crash_analysis.stack_parsing.stack_symbolizer.symbolize_stacktrace',
-            'metrics.logs.log_error',
-        ])
-        os.environ['JOB_NAME'] = TEST_JOB_NAME
+        test_helpers.patch(
+            self,
+            [
+                "crash_analysis.stack_parsing.stack_symbolizer.symbolize_stacktrace",
+                "metrics.logs.log_error",
+            ],
+        )
+        os.environ["JOB_NAME"] = TEST_JOB_NAME
 
         self.mock.symbolize_stacktrace.side_effect = _mock_symbolize_stacktrace
 
     def _mock_read_data_from_file(self, file_path, eval_data=True, default=None):
-        if file_path.endswith('repo.prop'):
+        if file_path.endswith("repo.prop"):
             return self._real_read_data_from_file(file_path, eval_data, default)
 
         return None
@@ -92,30 +92,33 @@ class AndroidStackAnalyzerTest(unittest.TestCase):
 
     def test_syzkaller_kasan_android_with_env(self):
         """Test syzkaller kasan."""
-        environment.set_value('OS_OVERRIDE', 'ANDROID')
+        environment.set_value("OS_OVERRIDE", "ANDROID")
         environment.set_bot_environment()
         self._real_read_data_from_file = utils.read_data_from_file
-        test_helpers.patch(self, [
-            'platforms.android.fetch_artifact.get',
-            'platforms.android.kernel_utils.get_kernel_hash_and_build_id',
-            'platforms.android.kernel_utils.get_kernel_name',
-            'platforms.android.settings.get_product_brand',
-            'google_cloud_utils.storage.get_file_from_cache_if_exists',
-            'google_cloud_utils.storage.store_file_in_cache',
-            'base.utils.write_data_to_file', 'base.utils.read_data_from_file'
-        ])
+        test_helpers.patch(
+            self,
+            [
+                "platforms.android.fetch_artifact.get",
+                "platforms.android.kernel_utils.get_kernel_hash_and_build_id",
+                "platforms.android.kernel_utils.get_kernel_name",
+                "platforms.android.settings.get_product_brand",
+                "google_cloud_utils.storage.get_file_from_cache_if_exists",
+                "google_cloud_utils.storage.store_file_in_cache",
+                "base.utils.write_data_to_file",
+                "base.utils.read_data_from_file",
+            ],
+        )
         self.mock.get.side_effect = _mock_fetch_artifact_get
-        self.mock.get_kernel_hash_and_build_id.return_value = '40e9b2ff3a2', '12345'
-        self.mock.get_kernel_name.return_value = 'device_kernel'
-        self.mock.get_product_brand.return_value = 'google'
+        self.mock.get_kernel_hash_and_build_id.return_value = "40e9b2ff3a2", "12345"
+        self.mock.get_kernel_name.return_value = "device_kernel"
+        self.mock.get_product_brand.return_value = "google"
         self.mock.get_file_from_cache_if_exists.return_value = False
         self.mock.store_file_in_cache.return_value = None
         self.mock.write_data_to_file = None
         self.mock.read_data_from_file.side_effect = self._mock_read_data_from_file
 
-        data = self._read_test_data('kasan_syzkaller_android.txt')
-        expected_stack = self._read_test_data(
-            'kasan_syzkaller_android_linkified.txt')
+        data = self._read_test_data("kasan_syzkaller_android.txt")
+        expected_stack = self._read_test_data("kasan_syzkaller_android_linkified.txt")
         actual_state = stack_analyzer.get_crash_data(data)
 
         self.assertEqual(actual_state.crash_stacktrace, expected_stack)

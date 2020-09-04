@@ -25,71 +25,76 @@ from tests.test_libs import helpers
 from tests.test_libs import test_utils
 
 
-@test_utils.with_cloud_emulators('datastore')
+@test_utils.with_cloud_emulators("datastore")
 class OpenReproducibleTestcaseTasksSchedulerTest(unittest.TestCase):
     """Tests OpenReproducibleTestcaseTasksScheduler."""
 
     def setUp(self):
-        flaskapp = flask.Flask('testflask')
+        flaskapp = flask.Flask("testflask")
         flaskapp.add_url_rule(
-            '/schedule-open-reproducible-testcase-tasks',
-            view_func=recurring_tasks.OpenReproducibleTestcaseTasksScheduler.
-            as_view('/schedule-open-reproducible-testcase-tasks'))
+            "/schedule-open-reproducible-testcase-tasks",
+            view_func=recurring_tasks.OpenReproducibleTestcaseTasksScheduler.as_view(
+                "/schedule-open-reproducible-testcase-tasks"
+            ),
+        )
         self.app = webtest.TestApp(flaskapp)
 
         self.testcase_0 = data_types.Testcase(
             open=True,
             one_time_crasher_flag=False,
-            status='Processed',
-            job_type='job',
-            queue='jobs-linux')
+            status="Processed",
+            job_type="job",
+            queue="jobs-linux",
+        )
         self.testcase_0.put()
 
         self.testcase_1 = data_types.Testcase(
             open=False,
             one_time_crasher_flag=False,
-            status='Processed',
-            job_type='job',
-            queue='jobs-linux')
+            status="Processed",
+            job_type="job",
+            queue="jobs-linux",
+        )
         self.testcase_1.put()
 
         self.testcase_2 = data_types.Testcase(
             open=True,
             one_time_crasher_flag=True,
-            status='Processed',
-            job_type='job',
-            queue='jobs-linux')
+            status="Processed",
+            job_type="job",
+            queue="jobs-linux",
+        )
         self.testcase_2.put()
 
         self.testcase_3 = data_types.Testcase(
             open=True,
             one_time_crasher_flag=False,
-            status='NA',
-            job_type='job',
-            queue='jobs-linux')
+            status="NA",
+            job_type="job",
+            queue="jobs-linux",
+        )
         self.testcase_3.put()
 
         self.testcase_4 = data_types.Testcase(
             open=True,
             one_time_crasher_flag=False,
-            status='Processed',
-            job_type='job_windows',
-            queue='jobs-windows')
+            status="Processed",
+            job_type="job_windows",
+            queue="jobs-windows",
+        )
         self.testcase_4.put()
 
-        data_types.Job(name='job', environment_string='',
-                       platform='LINUX').put()
+        data_types.Job(name="job", environment_string="", platform="LINUX").put()
         data_types.Job(
-            name='job_windows', environment_string='', platform='WINDOWS').put()
+            name="job_windows", environment_string="", platform="WINDOWS"
+        ).put()
 
-        helpers.patch(self, [
-            'handlers.base_handler.Handler.is_cron',
-        ])
+        helpers.patch(self, ["handlers.base_handler.Handler.is_cron",])
 
     def test_execute(self):
         """Tests that we don't directly use this scheduler."""
         with self.assertRaises(webtest.AppError):
-            self.app.get('/schedule-open-reproducible-testcase-tasks')
+            self.app.get("/schedule-open-reproducible-testcase-tasks")
 
 
 class ProgressionTasksSchedulerTest(OpenReproducibleTestcaseTasksSchedulerTest):
@@ -97,24 +102,26 @@ class ProgressionTasksSchedulerTest(OpenReproducibleTestcaseTasksSchedulerTest):
 
     def setUp(self):
         super(ProgressionTasksSchedulerTest, self).setUp()
-        flaskapp = flask.Flask('testflask')
+        flaskapp = flask.Flask("testflask")
         flaskapp.add_url_rule(
-            '/schedule-progression-tasks',
+            "/schedule-progression-tasks",
             view_func=recurring_tasks.ProgressionTasksScheduler.as_view(
-                '/schedule-progression-tasks'))
+                "/schedule-progression-tasks"
+            ),
+        )
         self.app = webtest.TestApp(flaskapp)
 
-        helpers.patch(self, [
-            'base.tasks.add_task',
-        ])
+        helpers.patch(self, ["base.tasks.add_task",])
 
     def test_execute(self):
         """Tests scheduling of progression tasks."""
-        self.app.get('/schedule-progression-tasks')
-        self.mock.add_task.assert_has_calls([
-            mock.call('progression', 1, 'job', queue='jobs-linux'),
-            mock.call('progression', 5, 'job_windows', queue='jobs-windows')
-        ])
+        self.app.get("/schedule-progression-tasks")
+        self.mock.add_task.assert_has_calls(
+            [
+                mock.call("progression", 1, "job", queue="jobs-linux"),
+                mock.call("progression", 5, "job_windows", queue="jobs-windows"),
+            ]
+        )
 
 
 class ImpactTasksSchedulerTest(OpenReproducibleTestcaseTasksSchedulerTest):
@@ -122,20 +129,22 @@ class ImpactTasksSchedulerTest(OpenReproducibleTestcaseTasksSchedulerTest):
 
     def setUp(self):
         super(ImpactTasksSchedulerTest, self).setUp()
-        flaskapp = flask.Flask('testflask')
+        flaskapp = flask.Flask("testflask")
         flaskapp.add_url_rule(
-            '/schedule-impact-tasks',
+            "/schedule-impact-tasks",
             view_func=recurring_tasks.ImpactTasksScheduler.as_view(
-                '/schedule-impact-tasks'))
+                "/schedule-impact-tasks"
+            ),
+        )
         self.app = webtest.TestApp(flaskapp)
-        helpers.patch(self, [
-            'base.tasks.add_task',
-        ])
+        helpers.patch(self, ["base.tasks.add_task",])
 
     def test_execute(self):
         """Tests scheduling of progression tasks."""
-        self.app.get('/schedule-impact-tasks')
-        self.mock.add_task.assert_has_calls([
-            mock.call('impact', 1, 'job', queue='jobs-linux'),
-            mock.call('impact', 5, 'job_windows', queue='jobs-windows'),
-        ])
+        self.app.get("/schedule-impact-tasks")
+        self.mock.add_task.assert_has_calls(
+            [
+                mock.call("impact", 1, "job", queue="jobs-linux"),
+                mock.call("impact", 5, "job_windows", queue="jobs-windows"),
+            ]
+        )

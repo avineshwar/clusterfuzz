@@ -27,28 +27,28 @@ from metrics import logs
 from system import environment
 from system import new_process
 
-REPRODUCE_REGEX = re.compile(r'reproduced (\d+) crashes')
+REPRODUCE_REGEX = re.compile(r"reproduced (\d+) crashes")
 
 
 def get_work_dir():
     """Return work directory for Syzkaller."""
-    return os.path.join(environment.get_value('FUZZ_INPUTS_DISK'), 'syzkaller')
+    return os.path.join(environment.get_value("FUZZ_INPUTS_DISK"), "syzkaller")
 
 
 def get_config():
     """Get arguments for a given fuzz target."""
-    device_serial = environment.get_value('ANDROID_SERIAL')
-    build_dir = environment.get_value('BUILD_DIR')
+    device_serial = environment.get_value("ANDROID_SERIAL")
+    build_dir = environment.get_value("BUILD_DIR")
     temp_dir = fuzzer_utils.get_temp_dir()
 
-    binary_path = os.path.join(build_dir, 'syzkaller')
-    json_config_path = os.path.join(temp_dir, 'config.json')
-    default_vmlinux_path = os.path.join('/tmp', device_serial, 'vmlinux')
-    vmlinux_path = environment.get_value('VMLINUX_PATH', default_vmlinux_path)
+    binary_path = os.path.join(build_dir, "syzkaller")
+    json_config_path = os.path.join(temp_dir, "config.json")
+    default_vmlinux_path = os.path.join("/tmp", device_serial, "vmlinux")
+    vmlinux_path = environment.get_value("VMLINUX_PATH", default_vmlinux_path)
 
-    syzhub_address = environment.get_value('SYZHUB_ADDRESS')
-    syzhub_client = environment.get_value('SYZHUB_CLIENT')
-    syzhub_key = environment.get_value('SYZHUB_KEY')
+    syzhub_address = environment.get_value("SYZHUB_ADDRESS")
+    syzhub_client = environment.get_value("SYZHUB_CLIENT")
+    syzhub_key = environment.get_value("SYZHUB_KEY")
 
     config.generate(
         serial=device_serial,
@@ -60,13 +60,14 @@ def get_config():
         reproduce=False,
         syzhub_address=syzhub_address,
         syzhub_client=syzhub_client,
-        syzhub_key=syzhub_key)
-    return ['-config', json_config_path]
+        syzhub_key=syzhub_key,
+    )
+    return ["-config", json_config_path]
 
 
 def get_cover_file_path():
     """Return location of coverage file for Syzkaller."""
-    return os.path.join(get_work_dir(), 'coverfile')
+    return os.path.join(get_work_dir(), "coverfile")
 
 
 def get_runner(fuzzer_path):
@@ -84,13 +85,13 @@ class AndroidSyzkallerRunner(new_process.UnicodeProcessRunner):
           executable_path: Path to the fuzzer executable.
           default_args: Default arguments to always pass to the fuzzer.
         """
-        super(AndroidSyzkallerRunner,
-              self).__init__(executable_path=executable_path)
+        super(AndroidSyzkallerRunner, self).__init__(executable_path=executable_path)
 
     def get_command(self, additional_args=None):
         """Process.get_command override."""
-        base_command = super(AndroidSyzkallerRunner,
-                             self).get_command(additional_args=additional_args)
+        base_command = super(AndroidSyzkallerRunner, self).get_command(
+            additional_args=additional_args
+        )
 
         return base_command
 
@@ -101,9 +102,9 @@ class AndroidSyzkallerRunner(new_process.UnicodeProcessRunner):
 
     def _crash_was_reproducible(self, output):
         reproducible = False
-        if 'all done.' in output:
+        if "all done." in output:
             search = REPRODUCE_REGEX.search(output)
-            if search and search.group(1) and search.group(1) > '0':
+            if search and search.group(1) and search.group(1) > "0":
                 reproducible = True
         return int(reproducible)
 
@@ -114,24 +115,27 @@ class AndroidSyzkallerRunner(new_process.UnicodeProcessRunner):
               to run for.
           repro_args: A sequence of arguments to be passed to the executable.
         """
-        logs.log('Running Syzkaller testcase.')
+        logs.log("Running Syzkaller testcase.")
         additional_args = copy.copy(repro_args)
         result = self.run_and_wait(additional_args, timeout=repro_timeout)
         result.return_code = self._crash_was_reproducible(result.output)
 
         if result.return_code:
-            logs.log('Successfully reproduced crash.')
+            logs.log("Successfully reproduced crash.")
         else:
-            logs.log('Failed to reproduce crash.')
-        logs.log('Syzkaller repro testcase stopped.')
-        return engine.ReproduceResult(result.command, result.return_code,
-                                      result.time_executed, result.output)
+            logs.log("Failed to reproduce crash.")
+        logs.log("Syzkaller repro testcase stopped.")
+        return engine.ReproduceResult(
+            result.command, result.return_code, result.time_executed, result.output
+        )
 
-    def fuzz(self,
-             fuzz_timeout,
-             additional_args,
-             unused_additional_args=None,
-             unused_extra_env=None):
+    def fuzz(
+        self,
+        fuzz_timeout,
+        additional_args,
+        unused_additional_args=None,
+        unused_extra_env=None,
+    ):
         """This is where actual syzkaller fuzzing is done.
         Args:
           fuzz_timeout: The maximum time in seconds that fuzz job is allowed
@@ -142,19 +146,20 @@ class AndroidSyzkallerRunner(new_process.UnicodeProcessRunner):
 
         def _filter_log(content):
             """Filter unneeded content from log."""
-            result = ''
-            strip_regex = re.compile(r'^c\d+\s+\d+\s')
+            result = ""
+            strip_regex = re.compile(r"^c\d+\s+\d+\s")
             for line in content.splitlines():
-                result += strip_regex.sub('', line) + '\n'
+                result += strip_regex.sub("", line) + "\n"
             return result
 
-        logs.log('Running Syzkaller.')
+        logs.log("Running Syzkaller.")
         additional_args = copy.copy(additional_args)
         fuzz_result = self.run_and_wait(additional_args, timeout=fuzz_timeout)
-        logs.log('Syzkaller stopped, fuzzing timed out: {}'.format(
-            fuzz_result.time_executed))
+        logs.log(
+            "Syzkaller stopped, fuzzing timed out: {}".format(fuzz_result.time_executed)
+        )
 
-        fuzz_logs = (fuzz_result.output or '') + '\n'
+        fuzz_logs = (fuzz_result.output or "") + "\n"
         crashes = []
         parsed_stats = {}
         visited = set()
@@ -164,20 +169,23 @@ class AndroidSyzkallerRunner(new_process.UnicodeProcessRunner):
                 # are grouped together in subfolders. unique_crash puts together the
                 # subfolder name and reportN.
                 unique_crash = os.path.join(subdir, file)
-                if fnmatch.fnmatch(file, 'report*') and unique_crash not in visited:
+                if fnmatch.fnmatch(file, "report*") and unique_crash not in visited:
                     visited.add(unique_crash)
                     log_content = _filter_log(
                         utils.read_data_from_file(
-                            os.path.join(subdir, file), eval_data=False).decode('utf-8'))
-                    fuzz_logs += log_content + '\n'
+                            os.path.join(subdir, file), eval_data=False
+                        ).decode("utf-8")
+                    )
+                    fuzz_logs += log_content + "\n"
 
                     # Since each crash (report file) has a corresponding log file
                     # that contains the syscalls that caused the crash. This file is
                     # located in the same subfolder and has the same number.
                     # E.g. ./439c37d288d4f26a33a6c7e5c57a97791453a447/report15 and
                     # ./439c37d288d4f26a33a6c7e5c57a97791453a447/log15.
-                    crash_testcase_file_path = os.path.join(subdir,
-                                                            'log' + file[len('report'):])
+                    crash_testcase_file_path = os.path.join(
+                        subdir, "log" + file[len("report") :]
+                    )
 
                     # TODO(hzawawy): Parse stats information and add them to FuzzResult.
 
@@ -187,8 +195,18 @@ class AndroidSyzkallerRunner(new_process.UnicodeProcessRunner):
                         # Write the new testcase.
                         # Copy crash testcase contents into the main testcase path.
                         crashes.append(
-                            engine.Crash(crash_testcase_file_path, log_content,
-                                         reproduce_arguments, actual_duration))
+                            engine.Crash(
+                                crash_testcase_file_path,
+                                log_content,
+                                reproduce_arguments,
+                                actual_duration,
+                            )
+                        )
 
-        return engine.FuzzResult(fuzz_logs, fuzz_result.command, crashes,
-                                 parsed_stats, fuzz_result.time_executed)
+        return engine.FuzzResult(
+            fuzz_logs,
+            fuzz_result.command,
+            crashes,
+            parsed_stats,
+            fuzz_result.time_executed,
+        )

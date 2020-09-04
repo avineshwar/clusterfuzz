@@ -24,7 +24,7 @@ class CredentialStorage(Storage):
 
     def locked_get(self):
         """Return Credentials."""
-        content = db_config.get_value('client_credentials')
+        content = db_config.get_value("client_credentials")
         if not content:
             return None
 

@@ -17,16 +17,18 @@ import json
 import os
 
 
-def generate(serial,
-             work_dir_path,
-             binary_path,
-             vmlinux_path,
-             config_path,
-             kcov=True,
-             reproduce=True,
-             syzhub_address=None,
-             syzhub_client=None,
-             syzhub_key=None):
+def generate(
+    serial,
+    work_dir_path,
+    binary_path,
+    vmlinux_path,
+    config_path,
+    kcov=True,
+    reproduce=True,
+    syzhub_address=None,
+    syzhub_client=None,
+    syzhub_key=None,
+):
     """Generates syzkaller config file.
 
     Args:
@@ -42,31 +44,31 @@ def generate(serial,
       syzhub_key: (str) syzhub key.
     """
     devices = {}
-    devices['devices'] = [serial]
+    devices["devices"] = [serial]
     data = {}
-    data['target'] = 'linux/arm64'
-    data['reproduce'] = reproduce
-    data['workdir'] = work_dir_path
-    data['http'] = 'localhost:0'
-    data['syzkaller'] = binary_path
+    data["target"] = "linux/arm64"
+    data["reproduce"] = reproduce
+    data["workdir"] = work_dir_path
+    data["http"] = "localhost:0"
+    data["syzkaller"] = binary_path
     # TODO(hzawawy): consider what suppressions are best for Android.
-    data['suppressions'] = ['do_rt_sigqueueinfo', 'do_rt_tgsigqueueinfo']
-    data['vm'] = devices
-    data['kernel_obj'] = vmlinux_path
-    data['sandbox'] = 'android'
-    data['ignores'] = ['WARNING:', 'INFO:']
-    data['type'] = 'adb'
-    data['procs'] = 1
-    data['cover'] = kcov
+    data["suppressions"] = ["do_rt_sigqueueinfo", "do_rt_tgsigqueueinfo"]
+    data["vm"] = devices
+    data["kernel_obj"] = vmlinux_path
+    data["sandbox"] = "android"
+    data["ignores"] = ["WARNING:", "INFO:"]
+    data["type"] = "adb"
+    data["procs"] = 1
+    data["cover"] = kcov
 
     if syzhub_address and syzhub_client and syzhub_key:
-        data['hub_addr'] = syzhub_address
-        data['hub_client'] = syzhub_client
-        data['hub_key'] = syzhub_key
-        data['name'] = '{}-{}'.format(syzhub_client, serial)
+        data["hub_addr"] = syzhub_address
+        data["hub_client"] = syzhub_client
+        data["hub_key"] = syzhub_key
+        data["name"] = "{}-{}".format(syzhub_client, serial)
 
     ensure_dir(config_path)
-    with open(config_path, 'w') as write_file:
+    with open(config_path, "w") as write_file:
         json.dump(data, write_file)
 
 

@@ -62,18 +62,22 @@ def build_model(num_rnn_cells, dropout_pkeep, batch_size, debug):
       Keras Sequential RNN model.
     """
     dropout_pdrop = 1 - dropout_pkeep
-    model = tf.keras.Sequential([
-        tf.keras.layers.Embedding(
-            constants.ALPHA_SIZE,
-            constants.ALPHA_SIZE,
-            batch_input_shape=[batch_size, None]),
-        tf.keras.layers.GRU(
-            num_rnn_cells,
-            return_sequences=True,
-            stateful=True,
-            dropout=dropout_pdrop),
-        tf.keras.layers.Dense(constants.ALPHA_SIZE),
-    ])
+    model = tf.keras.Sequential(
+        [
+            tf.keras.layers.Embedding(
+                constants.ALPHA_SIZE,
+                constants.ALPHA_SIZE,
+                batch_input_shape=[batch_size, None],
+            ),
+            tf.keras.layers.GRU(
+                num_rnn_cells,
+                return_sequences=True,
+                stateful=True,
+                dropout=dropout_pdrop,
+            ),
+            tf.keras.layers.Dense(constants.ALPHA_SIZE),
+        ]
+    )
 
     # Display a summary of the model to debug shapes.
     if debug:
@@ -100,14 +104,15 @@ def train_step(model, optimizer, input_data, expected_data, train=False):
     with tf.GradientTape() as tape:
         predicted_data = model(input_data)
         loss = tf.keras.losses.sparse_categorical_crossentropy(
-            expected_data, predicted_data, from_logits=True)
+            expected_data, predicted_data, from_logits=True
+        )
         seq_loss = tf.reduce_mean(input_tensor=loss, axis=1)
         batch_loss = tf.reduce_mean(input_tensor=seq_loss)
 
-        output_bytes = tf.cast(
-            tf.argmax(predicted_data, axis=-1), expected_data.dtype)
+        output_bytes = tf.cast(tf.argmax(predicted_data, axis=-1), expected_data.dtype)
         accuracy = tf.reduce_mean(
-            tf.cast(tf.equal(expected_data, output_bytes), tf.float32))
+            tf.cast(tf.equal(expected_data, output_bytes), tf.float32)
+        )
 
     if train:
         grads = tape.gradient(loss, model.trainable_variables)
@@ -149,7 +154,8 @@ def main(args):
     # Split corpus for training and validation.
     # validation_text will be empty if validation is False.
     code_text, validation_text, input_ranges = utils.read_data_files(
-        input_dir, validation=validation)
+        input_dir, validation=validation
+    )
 
     # Bail out if we don't have enough corpus for training.
     if len(code_text) < batch_size * constants.TRAINING_SEQLEN + 1:
@@ -173,8 +179,9 @@ def main(args):
     tf.random.set_seed(0)
 
     # Build the RNN model.
-    model = build_model(hidden_layer_size * hidden_state_size, dropout_pkeep,
-                        batch_size, debug)
+    model = build_model(
+        hidden_layer_size * hidden_state_size, dropout_pkeep, batch_size, debug
+    )
 
     # Choose Adam optimizer to compute gradients.
     optimizer = tf.keras.optimizers.Adam(learning_rate)
@@ -185,9 +192,11 @@ def main(args):
     # validation curves visually in Tensorboard.
     timestamp = str(math.trunc(time.time()))
     summary_writer = tf.summary.create_file_writer(
-        os.path.join(log_dir, timestamp + '-training'))
+        os.path.join(log_dir, timestamp + "-training")
+    )
     validation_writer = tf.summary.create_file_writer(
-        os.path.join(log_dir, timestamp + '-validation'))
+        os.path.join(log_dir, timestamp + "-validation")
+    )
 
     # For display: init the progress bar.
     step_size = batch_size * constants.TRAINING_SEQLEN
@@ -195,45 +204,56 @@ def main(args):
     progress = utils.Progress(
         constants.DISPLAY_FREQ,
         size=constants.DISPLAY_LEN,
-        msg='Training on next {} batches'.format(constants.DISPLAY_FREQ))
+        msg="Training on next {} batches".format(constants.DISPLAY_FREQ),
+    )
 
     # We continue training on existing model, or start with a new model.
     if existing_model:
-        print('Continue training on existing model: {}'.format(existing_model))
+        print("Continue training on existing model: {}".format(existing_model))
         try:
             model.load_weights(existing_model)
         except:
             print(
-                ('Failed to restore existing model since model '
-                 'parameters do not match.'),
-                file=sys.stderr)
+                (
+                    "Failed to restore existing model since model "
+                    "parameters do not match."
+                ),
+                file=sys.stderr,
+            )
             return constants.ExitCode.TENSORFLOW_ERROR
     else:
-        print('No existing model provided. Start training with a new model.')
+        print("No existing model provided. Start training with a new model.")
 
     # Num of bytes we have trained so far.
     steps = 0
 
     # Training loop.
     for input_batch, expected_batch, epoch in utils.rnn_minibatch_sequencer(
-            code_text,
-            batch_size,
-            constants.TRAINING_SEQLEN,
-            nb_epochs=constants.EPOCHS):
+        code_text, batch_size, constants.TRAINING_SEQLEN, nb_epochs=constants.EPOCHS
+    ):
 
         # Train on one mini-batch.
         seq_loss, batch_loss, accuracy, output_bytes = train_step(
-            model, optimizer, input_batch, expected_batch, train=True)
+            model, optimizer, input_batch, expected_batch, train=True
+        )
 
         # Log training data for Tensorboard display a mini-batch of sequences
         # every `frequency` batches.
         if debug and steps % frequency == 0:
             utils.print_learning_learned_comparison(
-                input_batch, output_bytes, seq_loss, input_ranges, batch_loss,
-                accuracy, epoch_size, steps, epoch)
+                input_batch,
+                output_bytes,
+                seq_loss,
+                input_ranges,
+                batch_loss,
+                accuracy,
+                epoch_size,
+                steps,
+                epoch,
+            )
             with summary_writer.as_default():  # pylint: disable=not-context-manager
-                tf.summary.scalar('batch_loss', batch_loss, step=steps)
-                tf.summary.scalar('batch_accuracy', accuracy, step=steps)
+                tf.summary.scalar("batch_loss", batch_loss, step=steps)
+                tf.summary.scalar("batch_accuracy", accuracy, step=steps)
             summary_writer.flush()
 
         # Run a validation step every `frequency` batches.
@@ -242,30 +262,37 @@ def main(args):
         if validation and steps % frequency == 0 and validation_batch_size:
             utils.print_validation_header(len(code_text), input_ranges)
             validation_x, validation_y, _ = next(
-                utils.rnn_minibatch_sequencer(validation_text, validation_batch_size,
-                                              constants.VALIDATION_SEQLEN, 1))
+                utils.rnn_minibatch_sequencer(
+                    validation_text,
+                    validation_batch_size,
+                    constants.VALIDATION_SEQLEN,
+                    1,
+                )
+            )
 
-            validation_model = build_model(hidden_layer_size * hidden_state_size,
-                                           dropout_pkeep, validation_batch_size,
-                                           False)
+            validation_model = build_model(
+                hidden_layer_size * hidden_state_size,
+                dropout_pkeep,
+                validation_batch_size,
+                False,
+            )
             last_weights = tf.train.latest_checkpoint(model_dir)
             if last_weights:
-                validation_model.load_weights(
-                    tf.train.latest_checkpoint(model_dir))
-                validation_model.build(tf.TensorShape(
-                    [validation_batch_size, None]))
+                validation_model.load_weights(tf.train.latest_checkpoint(model_dir))
+                validation_model.build(tf.TensorShape([validation_batch_size, None]))
                 validation_model.reset_states()
 
             # Run one single inference step
             _, batch_loss, accuracy, _ = train_step(
-                validation_model, optimizer, validation_x, validation_y, train=False)
+                validation_model, optimizer, validation_x, validation_y, train=False
+            )
 
             utils.print_validation_stats(batch_loss, accuracy)
 
             # Save validation data for Tensorboard.
             with validation_writer.as_default():  # pylint: disable=not-context-manager
-                tf.summary.scalar('batch_loss', batch_loss, step=steps)
-                tf.summary.scalar('batch_accuracy', accuracy, step=steps)
+                tf.summary.scalar("batch_loss", batch_loss, step=steps)
+                tf.summary.scalar("batch_accuracy", accuracy, step=steps)
             validation_writer.flush()
 
         # Display a short text generated with the current weights and biases.
@@ -273,16 +300,16 @@ def main(args):
         if debug and steps // 4 % frequency == 0:
             utils.print_text_generation_header()
             file_info = utils.random_element_from_list(files_info_list)
-            first_byte, file_size = file_info['first_byte'], file_info['file_size']
+            first_byte, file_size = file_info["first_byte"], file_info["file_size"]
             ry = np.array([[first_byte]])
             sample = [first_byte]
 
-            generation_model = build_model(hidden_layer_size * hidden_state_size,
-                                           dropout_pkeep, 1, False)
+            generation_model = build_model(
+                hidden_layer_size * hidden_state_size, dropout_pkeep, 1, False
+            )
             last_weights = tf.train.latest_checkpoint(model_dir)
             if last_weights:
-                generation_model.load_weights(
-                    tf.train.latest_checkpoint(model_dir))
+                generation_model.load_weights(tf.train.latest_checkpoint(model_dir))
                 generation_model.build(tf.TensorShape([1, None]))
                 generation_model.reset_states()
 
@@ -290,7 +317,8 @@ def main(args):
                 prediction = generation_model(ry)
                 prediction = tf.squeeze(prediction, 0).numpy()
                 rc = utils.sample_from_probabilities(
-                    prediction, topn=10 if epoch <= 1 else 2)
+                    prediction, topn=10 if epoch <= 1 else 2
+                )
                 sample.append(rc)
                 ry = np.array([[rc]])
 
@@ -300,10 +328,10 @@ def main(args):
         # Save a checkpoint every `10 * frequency` batches. Each checkpoint is
         # a version of model.
         if steps // 10 % frequency == 0:
-            saved_model_name = constants.RNN_MODEL_NAME + '_' + timestamp
+            saved_model_name = constants.RNN_MODEL_NAME + "_" + timestamp
             saved_model_path = os.path.join(model_dir, saved_model_name)
             model.save_weights(saved_model_path)
-            print('Saved model: {}'.format(saved_model_path))
+            print("Saved model: {}".format(saved_model_path))
 
         # Display progress bar.
         if debug:
@@ -313,10 +341,10 @@ def main(args):
         steps += step_size
 
     # Save the model after training is done.
-    saved_model_name = constants.RNN_MODEL_NAME + '_' + timestamp
+    saved_model_name = constants.RNN_MODEL_NAME + "_" + timestamp
     saved_model_path = os.path.join(model_dir, saved_model_name)
     model.save_weights(saved_model_path)
-    print('Saved model: {}'.format(saved_model_path))
+    print("Saved model: {}".format(saved_model_path))
 
     return constants.ExitCode.SUCCESS
 
@@ -332,8 +360,8 @@ def validate_paths(args):
     """
     if not os.path.exists(args.input_dir):
         print(
-            'Input directory {} does not exist'.format(args.input_dir),
-            file=sys.stderr)
+            "Input directory {} does not exist".format(args.input_dir), file=sys.stderr
+        )
         return False
 
     if not os.path.exists(args.model_dir):
@@ -344,8 +372,9 @@ def validate_paths(args):
 
     if args.existing_model and not utils.validate_model_path(args.existing_model):
         print(
-            'Existing model {} does not exist'.format(args.existing_model),
-            file=sys.stderr)
+            "Existing model {} does not exist".format(args.existing_model),
+            file=sys.stderr,
+        )
         return False
 
     return True
@@ -357,49 +386,51 @@ def parse_args():
     Returns:
       Parsed arguement object.
     """
-    parser = argparse.ArgumentParser(
-        'Training RNN model on existing testcases')
+    parser = argparse.ArgumentParser("Training RNN model on existing testcases")
 
-    parser.add_argument('--input-dir', help='Input folder path', required=True)
-    parser.add_argument('--log-dir', help='Log folder path', required=True)
-    parser.add_argument(
-        '--model-dir', help='Path to save models', required=True)
+    parser.add_argument("--input-dir", help="Input folder path", required=True)
+    parser.add_argument("--log-dir", help="Log folder path", required=True)
+    parser.add_argument("--model-dir", help="Path to save models", required=True)
 
     # Optional arguments: model parameters and additional flags.
     parser.add_argument(
-        '--batch-size', help='Batch size', type=int, default=constants.BATCH_SIZE)
+        "--batch-size", help="Batch size", type=int, default=constants.BATCH_SIZE
+    )
+    parser.add_argument("--debug", help="Print training progress", action="store_true")
     parser.add_argument(
-        '--debug', help='Print training progress', action='store_true')
-    parser.add_argument(
-        '--dropout-pkeep',
-        help='Dropout probability (keep rate)',
+        "--dropout-pkeep",
+        help="Dropout probability (keep rate)",
         type=float,
-        default=constants.DROPOUT_PKEEP)
+        default=constants.DROPOUT_PKEEP,
+    )
+    parser.add_argument("--existing-model", help="Continue training on existing model")
     parser.add_argument(
-        '--existing-model', help='Continue training on existing model')
-    parser.add_argument(
-        '--hidden-state-size',
-        help='Hidden state size of LSTM cell',
+        "--hidden-state-size",
+        help="Hidden state size of LSTM cell",
         type=int,
-        default=constants.HIDDEN_STATE_SIZE)
+        default=constants.HIDDEN_STATE_SIZE,
+    )
     parser.add_argument(
-        '--hidden-layer-size',
-        help='Hidden layer size of LSTM model',
+        "--hidden-layer-size",
+        help="Hidden layer size of LSTM model",
         type=int,
-        default=constants.HIDDEN_LAYER_SIZE)
+        default=constants.HIDDEN_LAYER_SIZE,
+    )
     parser.add_argument(
-        '--learning-rate',
-        help='Learning rate',
+        "--learning-rate",
+        help="Learning rate",
         type=float,
-        default=constants.LEARNING_RATE)
+        default=constants.LEARNING_RATE,
+    )
     parser.add_argument(
-        '--validation',
-        help='Print validation stats during training',
-        action='store_true')
+        "--validation",
+        help="Print validation stats during training",
+        action="store_true",
+    )
 
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parsed_args = parse_args()
     sys.exit(main(parsed_args))

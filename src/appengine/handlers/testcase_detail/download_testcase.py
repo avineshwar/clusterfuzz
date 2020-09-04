@@ -23,6 +23,7 @@ from flask import request
 import urllib.parse
 from builtins import str
 from future import standard_library
+
 standard_library.install_aliases()
 
 
@@ -36,13 +37,14 @@ def get_testcase_blob_info(testcase):
     blob_key = testcase.minimized_keys
     using_minimized_keys = True
 
-    if not blob_key or blob_key == 'NA':
+    if not blob_key or blob_key == "NA":
         blob_key = testcase.fuzzed_keys
         using_minimized_keys = False
 
     if not blob_key:
         raise helpers.EarlyExitException(
-            "The testcase (%d) doesn't have fuzzed keys." % testcase.key.id(), 400)
+            "The testcase (%d) doesn't have fuzzed keys." % testcase.key.id(), 400
+        )
 
     blob_key = str(urllib.parse.unquote(blob_key))
 
@@ -52,17 +54,20 @@ def get_testcase_blob_info(testcase):
 
 def get(self):
     """Get testcase file and write it to the handler."""
-    testcase_id = request.get('id')
+    testcase_id = request.get("id")
     testcase = access.check_access_and_get_testcase(testcase_id)
 
     blob_info, _ = get_testcase_blob_info(testcase)
 
-    save_as_filename = 'testcase-%s-%s' % (
-        testcase.key.id(), blob_info.filename[-PREVIEW_BLOB_FILENAME_LENTGH:])
+    save_as_filename = "testcase-%s-%s" % (
+        testcase.key.id(),
+        blob_info.filename[-PREVIEW_BLOB_FILENAME_LENTGH:],
+    )
 
-    content_disposition = str('attachment; filename=%s' % save_as_filename)
-    return self.serve_gcs_object(blob_info.bucket, blob_info.object_path,
-                                 content_disposition)
+    content_disposition = str("attachment; filename=%s" % save_as_filename)
+    return self.serve_gcs_object(
+        blob_info.bucket, blob_info.object_path, content_disposition
+    )
 
 
 class Handler(base_handler.Handler, gcs.SignedGcsHandler):

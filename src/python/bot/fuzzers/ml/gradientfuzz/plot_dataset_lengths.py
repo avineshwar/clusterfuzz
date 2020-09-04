@@ -26,10 +26,12 @@ import bot.fuzzers.ml.gradientfuzz.constants as constants
 import bot.fuzzers.ml.gradientfuzz.plot_utils as plot_utils
 
 
-def plot_lengths(dataset_name,
-                 all_inputs,
-                 plot_name_prefix='',
-                 plot_title='Input Length Distribution'):
+def plot_lengths(
+    dataset_name,
+    all_inputs,
+    plot_name_prefix="",
+    plot_title="Input Length Distribution",
+):
     """
       Plots distribution of input lengths given a list of zero-padded numpy
       byte arrays. Used as a subroutine for `libfuzzer_to_numpy.py`.
@@ -56,15 +58,24 @@ def plot_lengths(dataset_name,
         else:
             lengths[idx] = np.max(all_nonzero)
 
-    print('\nAverage input length/std: {} | {}'.format(
-        np.mean(lengths), np.std(lengths)))
-    print('Input length boxplot: {} | {} | {} | {} | {}'.format(
-        np.min(lengths), np.percentile(lengths, 25), np.median(lengths),
-        np.percentile(lengths, 75), np.max(lengths)))
+    print(
+        "\nAverage input length/std: {} | {}".format(np.mean(lengths), np.std(lengths))
+    )
+    print(
+        "Input length boxplot: {} | {} | {} | {} | {}".format(
+            np.min(lengths),
+            np.percentile(lengths, 25),
+            np.median(lengths),
+            np.percentile(lengths, 75),
+            np.max(lengths),
+        )
+    )
 
     save_path = os.path.join(
-        constants.DATASET_DIR, dataset_name,
-        plot_name_prefix + constants.INPUT_LENGTH_PLOT_FILENAME)
+        constants.DATASET_DIR,
+        dataset_name,
+        plot_name_prefix + constants.INPUT_LENGTH_PLOT_FILENAME,
+    )
 
     plot_utils.plot_histogram(
         lengths,
@@ -72,7 +83,8 @@ def plot_lengths(dataset_name,
         plot_title,
         x_axis_title=constants.HIST_INPUT_LEN_X_TITLE,
         y_axis_title=constants.HIST_INPUT_LEN_Y_TITLE,
-        bins=constants.HIST_NUM_BINS_INPUT_LEN)
+        bins=constants.HIST_NUM_BINS_INPUT_LEN,
+    )
 
 
 def read_and_plot(dataset_name, num_bins=None):
@@ -91,9 +103,10 @@ def read_and_plot(dataset_name, num_bins=None):
       Returns:
           N/A
       """
-    dataset_dir = os.path.join(constants.DATASET_DIR, dataset_name,
-                               constants.STANDARD_INPUT_DIR)
-    all_dataset_files = list(glob.glob(os.path.join(dataset_dir, '*')))
+    dataset_dir = os.path.join(
+        constants.DATASET_DIR, dataset_name, constants.STANDARD_INPUT_DIR
+    )
+    all_dataset_files = list(glob.glob(os.path.join(dataset_dir, "*")))
     lengths = np.zeros(len(all_dataset_files))
     for idx in tqdm.tqdm(range(len(all_dataset_files))):
         all_nonzero = np.nonzero(np.load(all_dataset_files[idx]))
@@ -102,16 +115,18 @@ def read_and_plot(dataset_name, num_bins=None):
         else:
             lengths[idx] = np.max(all_nonzero)
 
-    save_path = os.path.join(constants.DATASET_DIR, dataset_name,
-                             constants.INPUT_LENGTH_PLOT_FILENAME)
+    save_path = os.path.join(
+        constants.DATASET_DIR, dataset_name, constants.INPUT_LENGTH_PLOT_FILENAME
+    )
 
     plot_utils.plot_histogram(
         lengths,
         save_path,
-        'Input Length Distribution',
+        "Input Length Distribution",
         x_axis_title=constants.HIST_INPUT_LEN_X_TITLE,
         y_axis_title=constants.HIST_INPUT_LEN_Y_TITLE,
-        bins=num_bins)
+        bins=num_bins,
+    )
 
 
 def get_args():
@@ -127,11 +142,11 @@ def get_args():
       """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--dataset-name',
+        "--dataset-name",
         required=True,
-        help='Name of dataset (look under {}/).'.format(constants.DATASET_DIR))
-    parser.add_argument(
-        '--num-bins', help='Number of bins in histogram.', type=int)
+        help="Name of dataset (look under {}/).".format(constants.DATASET_DIR),
+    )
+    parser.add_argument("--num-bins", help="Number of bins in histogram.", type=int)
     return parser.parse_args()
 
 
@@ -144,5 +159,5 @@ def main():
     read_and_plot(args.dataset_name, args.num_bins)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

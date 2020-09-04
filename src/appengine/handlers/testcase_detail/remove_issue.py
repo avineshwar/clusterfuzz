@@ -30,13 +30,13 @@ class Handler(base_handler.Handler):
         testcase = helpers.get_testcase(testcase_id)
         issue_id = testcase.bug_information
 
-        testcase.bug_information = ''
+        testcase.bug_information = ""
         testcase.put()
 
         helpers.log(
-            'Removed the issue %s from the testcase %s' % (issue_id,
-                                                           testcase.key.id()),
-            helpers.MODIFY_OPERATION)
+            "Removed the issue %s from the testcase %s" % (issue_id, testcase.key.id()),
+            helpers.MODIFY_OPERATION,
+        )
 
         return testcase
 
@@ -45,7 +45,7 @@ class Handler(base_handler.Handler):
     @handler.check_admin_access
     def post(self):
         """Remove the issue from the testcase."""
-        testcase_id = request.get('testcaseId')
+        testcase_id = request.get("testcaseId")
 
         updated_testcase = self.remove_issue(testcase_id)
         return self.render_json(show.get_testcase_detail(updated_testcase))

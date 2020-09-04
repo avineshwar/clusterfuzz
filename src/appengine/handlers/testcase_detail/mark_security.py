@@ -26,8 +26,10 @@ def mark(testcase):
     testcase.security_flag = True
     testcase.put()
 
-    helpers.log('Added security flags on testcase %s' % testcase.key.id(),
-                helpers.MODIFY_OPERATION)
+    helpers.log(
+        "Added security flags on testcase %s" % testcase.key.id(),
+        helpers.MODIFY_OPERATION,
+    )
 
 
 class Handler(base_handler.Handler):
@@ -38,7 +40,7 @@ class Handler(base_handler.Handler):
     @handler.check_admin_access
     def post(self):
         """Mark the testcase as security-related."""
-        testcase_id = request.get('testcaseId')
+        testcase_id = request.get("testcaseId")
         testcase = helpers.get_testcase(testcase_id)
         mark(testcase)
         return self.render_json(show.get_testcase_detail(testcase))

@@ -25,22 +25,28 @@ FUZZER_JOB_BATCH_SIZE = 4000
 def batch_fuzzer_jobs():
     """Batch FuzzerJobs for reduced Datastore read ops by bots."""
     platforms = [
-        item.platform for item in data_types.FuzzerJob.query(
-            projection=[data_types.FuzzerJob.platform], distinct=True)
+        item.platform
+        for item in data_types.FuzzerJob.query(
+            projection=[data_types.FuzzerJob.platform], distinct=True
+        )
     ]
 
     for platform in platforms:
         fuzzer_jobs = list(
-            data_types.FuzzerJob.query(data_types.FuzzerJob.platform == platform))
+            data_types.FuzzerJob.query(data_types.FuzzerJob.platform == platform)
+        )
         fuzzer_jobs.sort(key=lambda item: item.job)
 
         batches_to_remove = set(
-            b.key for b in data_types.FuzzerJobs.query(
-                data_types.FuzzerJobs.platform == platform))
+            b.key
+            for b in data_types.FuzzerJobs.query(
+                data_types.FuzzerJobs.platform == platform
+            )
+        )
 
         batch_count = 0
         for i in range(0, len(fuzzer_jobs), FUZZER_JOB_BATCH_SIZE):
-            key_id = platform + '-' + str(batch_count)
+            key_id = platform + "-" + str(batch_count)
             end = min(i + FUZZER_JOB_BATCH_SIZE, len(fuzzer_jobs))
 
             batched = data_types.FuzzerJobs(id=key_id, platform=platform)

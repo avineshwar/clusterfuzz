@@ -34,17 +34,15 @@ class MonitorTest(unittest.TestCase):
     def test_succeed(self):
         """Test succeed."""
         task = mock.Mock()
-        task.command = 'task'
-        task.job = 'job'
+        task.command = "task"
+        task.job = "job"
 
         with run_bot._Monitor(task, time_module=self.time):
             self.time.advance(5)
 
         self.assertEqual(
-            1, monitoring_metrics.TASK_COUNT.get({
-                'task': 'task',
-                'job': 'job'
-            }))
+            1, monitoring_metrics.TASK_COUNT.get({"task": "task", "job": "job"})
+        )
 
     def test_empty(self):
         """Test empty."""
@@ -55,28 +53,22 @@ class MonitorTest(unittest.TestCase):
         with run_bot._Monitor(task, time_module=self.time):
             self.time.advance(5)
 
-        self.assertEqual(1,
-                         monitoring_metrics.TASK_COUNT.get({
-                             'task': '',
-                             'job': ''
-                         }))
+        self.assertEqual(1, monitoring_metrics.TASK_COUNT.get({"task": "", "job": ""}))
 
     def test_exception(self):
         """Test raising exception."""
         task = mock.Mock()
-        task.command = 'task'
-        task.job = 'job'
+        task.command = "task"
+        task.job = "job"
 
         with self.assertRaises(Exception):
             with run_bot._Monitor(task, time_module=self.time):
                 self.time.advance(5)
-                raise Exception('test')
+                raise Exception("test")
 
         self.assertEqual(
-            1, monitoring_metrics.TASK_COUNT.get({
-                'task': 'task',
-                'job': 'job'
-            }))
+            1, monitoring_metrics.TASK_COUNT.get({"task": "task", "job": "job"})
+        )
 
 
 class TaskLoopTest(unittest.TestCase):
@@ -84,25 +76,28 @@ class TaskLoopTest(unittest.TestCase):
 
     def setUp(self):
         helpers.patch_environ(self)
-        helpers.patch(self, [
-            'base.tasks.get_task',
-            'bot.tasks.commands.process_command',
-            'bot.tasks.update_task.run',
-            'bot.tasks.update_task.track_revision',
-        ])
+        helpers.patch(
+            self,
+            [
+                "base.tasks.get_task",
+                "bot.tasks.commands.process_command",
+                "bot.tasks.update_task.run",
+                "bot.tasks.update_task.track_revision",
+            ],
+        )
 
         self.task = mock.MagicMock()
-        self.task.payload.return_value = 'payload'
+        self.task.payload.return_value = "payload"
         self.mock.get_task.return_value = self.task
         self.task.lease.__enter__ = mock.Mock(return_value=None)
         self.task.lease.__exit = mock.Mock(return_value=False)
 
-        os.environ['FAIL_WAIT'] = '1'
+        os.environ["FAIL_WAIT"] = "1"
 
     def test_exception(self):
         """Test that exceptions are properly reported."""
-        self.mock.process_command.side_effect = Exception('text')
+        self.mock.process_command.side_effect = Exception("text")
         exception, clean_exit, payload = run_bot.task_loop()
-        self.assertIn('Exception: text', exception)
+        self.assertIn("Exception: text", exception)
         self.assertFalse(clean_exit)
-        self.assertEqual('payload', payload)
+        self.assertEqual("payload", payload)

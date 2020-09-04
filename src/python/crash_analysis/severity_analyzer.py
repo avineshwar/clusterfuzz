@@ -25,26 +25,39 @@ from system import environment
 # These should be generic within ClusterFuzz.
 LOW_SEVERITY_CRASH_TYPES = []
 MEDIUM_SEVERITY_CRASH_TYPES = [
-    'Container-overflow', 'Heap-buffer-overflow',
-    'Incorrect-function-pointer-type', 'Index-out-of-bounds',
-    'Memcpy-param-overlap', 'Non-positive-vla-bound-value', 'Object-size',
-    'Stack-buffer-overflow', 'UNKNOWN', 'Use-of-uninitialized-value'
+    "Container-overflow",
+    "Heap-buffer-overflow",
+    "Incorrect-function-pointer-type",
+    "Index-out-of-bounds",
+    "Memcpy-param-overlap",
+    "Non-positive-vla-bound-value",
+    "Object-size",
+    "Stack-buffer-overflow",
+    "UNKNOWN",
+    "Use-of-uninitialized-value",
 ]
 HIGH_SEVERITY_CRASH_TYPES = [
-    'Bad-cast', 'Heap-double-free', 'Heap-use-after-free',
-    'Security DCHECK failure', 'Use-after-poison'
+    "Bad-cast",
+    "Heap-double-free",
+    "Heap-use-after-free",
+    "Security DCHECK failure",
+    "Use-after-poison",
 ]
 
 SEVERITY_ORDER = [
-    SecuritySeverity.LOW, SecuritySeverity.MEDIUM, SecuritySeverity.HIGH,
-    SecuritySeverity.CRITICAL
+    SecuritySeverity.LOW,
+    SecuritySeverity.MEDIUM,
+    SecuritySeverity.HIGH,
+    SecuritySeverity.CRITICAL,
 ]
 
 
-def _modify_severity(severity,
-                     delta,
-                     min_severity=SecuritySeverity.LOW,
-                     max_severity=SecuritySeverity.CRITICAL):
+def _modify_severity(
+    severity,
+    delta,
+    min_severity=SecuritySeverity.LOW,
+    max_severity=SecuritySeverity.CRITICAL,
+):
     """Increase/decrease the given |severity| by |delta|."""
     min_index = SEVERITY_ORDER.index(min_severity)
     max_index = SEVERITY_ORDER.index(max_severity)
@@ -67,35 +80,38 @@ def _modify_severity(severity,
 
 def get_analyzer(name):
     """Return an analyzer for the given |name|."""
-    if name == 'sanitizer_generic':
+    if name == "sanitizer_generic":
         return SeverityAnalyzerSanitizer()
-    if name == 'sanitizer_chrome':
+    if name == "sanitizer_chrome":
         return SeverityAnalyzerSanitizerChrome(is_compromised_renderer=False)
-    if name == 'sanitizer_chrome_compromised_renderer':
+    if name == "sanitizer_chrome_compromised_renderer":
         return SeverityAnalyzerSanitizerChrome(is_compromised_renderer=True)
     return None
 
 
-def get_security_severity(crash_type, crash_output, job_name,
-                          requires_gestures):
+def get_security_severity(crash_type, crash_output, job_name, requires_gestures):
     """Convenience function to get the security severity of a crash."""
     analyzer = None
-    severity_analyzer_name = environment.get_value(
-        'SECURITY_SEVERITY_ANALYZER')
+    severity_analyzer_name = environment.get_value("SECURITY_SEVERITY_ANALYZER")
 
     if severity_analyzer_name:
         analyzer = get_analyzer(severity_analyzer_name)
     else:
-        is_chrome = 'chrome' in job_name or 'content_shell' in job_name
-        is_sanitizer = ('_asan' in job_name or '_cfi' in job_name or
-                        '_lsan' in job_name or '_msan' in job_name or
-                        '_tsan' in job_name or '_ubsan' in job_name)
+        is_chrome = "chrome" in job_name or "content_shell" in job_name
+        is_sanitizer = (
+            "_asan" in job_name
+            or "_cfi" in job_name
+            or "_lsan" in job_name
+            or "_msan" in job_name
+            or "_tsan" in job_name
+            or "_ubsan" in job_name
+        )
 
         if is_sanitizer:
             if is_chrome:
-                analyzer = get_analyzer('sanitizer_chrome')
+                analyzer = get_analyzer("sanitizer_chrome")
             else:
-                analyzer = get_analyzer('sanitizer_generic')
+                analyzer = get_analyzer("sanitizer_generic")
 
     if not analyzer:
         return None
@@ -121,9 +137,8 @@ class SeverityAnalyzerSanitizer(object):
         if requires_gestures:
             severity = _modify_severity(severity, -1)
 
-        if 'WRITE' in crash_type:
-            severity = _modify_severity(
-                severity, 1, max_severity=SecuritySeverity.HIGH)
+        if "WRITE" in crash_type:
+            severity = _modify_severity(severity, 1, max_severity=SecuritySeverity.HIGH)
 
         # TODO(ochang): Detect really weird stacks, and bump them up to high.
         # TODO(ochang): ASSERTs should be high, but right now we also hit release
@@ -138,7 +153,7 @@ class SeverityAnalyzerSanitizerChrome(SeverityAnalyzerSanitizer):
     """Chrome specific severity analyzer."""
 
     PROCESS_TYPE_EXCEPTIONS = [
-        'Use-of-uninitialized-value',
+        "Use-of-uninitialized-value",
     ]
 
     def __init__(self, is_compromised_renderer):
@@ -148,15 +163,18 @@ class SeverityAnalyzerSanitizerChrome(SeverityAnalyzerSanitizer):
     def analyze(self, crash_type, crash_output, requires_gestures):
         """Return a security severity based on the ASan crash output."""
         # Base severity.
-        severity = SeverityAnalyzerSanitizer.analyze(self, crash_type, crash_output,
-                                                     requires_gestures)
+        severity = SeverityAnalyzerSanitizer.analyze(
+            self, crash_type, crash_output, requires_gestures
+        )
         if severity is None:
             return None
 
         # Chrome specific severity adjustments.
-        if (crash_type not in self.PROCESS_TYPE_EXCEPTIONS and
-            not self.is_compromised_renderer and
-                self._find_process_type(crash_output) == 'browser'):
+        if (
+            crash_type not in self.PROCESS_TYPE_EXCEPTIONS
+            and not self.is_compromised_renderer
+            and self._find_process_type(crash_output) == "browser"
+        ):
             severity = _modify_severity(severity, 1)
 
         return severity
@@ -170,18 +188,18 @@ class SeverityAnalyzerSanitizerChrome(SeverityAnalyzerSanitizer):
         # (or V8). Since we only care right now if this is a browser process (where
         # this should be rare from an uncompromised renderer), it shouldn't matter
         # too much.
-        main_function_regex = re.compile(r'content::([A-Z][a-z]+)Main\(')
+        main_function_regex = re.compile(r"content::([A-Z][a-z]+)Main\(")
 
         # As a fallback, search for content/browser file paths for determining the
         # browser process.
-        content_browser_regex = re.compile(r'content[/\\]browser')
+        content_browser_regex = re.compile(r"content[/\\]browser")
 
         for line in crash_output.splitlines():
-            if 'content::ContentMain' in line:
+            if "content::ContentMain" in line:
                 continue
 
             if content_browser_regex.search(line):
-                process_type = 'browser'
+                process_type = "browser"
                 break
 
             match = main_function_regex.search(line)
@@ -197,10 +215,10 @@ class SeverityAnalyzerSanitizerChrome(SeverityAnalyzerSanitizer):
 def severity_to_string(severity):
     """Convert a severity value to a human-readable string."""
     severity_map = {
-        SecuritySeverity.CRITICAL: 'Critical',
-        SecuritySeverity.HIGH: 'High',
-        SecuritySeverity.MEDIUM: 'Medium',
-        SecuritySeverity.LOW: 'Low',
+        SecuritySeverity.CRITICAL: "Critical",
+        SecuritySeverity.HIGH: "High",
+        SecuritySeverity.MEDIUM: "Medium",
+        SecuritySeverity.LOW: "Low",
         SecuritySeverity.MISSING: MISSING_VALUE_STRING,
     }
 
@@ -210,10 +228,10 @@ def severity_to_string(severity):
 def string_to_severity(severity):
     """Convert a string value to a severity value."""
     severity_map = {
-        'critical': SecuritySeverity.CRITICAL,
-        'high': SecuritySeverity.HIGH,
-        'medium': SecuritySeverity.MEDIUM,
-        'low': SecuritySeverity.LOW,
+        "critical": SecuritySeverity.CRITICAL,
+        "high": SecuritySeverity.HIGH,
+        "medium": SecuritySeverity.MEDIUM,
+        "low": SecuritySeverity.LOW,
     }
 
     if severity.lower() in severity_map:

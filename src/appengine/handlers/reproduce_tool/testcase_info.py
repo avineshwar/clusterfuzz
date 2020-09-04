@@ -38,8 +38,8 @@ def _prepare_testcase_dict(testcase):
     # Several nonstandard bits of information are required for the tool to run.
     # Append these to the test case dict and serialize them as well.
     job = data_types.Job.query(data_types.Job.name == testcase.job_type).get()
-    testcase_dict['job_definition'] = job.get_environment_string()
-    testcase_dict['serialized_fuzz_target'] = fuzz_target_dict
+    testcase_dict["job_definition"] = job.get_environment_string()
+    testcase_dict["serialized_fuzz_target"] = fuzz_target_dict
 
     return testcase_dict
 
@@ -51,7 +51,7 @@ class Handler(base_handler.Handler):
     @handler.oauth
     def post(self):
         """Serve the testcase JSON."""
-        testcase_id = request.get('testcaseId')
+        testcase_id = request.get("testcaseId")
         testcase = access.check_access_and_get_testcase(testcase_id)
 
         testcase_dict = _prepare_testcase_dict(testcase)

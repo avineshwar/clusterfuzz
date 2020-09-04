@@ -29,18 +29,18 @@ from system import environment
 
 def mark_unreproducible_if_flaky(testcase, potentially_flaky):
     """Check to see if a test case appears to be flaky."""
-    task_name = environment.get_value('TASK_NAME')
+    task_name = environment.get_value("TASK_NAME")
 
     # If this run does not suggest that we are flaky, clear the flag and assume
     # that we are reproducible.
     if not potentially_flaky:
-        testcase.set_metadata('potentially_flaky', False)
+        testcase.set_metadata("potentially_flaky", False)
         return
 
     # If we have not been marked as potentially flaky in the past, don't mark
     # mark the test case as unreproducible yet. It is now potentially flaky.
-    if not testcase.get_metadata('potentially_flaky'):
-        testcase.set_metadata('potentially_flaky', True)
+    if not testcase.get_metadata("potentially_flaky"):
+        testcase.set_metadata("potentially_flaky", True)
 
         # In this case, the current task will usually be in a state where it cannot
         # be completed. Recreate it.
@@ -50,18 +50,19 @@ def mark_unreproducible_if_flaky(testcase, potentially_flaky):
     # At this point, this test case has been flagged as potentially flaky twice.
     # It should be marked as unreproducible. Mark it as unreproducible, and set
     # fields that cannot be populated accordingly.
-    if task_name == 'minimize' and not testcase.minimized_keys:
-        testcase.minimized_keys = 'NA'
-    if task_name in ['minimize', 'impact']:
+    if task_name == "minimize" and not testcase.minimized_keys:
+        testcase.minimized_keys = "NA"
+    if task_name in ["minimize", "impact"]:
         testcase.set_impacts_as_na()
-    if task_name in ['minimize', 'regression']:
-        testcase.regression = 'NA'
-    if task_name in ['minimize', 'progression']:
-        testcase.fixed = 'NA'
+    if task_name in ["minimize", "regression"]:
+        testcase.regression = "NA"
+    if task_name in ["minimize", "progression"]:
+        testcase.fixed = "NA"
 
     testcase.one_time_crasher_flag = True
-    data_handler.update_testcase_comment(testcase, data_types.TaskState.ERROR,
-                                         'Testcase appears to be flaky')
+    data_handler.update_testcase_comment(
+        testcase, data_types.TaskState.ERROR, "Testcase appears to be flaky"
+    )
 
     # Issue update to flip reproducibility label is done in App Engine cleanup
     # cron. This avoids calling the issue tracker apis from GCE.
@@ -78,7 +79,7 @@ def create_blame_task_if_needed(testcase):
         return
 
     # Blame is only applicable to chromium project, otherwise bail out.
-    if testcase.project_name != 'chromium':
+    if testcase.project_name != "chromium":
         return
 
     # We cannot run blame job for custom binaries since we don't have any context
@@ -88,7 +89,7 @@ def create_blame_task_if_needed(testcase):
 
     # Don't send duplicate issues to Predator. This causes issues with metrics
     # tracking and wastes cycles.
-    if testcase.status == 'Duplicate':
+    if testcase.status == "Duplicate":
         return
 
     create_task = False
@@ -110,7 +111,7 @@ def create_blame_task_if_needed(testcase):
         create_task = True
 
     if create_task:
-        tasks.add_task('blame', testcase.key.id(), testcase.job_type)
+        tasks.add_task("blame", testcase.key.id(), testcase.job_type)
 
 
 def create_impact_task_if_needed(testcase):
@@ -120,7 +121,7 @@ def create_impact_task_if_needed(testcase):
         return
 
     # Impact is only applicable to chromium project, otherwise bail out.
-    if testcase.project_name != 'chromium':
+    if testcase.project_name != "chromium":
         return
 
     # We cannot run impact job for custom binaries since we don't have any
@@ -128,12 +129,12 @@ def create_impact_task_if_needed(testcase):
     if build_manager.is_custom_binary():
         return
 
-    tasks.add_task('impact', testcase.key.id(), testcase.job_type)
+    tasks.add_task("impact", testcase.key.id(), testcase.job_type)
 
 
 def create_minimize_task_if_needed(testcase):
     """Creates a minimize task if needed."""
-    tasks.add_task('minimize', testcase.key.id(), testcase.job_type)
+    tasks.add_task("minimize", testcase.key.id(), testcase.job_type)
 
 
 def create_regression_task_if_needed(testcase):
@@ -144,7 +145,7 @@ def create_regression_task_if_needed(testcase):
     if build_manager.is_custom_binary():
         return
 
-    tasks.add_task('regression', testcase.key.id(), testcase.job_type)
+    tasks.add_task("regression", testcase.key.id(), testcase.job_type)
 
 
 def create_variant_tasks_if_needed(testcase):
@@ -165,17 +166,18 @@ def create_variant_tasks_if_needed(testcase):
 
         # Don't try to reproduce engine fuzzer testcase with blackbox fuzzer
         # testcases and vice versa.
-        if (environment.is_engine_fuzzer_job(testcase.job_type) !=
-                environment.is_engine_fuzzer_job(job_type)):
+        if environment.is_engine_fuzzer_job(
+            testcase.job_type
+        ) != environment.is_engine_fuzzer_job(job_type):
             continue
 
         # Skip experimental jobs.
         job_environment = job.get_environment()
-        if utils.string_is_true(job_environment.get('EXPERIMENTAL')):
+        if utils.string_is_true(job_environment.get("EXPERIMENTAL")):
             continue
 
         queue = tasks.queue_for_platform(job.platform)
-        tasks.add_task('variant', testcase_id, job_type, queue)
+        tasks.add_task("variant", testcase_id, job_type, queue)
 
         variant = data_handler.get_testcase_variant(testcase_id, job_type)
         variant.status = data_types.TestcaseVariantStatus.PENDING
@@ -193,7 +195,7 @@ def create_symbolize_task_if_needed(testcase):
     if not build_manager.has_symbolized_builds():
         return
 
-    tasks.add_task('symbolize', testcase.key.id(), testcase.job_type)
+    tasks.add_task("symbolize", testcase.key.id(), testcase.job_type)
 
 
 def create_tasks(testcase):
@@ -217,10 +219,10 @@ def create_tasks(testcase):
     # a large timeout and we can't afford to waste more than a couple of hours
     # on these jobs.
     testcase_id = testcase.key.id()
-    if environment.get_value('MIN') == 'No':
+    if environment.get_value("MIN") == "No":
         testcase = data_handler.get_testcase_by_id(testcase_id)
-        testcase.minimized_keys = 'NA'
-        testcase.regression = 'NA'
+        testcase.minimized_keys = "NA"
+        testcase.regression = "NA"
         testcase.set_impacts_as_na()
         testcase.put()
         return
@@ -232,7 +234,7 @@ def create_tasks(testcase):
 
 def _get_commits(commit_range, job_type):
     """Get commits from range."""
-    if not commit_range or commit_range == 'NA':
+    if not commit_range or commit_range == "NA":
         return None, None
 
     start, end = revisions.get_start_and_end_revision(commit_range)
@@ -240,21 +242,21 @@ def _get_commits(commit_range, job_type):
     if not components:
         return None, None
 
-    commits = components[0]['link_text']
+    commits = components[0]["link_text"]
 
-    if ':' not in commits:
+    if ":" not in commits:
         return commits, commits
 
-    old_commit, new_commit = commits.split(':')
-    if old_commit == '0':
-        old_commit = ''
+    old_commit, new_commit = commits.split(":")
+    if old_commit == "0":
+        old_commit = ""
 
     return old_commit, new_commit
 
 
 def request_bisection(testcase_id):
     """Request precise bisection."""
-    pubsub_topic = local_config.ProjectConfig().get('bisect_service.pubsub_topic')
+    pubsub_topic = local_config.ProjectConfig().get("bisect_service.pubsub_topic")
     if not pubsub_topic:
         return
 
@@ -276,59 +278,53 @@ def request_bisection(testcase_id):
         return
 
     # Only make 1 request of each type per testcase.
-    if (not testcase.get_metadata('requested_regressed_bisect') and
-            _make_bisection_request(pubsub_topic, testcase, target, 'regressed')):
-        testcase.set_metadata('requested_regressed_bisect', True)
+    if not testcase.get_metadata(
+        "requested_regressed_bisect"
+    ) and _make_bisection_request(pubsub_topic, testcase, target, "regressed"):
+        testcase.set_metadata("requested_regressed_bisect", True)
 
-    if (not testcase.get_metadata('requested_fixed_bisect') and
-            _make_bisection_request(pubsub_topic, testcase, target, 'fixed')):
-        testcase.set_metadata('requested_fixed_bisect', True)
+    if not testcase.get_metadata("requested_fixed_bisect") and _make_bisection_request(
+        pubsub_topic, testcase, target, "fixed"
+    ):
+        testcase.set_metadata("requested_fixed_bisect", True)
 
 
 def _make_bisection_request(pubsub_topic, testcase, target, bisect_type):
     """Make a bisection request to the external bisection service. Returns whether
     or not a request was actually made."""
-    if bisect_type == 'fixed':
-        old_commit, new_commit = _get_commits(
-            testcase.fixed, testcase.job_type)
-    elif bisect_type == 'regressed':
-        old_commit, new_commit = _get_commits(testcase.regression,
-                                              testcase.job_type)
+    if bisect_type == "fixed":
+        old_commit, new_commit = _get_commits(testcase.fixed, testcase.job_type)
+    elif bisect_type == "regressed":
+        old_commit, new_commit = _get_commits(testcase.regression, testcase.job_type)
     else:
-        raise ValueError('Invalid bisection type: ' + bisect_type)
+        raise ValueError("Invalid bisection type: " + bisect_type)
 
     if not new_commit:
         # old_commit can be empty (i.e. '0' case), but new_commit should never be.
         return False
 
-    reproducer = blobs.read_key(
-        testcase.minimized_keys or testcase.fuzzed_keys)
+    reproducer = blobs.read_key(testcase.minimized_keys or testcase.fuzzed_keys)
     pubsub_client = pubsub.PubSubClient()
-    pubsub_client.publish(pubsub_topic, [
-        pubsub.Message(
-            reproducer, {
-                'type':
-                    bisect_type,
-                'project_name':
-                    target.project,
-                'sanitizer':
-                    environment.SANITIZER_NAME_MAP[
+    pubsub_client.publish(
+        pubsub_topic,
+        [
+            pubsub.Message(
+                reproducer,
+                {
+                    "type": bisect_type,
+                    "project_name": target.project,
+                    "sanitizer": environment.SANITIZER_NAME_MAP[
                         environment.get_memory_tool_name(testcase.job_type)
                     ],
-                'fuzz_target':
-                    target.binary,
-                'old_commit':
-                    old_commit,
-                'new_commit':
-                    new_commit,
-                'testcase_id':
-                    str(testcase.key.id()),
-                'issue_id':
-                    testcase.bug_information,
-                'crash_type':
-                    testcase.crash_type,
-                'security':
-                    str(testcase.security_flag),
-            })
-    ])
+                    "fuzz_target": target.binary,
+                    "old_commit": old_commit,
+                    "new_commit": new_commit,
+                    "testcase_id": str(testcase.key.id()),
+                    "issue_id": testcase.bug_information,
+                    "crash_type": testcase.crash_type,
+                    "security": str(testcase.security_flag),
+                },
+            )
+        ],
+    )
     return True

@@ -30,8 +30,9 @@ def remove_group(testcase_id):
     data_handler.remove_testcase_from_group(testcase)
 
     helpers.log(
-        'Removed the testcase %s from the group %s' %
-        (testcase.key.id(), group_id), helpers.MODIFY_OPERATION)
+        "Removed the testcase %s from the group %s" % (testcase.key.id(), group_id),
+        helpers.MODIFY_OPERATION,
+    )
 
     return testcase
 
@@ -44,7 +45,7 @@ class Handler(base_handler.Handler):
     @handler.check_admin_access
     def post(self):
         """Remove the issue from the testcase."""
-        testcase_id = request.get('testcaseId')
+        testcase_id = request.get("testcaseId")
 
         updated_testcase = remove_group(testcase_id)
         return self.render_json(show.get_testcase_detail(updated_testcase))

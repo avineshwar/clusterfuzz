@@ -23,35 +23,35 @@ from local.butler import appengine
 from local.butler import common
 
 _GOLINT_EXCEPTIONS = [
-    'types.go'  # Not all model names conform to Go naming conventions.
+    "types.go"  # Not all model names conform to Go naming conventions.
 ]
-_LICENSE_CHECK_FILENAMES = ['Dockerfile']
+_LICENSE_CHECK_FILENAMES = ["Dockerfile"]
 _LICENSE_CHECK_EXTENSIONS = [
-    '.bash',
-    '.c',
-    '.cc',
-    '.cpp',
-    '.css',
-    '.h',
-    '.htm',
-    '.html',
-    '.js',
-    '.go',
-    '.proto',
-    '.ps1',
-    '.py',
-    '.sh',
-    '.yaml',
+    ".bash",
+    ".c",
+    ".cc",
+    ".cpp",
+    ".css",
+    ".h",
+    ".htm",
+    ".html",
+    ".js",
+    ".go",
+    ".proto",
+    ".ps1",
+    ".py",
+    ".sh",
+    ".yaml",
 ]
-_LICENSE_CHECK_IGNORE_FILENAMES = ['technology.css']
+_LICENSE_CHECK_IGNORE_FILENAMES = ["technology.css"]
 _LICENSE_CHECK_IGNORE_DIRECTORIES = [
-    'third_party',
-    'templates',  # Generated code.
+    "third_party",
+    "templates",  # Generated code.
 ]
-_LICENSE_CHECK_STRING = 'http://www.apache.org/licenses/LICENSE-2.0'
-_PY_TEST_SUFFIX = '_test.py'
-_PY_INIT_FILENAME = '__init__.py'
-_YAML_EXCEPTIONS = ['bad.yaml']
+_LICENSE_CHECK_STRING = "http://www.apache.org/licenses/LICENSE-2.0"
+_PY_TEST_SUFFIX = "_test.py"
+_PY_INIT_FILENAME = "__init__.py"
+_YAML_EXCEPTIONS = ["bad.yaml"]
 
 _error_occurred = False
 
@@ -71,15 +71,17 @@ def _execute_command_and_track_error(command):
     if returncode != 0:
         _error()
 
-    return output.decode('utf-8')
+    return output.decode("utf-8")
 
 
 def license_validate(file_path):
     """Run license header validation."""
     filename = os.path.basename(file_path)
     extension = os.path.splitext(file_path)[1]
-    if (filename not in _LICENSE_CHECK_FILENAMES and
-            extension not in _LICENSE_CHECK_EXTENSIONS):
+    if (
+        filename not in _LICENSE_CHECK_FILENAMES
+        and extension not in _LICENSE_CHECK_EXTENSIONS
+    ):
         return
 
     path_directories = file_path.split(os.sep)
@@ -94,7 +96,7 @@ def license_validate(file_path):
         if _LICENSE_CHECK_STRING in f.read():
             return
 
-    _error('Failed: Missing license header for %s.' % file_path)
+    _error("Failed: Missing license header for %s." % file_path)
 
 
 def py_import_order(file_path):
@@ -109,7 +111,7 @@ def py_import_order(file_path):
         if sorted_import_block == import_block:
             return []
 
-        return ['\n'.join(sorted_import_block)]
+        return ["\n".join(sorted_import_block)]
 
     with open(file_path) as f:
         file_content = f.read()
@@ -117,7 +119,7 @@ def py_import_order(file_path):
     imports = []
     corrected_import_blocks = []
     for line in file_content.splitlines():
-        if line.startswith('import ') or line.startswith('from '):
+        if line.startswith("import ") or line.startswith("from "):
             imports.append(line)
         else:
             corrected_import_blocks += _validate_block(imports)
@@ -129,10 +131,13 @@ def py_import_order(file_path):
     if not corrected_import_blocks:
         return
 
-    suggestions = '\n\n--------\n\n'.join(corrected_import_blocks)
-    _error(('Failed: File {filename} has non-alphabetized import blocks. '
-            'Suggested order:\n\n{suggestions}').format(
-                filename=file_path, suggestions=suggestions))
+    suggestions = "\n\n--------\n\n".join(corrected_import_blocks)
+    _error(
+        (
+            "Failed: File {filename} has non-alphabetized import blocks. "
+            "Suggested order:\n\n{suggestions}"
+        ).format(filename=file_path, suggestions=suggestions)
+    )
 
 
 def py_test_init_check(file_path):
@@ -143,8 +148,11 @@ def py_test_init_check(file_path):
 
     test_directory = os.path.dirname(file_path)
     if _PY_INIT_FILENAME not in os.listdir(test_directory):
-        _error('Failed: Missing {filename} file in test directory {dir}.'.format(
-            filename=_PY_INIT_FILENAME, dir=test_directory))
+        _error(
+            "Failed: Missing {filename} file in test directory {dir}.".format(
+                filename=_PY_INIT_FILENAME, dir=test_directory
+            )
+        )
 
 
 def yaml_validate(file_path):
@@ -156,53 +164,54 @@ def yaml_validate(file_path):
         with open(file_path) as f:
             yaml.safe_load(f.read())
     except Exception as e:
-        _error('Failed: Invalid yaml file %s.\n\n%s' % (file_path, e))
+        _error("Failed: Invalid yaml file %s.\n\n%s" % (file_path, e))
 
 
 def is_auto_generated_file(filepath):
     """Check if file is auto-generated so we dont lint it"""
-    return filepath.endswith('_pb2.py') or filepath.endswith('pb2_grpc.py') or \
-        os.path.dirname(filepath) == os.path.join('src', 'python', 'bot',
-                                                  'tokenizer', 'grammars')
+    return (
+        filepath.endswith("_pb2.py")
+        or filepath.endswith("pb2_grpc.py")
+        or os.path.dirname(filepath)
+        == os.path.join("src", "python", "bot", "tokenizer", "grammars")
+    )
 
 
 def execute(_):
     """Lint changed code."""
-    pythonpath = os.getenv('PYTHONPATH', '')
-    os.environ['PYTHONPATH'] = appengine.find_sdk_path() + ':' + pythonpath
+    pythonpath = os.getenv("PYTHONPATH", "")
+    os.environ["PYTHONPATH"] = appengine.find_sdk_path() + ":" + pythonpath
 
-    if 'GOOGLE_CLOUDBUILD' in os.environ:
+    if "GOOGLE_CLOUDBUILD" in os.environ:
         # Explicitly compare against master if we're running on the CI
-        _, output = common.execute('git diff --name-only master FETCH_HEAD')
-    elif 'TRAVIS_BRANCH' in os.environ:
+        _, output = common.execute("git diff --name-only master FETCH_HEAD")
+    elif "TRAVIS_BRANCH" in os.environ:
         _, output = common.execute(
-            'git diff --name-only HEAD $(git merge-base HEAD FETCH_HEAD)')
+            "git diff --name-only HEAD $(git merge-base HEAD FETCH_HEAD)"
+        )
     else:
-        _, output = common.execute('git diff --name-only FETCH_HEAD')
+        _, output = common.execute("git diff --name-only FETCH_HEAD")
 
-    file_paths = [
-        f.decode('utf-8') for f in output.splitlines() if os.path.exists(f)
-    ]
+    file_paths = [f.decode("utf-8") for f in output.splitlines() if os.path.exists(f)]
     py_changed_file_paths = [
-        f for f in file_paths
-        if f.endswith('.py') and not is_auto_generated_file(f)
+        f for f in file_paths if f.endswith(".py") and not is_auto_generated_file(f)
     ]
-    go_changed_file_paths = [f for f in file_paths if f.endswith('.go')]
-    yaml_changed_file_paths = [f for f in file_paths if f.endswith('.yaml')]
+    go_changed_file_paths = [f for f in file_paths if f.endswith(".go")]
+    yaml_changed_file_paths = [f for f in file_paths if f.endswith(".yaml")]
 
     for file_path in py_changed_file_paths:
-        _execute_command_and_track_error('pylint ' + file_path)
-        _execute_command_and_track_error('yapf -d ' + file_path)
+        _execute_command_and_track_error("pylint " + file_path)
+        _execute_command_and_track_error("yapf -d " + file_path)
 
         py_import_order(file_path)
         py_test_init_check(file_path)
 
-    golint_path = os.path.join('local', 'bin', 'golint')
+    golint_path = os.path.join("local", "bin", "golint")
     for file_path in go_changed_file_paths:
         if not os.path.basename(file_path) in _GOLINT_EXCEPTIONS:
-            _execute_command_and_track_error(golint_path + ' ' + file_path)
+            _execute_command_and_track_error(golint_path + " " + file_path)
 
-        output = _execute_command_and_track_error('gofmt -d ' + file_path)
+        output = _execute_command_and_track_error("gofmt -d " + file_path)
         if output.strip():
             _error()
 
@@ -213,7 +222,7 @@ def execute(_):
         license_validate(file_path)
 
     if _error_occurred:
-        print('Linting failed, see errors above.')
+        print("Linting failed, see errors above.")
         sys.exit(1)
     else:
-        print('Linting passed.')
+        print("Linting passed.")

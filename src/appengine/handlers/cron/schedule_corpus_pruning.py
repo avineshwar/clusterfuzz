@@ -24,7 +24,7 @@ from libs import handler
 def get_tasks_to_schedule():
     """Return (task_target, job_name, queue_name) arguments to schedule a task."""
     for job in data_types.Job.query():
-        if not utils.string_is_true(job.get_environment().get('CORPUS_PRUNE')):
+        if not utils.string_is_true(job.get_environment().get("CORPUS_PRUNE")):
             continue
 
         queue_name = tasks.queue_for_job(job.name)
@@ -40,5 +40,4 @@ class Handler(base_handler.Handler):
     def get(self):
         """Schedule the corpus pruning tasks."""
         for task_target, job_name, queue_name in get_tasks_to_schedule():
-            tasks.add_task('corpus_pruning', task_target,
-                           job_name, queue=queue_name)
+            tasks.add_task("corpus_pruning", task_target, job_name, queue=queue_name)

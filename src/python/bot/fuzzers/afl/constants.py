@@ -16,46 +16,46 @@ Should not have any dependancies.
 """
 
 # AFL flags.
-DICT_FLAG = '-x'
+DICT_FLAG = "-x"
 
-INPUT_FLAG = '-i'
+INPUT_FLAG = "-i"
 
-MEMORY_LIMIT_FLAG = '-m'
+MEMORY_LIMIT_FLAG = "-m"
 
-OUTPUT_FLAG = '-o'
+OUTPUT_FLAG = "-o"
 
-SKIP_DETERMINISTIC_FLAG = '-d'
+SKIP_DETERMINISTIC_FLAG = "-d"
 
-TIMEOUT_FLAG = '-t'
+TIMEOUT_FLAG = "-t"
 
 # AFL environment variables.
-SKIP_CPUFREQ_ENV_VAR = 'AFL_SKIP_CPUFREQ'
+SKIP_CPUFREQ_ENV_VAR = "AFL_SKIP_CPUFREQ"
 
-BENCH_UNTIL_CRASH_ENV_VAR = 'AFL_BENCH_UNTIL_CRASH'
+BENCH_UNTIL_CRASH_ENV_VAR = "AFL_BENCH_UNTIL_CRASH"
 
-DONT_DEFER_ENV_VAR = 'AFL_DRIVER_DONT_DEFER'
+DONT_DEFER_ENV_VAR = "AFL_DRIVER_DONT_DEFER"
 
-FAST_CAL_ENV_VAR = 'AFL_FAST_CAL'
+FAST_CAL_ENV_VAR = "AFL_FAST_CAL"
 
-NO_AFFINITY_ENV_VAR = 'AFL_NO_AFFINITY'
+NO_AFFINITY_ENV_VAR = "AFL_NO_AFFINITY"
 
-STDERR_FILENAME_ENV_VAR = 'AFL_DRIVER_STDERR_DUPLICATE_FILENAME'
+STDERR_FILENAME_ENV_VAR = "AFL_DRIVER_STDERR_DUPLICATE_FILENAME"
 
-CLOSE_FD_MASK_ENV_VAR = 'AFL_DRIVER_CLOSE_FD_MASK'
+CLOSE_FD_MASK_ENV_VAR = "AFL_DRIVER_CLOSE_FD_MASK"
 
-MAX_FILE_BYTES = 2**20  # 1 MB
+MAX_FILE_BYTES = 2 ** 20  # 1 MB
 
 # This should be as high as possible, otherwise AFL will restart the binary too
 # often to be competitive with pure libFuzzer. 2147483647 is the maximum signed
 # integer. afl_driver accepts one argument which it converts to a signed int
 # using atoi hence this is the largest value we can pick.
-MAX_PERSISTENT_EXECUTIONS = '2147483647'
+MAX_PERSISTENT_EXECUTIONS = "2147483647"
 
 # Resume is used by passing -i- to AFL. See https://goo.gl/rZi455
-RESUME_INPUT = '-'
+RESUME_INPUT = "-"
 
 # Don't let afl set a memory limit. Otherwise we will not be able to use
 # sanitizers.
-MAX_MEMORY_LIMIT = 'none'
+MAX_MEMORY_LIMIT = "none"
 
-CORE_PATTERN_FILE_PATH = '/proc/sys/kernel/core_pattern'
+CORE_PATTERN_FILE_PATH = "/proc/sys/kernel/core_pattern"

@@ -40,30 +40,33 @@ def load_existing_model_from(config):
           model (keras.Model): loaded model from config.
       """
     latest_filename = tf.train.latest_checkpoint(
-        utils.get_full_path(config['run_name']))
+        utils.get_full_path(config["run_name"])
+    )
 
-    print('Loading \"{}\" model from {}...'.format(config['architecture'],
-                                                   latest_filename))
+    print(
+        'Loading "{}" model from {}...'.format(config["architecture"], latest_filename)
+    )
     model = models.make_model_from_layer(
-        constants.ARCHITECTURE_MAP[config['architecture']],
-        config['output_dim'],
-        config['input_shape'],
-        hidden_layer_dim=config['num_hidden'])
+        constants.ARCHITECTURE_MAP[config["architecture"]],
+        config["output_dim"],
+        config["input_shape"],
+        hidden_layer_dim=config["num_hidden"],
+    )
     model.load_weights(latest_filename).expect_partial()
 
     # Update 'cur_epoch' in config, since training loop doesn't do it.
-    config['cur_epoch'] = int(
-        latest_filename[-constants.CP_EPOCH_NUM_DIGITS + 1:])
-    print('Last saved epoch: {}.'.format(config['cur_epoch']))
+    config["cur_epoch"] = int(latest_filename[-constants.CP_EPOCH_NUM_DIGITS + 1 :])
+    print("Last saved epoch: {}.".format(config["cur_epoch"]))
     utils.save_model_config(config)
 
     # Training options.
     model.compile(
-        optimizer=constants.OPTIMIZER_MAP[config['optimizer']](
-            learning_rate=config['lr']),
+        optimizer=constants.OPTIMIZER_MAP[config["optimizer"]](
+            learning_rate=config["lr"]
+        ),
         loss=keras.losses.BinaryCrossentropy(from_logits=False),
-        metrics=[model_utils.BitmapAcc(),
-                 model_utils.NeuzzJaccardAcc()])
+        metrics=[model_utils.BitmapAcc(), model_utils.NeuzzJaccardAcc()],
+    )
 
     return model
 
@@ -84,18 +87,20 @@ def get_new_model_from(config):
 
     # Model options.
     model = models.make_model_from_layer(
-        constants.ARCHITECTURE_MAP[config['architecture']],
-        config['output_dim'],
-        config['input_shape'],
-        hidden_layer_dim=config['num_hidden'])
+        constants.ARCHITECTURE_MAP[config["architecture"]],
+        config["output_dim"],
+        config["input_shape"],
+        hidden_layer_dim=config["num_hidden"],
+    )
 
     # Training options.
     model.compile(
-        optimizer=constants.OPTIMIZER_MAP[config['optimizer']](
-            learning_rate=config['lr']),
+        optimizer=constants.OPTIMIZER_MAP[config["optimizer"]](
+            learning_rate=config["lr"]
+        ),
         loss=keras.losses.BinaryCrossentropy(from_logits=False),
-        metrics=[model_utils.BitmapAcc(),
-                 model_utils.NeuzzJaccardAcc()])
+        metrics=[model_utils.BitmapAcc(), model_utils.NeuzzJaccardAcc()],
+    )
 
     return model
 
@@ -119,17 +124,18 @@ def train_model(model, config, train_dataset, val_dataset):
     callback_list = model_utils.get_callbacks(config)
     model.fit(
         train_dataset,
-        batch_size=config['batch_size'],
-        epochs=config['epochs'],
+        batch_size=config["batch_size"],
+        epochs=config["epochs"],
         verbose=1,
         callbacks=callback_list,
         validation_data=val_dataset,
         shuffle=True,
-        initial_epoch=config['cur_epoch'],
-        validation_batch_size=config['val_batch_size'],
+        initial_epoch=config["cur_epoch"],
+        validation_batch_size=config["val_batch_size"],
         validation_freq=1,
         workers=os.cpu_count(),
-        use_multiprocessing=False)
+        use_multiprocessing=False,
+    )
     return constants.ExitCodes.SUCCESS
 
 
@@ -155,9 +161,9 @@ def main():
     else:
         model = load_existing_model_from(config)
 
-    model_utils.print_model_summary(model, config, config['input_shape'])
+    model_utils.print_model_summary(model, config, config["input_shape"])
     train_model(model, config, train_dataset, val_dataset)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

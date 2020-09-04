@@ -22,7 +22,7 @@ from metrics import profiler
 from system import environment
 import os
 
-BIN_FOLDER_PATH = 'bin'
+BIN_FOLDER_PATH = "bin"
 REPRO_TIME = 70
 
 
@@ -34,10 +34,8 @@ class SyzkallerOptions(engine.FuzzOptions):
     """Represents options passed to the engine. Can be overridden to provide more
     options."""
 
-    def __init__(self, corpus_dir, arguments, strategies, fuzz_corpus_dirs,
-                 extra_env):
-        super(SyzkallerOptions, self).__init__(
-            corpus_dir, arguments, strategies)
+    def __init__(self, corpus_dir, arguments, strategies, fuzz_corpus_dirs, extra_env):
+        super(SyzkallerOptions, self).__init__(corpus_dir, arguments, strategies)
         self.fuzz_corpus_dirs = fuzz_corpus_dirs
         self.extra_env = extra_env
 
@@ -47,7 +45,7 @@ class SyzkallerEngine(engine.Engine):
 
     @property
     def name(self):
-        return 'syzkaller'
+        return "syzkaller"
 
     def prepare_binary_path(self):
         """Prepares the path for the syzkaller binary.
@@ -55,10 +53,9 @@ class SyzkallerEngine(engine.Engine):
         Returns:
           The full path of the binary folder.
         """
-        syzkaller_path = os.path.join(
-            environment.get_value('BUILD_DIR'), 'syzkaller')
+        syzkaller_path = os.path.join(environment.get_value("BUILD_DIR"), "syzkaller")
         if not os.path.exists(syzkaller_path):
-            raise SyzkallerError('syzkaller not found in build')
+            raise SyzkallerError("syzkaller not found in build")
         binary_folder = os.path.join(syzkaller_path, BIN_FOLDER_PATH)
 
         for root, _, filenames in os.walk(binary_folder):
@@ -68,7 +65,9 @@ class SyzkallerEngine(engine.Engine):
 
         return binary_folder
 
-    def prepare(self, corpus_dir, target_path, unused_build_dir):  # pylint: disable=unused-argument
+    def prepare(
+        self, corpus_dir, target_path, unused_build_dir
+    ):  # pylint: disable=unused-argument
         """Prepare for a fuzzing session, by generating options and making
         syzkaller binaries executable.
 
@@ -82,11 +81,8 @@ class SyzkallerEngine(engine.Engine):
         self.prepare_binary_path()
         config = runner.get_config()
         return SyzkallerOptions(
-            corpus_dir,
-            config,
-            strategies={},
-            fuzz_corpus_dirs=None,
-            extra_env=None)
+            corpus_dir, config, strategies={}, fuzz_corpus_dirs=None, extra_env=None
+        )
 
     def _create_temp_corpus_dir(self, name):
         """Create temporary corpus directory."""
@@ -107,18 +103,20 @@ class SyzkallerEngine(engine.Engine):
         Returns:
           A FuzzResult object.
         """
-        profiler.start_if_needed('syzkaller_kasan')
+        profiler.start_if_needed("syzkaller_kasan")
         syzkaller_runner = runner.get_runner(target_path)
 
         # Directory to place new units.
-        self._create_temp_corpus_dir('new')
+        self._create_temp_corpus_dir("new")
 
         args = options.arguments
-        args += ['--coverfile', runner.get_cover_file_path()]
+        args += ["--coverfile", runner.get_cover_file_path()]
 
         return syzkaller_runner.fuzz(max_time, additional_args=args)
 
-    def reproduce(self, target_path, input_path, arguments, max_time):  # pylint: disable=unused-argument
+    def reproduce(
+        self, target_path, input_path, arguments, max_time
+    ):  # pylint: disable=unused-argument
         """Reproduce a crash given an input.
            Example: ./syz-crush -config my.cfg -infinite=false -restart_time=20s
             crash-qemu-1-1455745459265726910
@@ -134,17 +132,27 @@ class SyzkallerEngine(engine.Engine):
         """
         binary_dir = self.prepare_binary_path()
         syzkaller_runner = runner.get_runner(
-            os.path.join(binary_dir, constants.SYZ_REPRO))
+            os.path.join(binary_dir, constants.SYZ_REPRO)
+        )
         repro_args = runner.get_config()
         repro_args.extend(
-            ['-infinite=false', '-restart_time={}s'.format(REPRO_TIME), input_path])
+            ["-infinite=false", "-restart_time={}s".format(REPRO_TIME), input_path]
+        )
         result = syzkaller_runner.repro(max_time, repro_args=repro_args)
 
-        return engine.ReproduceResult(result.command, result.return_code,
-                                      result.time_executed, result.output)
+        return engine.ReproduceResult(
+            result.command, result.return_code, result.time_executed, result.output
+        )
 
-    def minimize_corpus(self, target_path, arguments, input_dirs, output_dir,
-                        unused_reproducers_dir, unused_max_time):
+    def minimize_corpus(
+        self,
+        target_path,
+        arguments,
+        input_dirs,
+        output_dir,
+        unused_reproducers_dir,
+        unused_max_time,
+    ):
         """Optional (but recommended): run corpus minimization.
 
         Args:
@@ -161,8 +169,9 @@ class SyzkallerEngine(engine.Engine):
         """
         raise NotImplementedError
 
-    def minimize_testcase(self, target_path, arguments, input_path, output_path,
-                          max_time):
+    def minimize_testcase(
+        self, target_path, arguments, input_path, output_path, max_time
+    ):
         """Optional (but recommended): Minimize a testcase.
 
         Args:

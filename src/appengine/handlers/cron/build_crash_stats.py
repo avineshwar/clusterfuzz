@@ -46,7 +46,7 @@ BIGQUERY_INSERTION_DELAY = datetime.timedelta(hours=1, minutes=2)
 
 # The template for job ids. Running on a already-run hour is fine to certain
 # degree. We de-dup when reading.
-JOB_ID_TEMPLATE = 'build_crash_stats_test_{unique_number}'
+JOB_ID_TEMPLATE = "build_crash_stats_test_{unique_number}"
 
 TIMEOUT = 2 * 60
 
@@ -88,7 +88,7 @@ FROM main.crashes
 
     result = client.query(query=sql)
     if result and result.rows:
-        return result.rows[0]['min_hour']
+        return result.rows[0]["min_hour"]
 
     return 0
 
@@ -121,22 +121,24 @@ def get_next_end_hour():
 
 def make_request(client, job_id, end_hour):
     """Make a request to BigQuery to build crash stats."""
-    table_id = (
-        'crash_stats$%s' % crash_stats.get_datetime(end_hour).strftime('%Y%m%d'))
+    table_id = "crash_stats$%s" % crash_stats.get_datetime(end_hour).strftime("%Y%m%d")
 
     sql = SQL.format(
         end_hour=end_hour,
-        end_date=(crash_stats.get_datetime(end_hour).strftime('%Y-%m-%d')))
-    logging.info('TableID: %s\nJobID: %s\nSQL: %s', table_id, job_id, sql)
+        end_date=(crash_stats.get_datetime(end_hour).strftime("%Y-%m-%d")),
+    )
+    logging.info("TableID: %s\nJobID: %s\nSQL: %s", table_id, job_id, sql)
 
     client.insert_from_query(
-        dataset_id='main', table_id=table_id, job_id=job_id, query=sql)
+        dataset_id="main", table_id=table_id, job_id=job_id, query=sql
+    )
 
 
 def build(end_hour):
     """Build crash stats for the end hour."""
-    logging.info('Started building crash stats for %s.',
-                 crash_stats.get_datetime(end_hour))
+    logging.info(
+        "Started building crash stats for %s.", crash_stats.get_datetime(end_hour)
+    )
     job_id = JOB_ID_TEMPLATE.format(unique_number=int(time.time()))
 
     client = big_query.Client()
@@ -147,14 +149,14 @@ def build(end_hour):
         time.sleep(10)
 
         result = client.get_job(job_id)
-        logging.info('Checking %s', json.dumps(result))
+        logging.info("Checking %s", json.dumps(result))
 
-        if result['status']['state'] == 'DONE':
-            if result['status'].get('errors'):
+        if result["status"]["state"] == "DONE":
+            if result["status"].get("errors"):
                 raise Exception(json.dumps(result))
             return
 
-    raise Exception('Building crash stats exceeded %d seconds.' % TIMEOUT)
+    raise Exception("Building crash stats exceeded %d seconds." % TIMEOUT)
 
 
 def build_if_needed():
@@ -167,8 +169,10 @@ def build_if_needed():
         job_history = data_types.BuildCrashStatsJobHistory()
         job_history.end_time_in_hours = end_hour
         job_history.put()
-        logging.info('CrashStatistics for end_hour=%s is built successfully',
-                     crash_stats.get_datetime(end_hour))
+        logging.info(
+            "CrashStatistics for end_hour=%s is built successfully",
+            crash_stats.get_datetime(end_hour),
+        )
         return end_hour
     except TooEarlyException:
         logging.info("Skip building crash stats because it's too early.")
@@ -181,4 +185,4 @@ class Handler(base_handler.Handler):
     def get(self):
         """Process a GET request from a cronjob."""
         end_hour = build_if_needed()
-        return 'OK (end_hour=%s)' % end_hour
+        return "OK (end_hour=%s)" % end_hour

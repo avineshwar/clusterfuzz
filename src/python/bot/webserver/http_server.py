@@ -20,6 +20,7 @@ import os
 import mimetypes
 import http.server
 from future import standard_library
+
 standard_library.install_aliases()
 
 
@@ -27,14 +28,16 @@ def get_absolute_testcase_file(request_path):
     """Search the input directory and additional paths for the requested file."""
     # Gather the list of search path directories.
     current_working_directory = os.getcwd()
-    data_directory = environment.get_value('FUZZ_DATA')
-    input_directory = environment.get_value('INPUT_DIR')
-    fuzzer_directory = environment.get_value('FUZZERS_DIR')
-    layout_tests_directory = os.path.join(data_directory, 'LayoutTests')
-    layout_tests_http_tests_directory = os.path.join(layout_tests_directory,
-                                                     'http', 'tests')
-    layout_tests_wpt_tests_directory = os.path.join(layout_tests_directory,
-                                                    'external', 'wpt')
+    data_directory = environment.get_value("FUZZ_DATA")
+    input_directory = environment.get_value("INPUT_DIR")
+    fuzzer_directory = environment.get_value("FUZZERS_DIR")
+    layout_tests_directory = os.path.join(data_directory, "LayoutTests")
+    layout_tests_http_tests_directory = os.path.join(
+        layout_tests_directory, "http", "tests"
+    )
+    layout_tests_wpt_tests_directory = os.path.join(
+        layout_tests_directory, "external", "wpt"
+    )
 
     # TODO(mbarbella): Add support for aliasing and directories from
     # https://cs.chromium.org/chromium/src/third_party/blink/tools/blinkpy/web_tests/servers/apache_http.py?q=apache_http.py&sq=package:chromium&dr&l=60
@@ -50,12 +53,15 @@ def get_absolute_testcase_file(request_path):
     ]
     for search_path in search_paths:
         base_string = search_path + os.path.sep
-        path = request_path.lstrip('/')
-        if not path or path.endswith('/'):
-            path += 'index.html'
+        path = request_path.lstrip("/")
+        if not path or path.endswith("/"):
+            path += "index.html"
         absolute_path = os.path.abspath(os.path.join(search_path, path))
-        if (absolute_path.startswith(base_string) and
-                os.path.exists(absolute_path) and not os.path.isdir(absolute_path)):
+        if (
+            absolute_path.startswith(base_string)
+            and os.path.exists(absolute_path)
+            and not os.path.isdir(absolute_path)
+        ):
             return absolute_path
 
     return None
@@ -107,12 +113,12 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             return
 
-        self.send_response(200, 'OK')
+        self.send_response(200, "OK")
 
         # Send a content type header if applicable.
         mime_type = guess_mime_type(absolute_path)
         if mime_type:
-            self.send_header('Content-type', mime_type)
+            self.send_header("Content-type", mime_type)
 
         self.end_headers()
         self.wfile.write(data)
@@ -142,9 +148,9 @@ def start_server_thread(host, port):
 
 def start():
     """Initialize the HTTP server on the specified ports."""
-    http_host = 'localhost'
-    http_port_1 = environment.get_value('HTTP_PORT_1', 8000)
-    http_port_2 = environment.get_value('HTTP_PORT_2', 8080)
+    http_host = "localhost"
+    http_port_1 = environment.get_value("HTTP_PORT_1", 8000)
+    http_port_2 = environment.get_value("HTTP_PORT_2", 8080)
     if not port_is_open(http_host, http_port_1):
         start_server_thread(http_host, http_port_1)
     if not port_is_open(http_host, http_port_2):

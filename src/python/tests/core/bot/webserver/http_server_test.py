@@ -29,9 +29,8 @@ class TestRequestHandler(http_server.RequestHandler):
     """Override methods which would be problematic for testing."""
 
     class TestWFile(object):
-
         def __init__(self):
-            self.contents = ''
+            self.contents = ""
 
         def write(self, data):
             self.contents += data
@@ -59,38 +58,38 @@ class RequestHandlerTest(fake_filesystem_unittest.TestCase):
         test_utils.set_up_pyfakefs(self)
         helpers.patch_environ(self)
 
-        os.environ['FUZZ_DATA'] = '/data'
-        os.environ['FUZZERS_DIR'] = '/fuzzers'
-        os.environ['INPUT_DIR'] = '/input'
+        os.environ["FUZZ_DATA"] = "/data"
+        os.environ["FUZZERS_DIR"] = "/fuzzers"
+        os.environ["INPUT_DIR"] = "/input"
+        self.fs.create_file(os.path.join("/input", "valid.txt"), contents="valid file")
         self.fs.create_file(
-            os.path.join('/input', 'valid.txt'), contents='valid file')
-        self.fs.create_file(
-            os.path.join('/input', 'unreadable.txt'), contents='unreadable file')
-        os.chmod(os.path.join('/input', 'unreadable.txt'), 0)
+            os.path.join("/input", "unreadable.txt"), contents="unreadable file"
+        )
+        os.chmod(os.path.join("/input", "unreadable.txt"), 0)
 
     def test_nonexistent_file(self):
         """Ensure that we respond with 404 for a nonexistent file."""
-        handler = TestRequestHandler('/invalid.txt')
+        handler = TestRequestHandler("/invalid.txt")
         handler.do_GET()
 
         self.assertEqual(handler.response_code, 404)
-        self.assertEqual(handler.wfile.contents, '')
+        self.assertEqual(handler.wfile.contents, "")
 
     def test_unreadable_file(self):
         """Ensure that we respond with 403 for a file we can't read."""
-        handler = TestRequestHandler('/unreadable.txt')
+        handler = TestRequestHandler("/unreadable.txt")
         handler.do_GET()
 
         self.assertEqual(handler.response_code, 403)
-        self.assertEqual(handler.wfile.contents, '')
+        self.assertEqual(handler.wfile.contents, "")
 
     def test_valid_file(self):
         """Ensure that we respond with 200 and the file contents for a valid one."""
-        handler = TestRequestHandler('/valid.txt')
+        handler = TestRequestHandler("/valid.txt")
         handler.do_GET()
 
         self.assertEqual(handler.response_code, 200)
-        self.assertEqual(handler.wfile.contents, 'valid file')
+        self.assertEqual(handler.wfile.contents, "valid file")
 
 
 class GuessMimeTypeTest(unittest.TestCase):
@@ -99,15 +98,15 @@ class GuessMimeTypeTest(unittest.TestCase):
     def test_common_mime_types(self):
         """Ensure that we are able to guess common mime types."""
         expected_types_map = {
-            'file.html': 'text/html',
-            'file.css': 'text/css',
-            'file.jpg': 'image/jpeg',
+            "file.html": "text/html",
+            "file.css": "text/css",
+            "file.jpg": "image/jpeg",
         }
         for filename, expected_value in six.iteritems(expected_types_map):
-            self.assertEqual(http_server.guess_mime_type(
-                filename), expected_value)
+            self.assertEqual(http_server.guess_mime_type(filename), expected_value)
 
     def test_invalid_type(self):
         """Ensure that guess_mime_type returns none"""
         self.assertIsNone(
-            http_server.guess_mime_type('file.uncommon_extension_79d8f8f6'))
+            http_server.guess_mime_type("file.uncommon_extension_79d8f8f6")
+        )

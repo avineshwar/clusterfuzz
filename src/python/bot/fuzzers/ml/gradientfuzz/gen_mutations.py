@@ -44,7 +44,7 @@ def write_numpy_to_bytefile(numpy_out, output_file_path):
           N/A
       """
     bytes_out = bytes(list(numpy_out))
-    with open(output_file_path, 'wb') as output_file:
+    with open(output_file_path, "wb") as output_file:
         output_file.write(bytes_out)
 
 
@@ -68,8 +68,11 @@ def extract_ranges(mut_range_idx, critical_indices, seed_file_numpy):
               `considered_indices`.
       """
     mut_range = list(
-        range(constants.NEUZZ_MUT_IDX_RANGES[mut_range_idx],
-              constants.NEUZZ_MUT_IDX_RANGES[mut_range_idx + 1]))
+        range(
+            constants.NEUZZ_MUT_IDX_RANGES[mut_range_idx],
+            constants.NEUZZ_MUT_IDX_RANGES[mut_range_idx + 1],
+        )
+    )
     considered_indices = critical_indices[mut_range]
     considered_bytes = seed_file_numpy[considered_indices]
 
@@ -98,9 +101,9 @@ def get_signs_and_limits(mut_range, considered_bytes):
 
     # {Add, Subtract} until we get to {255, 0} for each byte considered.
     signs = np.random.choice([-1, 1], size=len(mut_range), replace=True)
-    positive_limits = np.asarray([(constants.MAX_BYTE_VAL
-                                   if x == 1 else constants.MIN_BYTE_VAL)
-                                  for x in signs])
+    positive_limits = np.asarray(
+        [(constants.MAX_BYTE_VAL if x == 1 else constants.MIN_BYTE_VAL) for x in signs]
+    )
     negative_limits = constants.MAX_BYTE_VAL - positive_limits
 
     # How many times we have to iterate \pm 1 until all considered bytes
@@ -111,9 +114,17 @@ def get_signs_and_limits(mut_range, considered_bytes):
     return signs, positive_iter_limit, negative_iter_limit
 
 
-def perform_neuzz_mutation(seed_file_numpy, mut_range, branch_idx, iter_limit,
-                           considered_indices, mutations_dir, seed_file_name,
-                           signs, positive):
+def perform_neuzz_mutation(
+    seed_file_numpy,
+    mut_range,
+    branch_idx,
+    iter_limit,
+    considered_indices,
+    mutations_dir,
+    seed_file_name,
+    signs,
+    positive,
+):
     """
       Makes a copy of `seed_file_numpy` and adds/subtracts `signs`
       to seed_file[considered_indices] for `iter_limit` iterations,
@@ -140,8 +151,8 @@ def perform_neuzz_mutation(seed_file_numpy, mut_range, branch_idx, iter_limit,
       """
     actual_signs = signs if positive else -1 * signs
     mutation_prefix = (
-        constants.PLUS_MUTATION_PREFIX
-        if positive else constants.MINUS_MUTATION_PREFIX)
+        constants.PLUS_MUTATION_PREFIX if positive else constants.MINUS_MUTATION_PREFIX
+    )
     seed_file_copy = seed_file_numpy.copy()
 
     # Iterate until saturated. Add `actual_signs` and save to appropriate path.
@@ -150,15 +161,17 @@ def perform_neuzz_mutation(seed_file_numpy, mut_range, branch_idx, iter_limit,
         seed_file_copy[considered_indices] = np.clip(
             seed_file_copy[considered_indices],
             a_max=constants.MAX_BYTE_VAL,
-            a_min=constants.MIN_BYTE_VAL)
-        save_path = (
-            os.path.join(mutations_dir, mutation_prefix + seed_file_name).format(
-                branch_idx=branch_idx, start=mut_range[0], num=plus_iter))
+            a_min=constants.MIN_BYTE_VAL,
+        )
+        save_path = os.path.join(
+            mutations_dir, mutation_prefix + seed_file_name
+        ).format(branch_idx=branch_idx, start=mut_range[0], num=plus_iter)
         write_numpy_to_bytefile(seed_file_copy, save_path)
 
 
-def mutate_one_like_neuzz(seed_file_numpy, ordered_indices, mutations_dir,
-                          seed_file_name):
+def mutate_one_like_neuzz(
+    seed_file_numpy, ordered_indices, mutations_dir, seed_file_name
+):
     """
       Mutates a single seed file. Emulates mutations performed in
       https://github.com/Dongdongshe/neuzz/blob/2c7179557a491266ca1478e5f8c431d0b69d3e3a/neuzz.c#L1155.
@@ -191,20 +204,45 @@ def mutate_one_like_neuzz(seed_file_numpy, ordered_indices, mutations_dir,
             # Extract mutation ranges, get subset of critical bytes/locations,
             # and generate mutations until all are saturated.
             mut_range, considered_indices, considered_bytes = extract_ranges(
-                mut_range_idx, critical_indices, seed_file_numpy)
+                mut_range_idx, critical_indices, seed_file_numpy
+            )
             signs, positive_iter_limit, negative_iter_limit = get_signs_and_limits(
-                mut_range, considered_bytes)
-            perform_neuzz_mutation(seed_file_numpy, mut_range, idx,
-                                   positive_iter_limit, considered_indices,
-                                   mutations_dir, seed_file_name, signs, True)
-            perform_neuzz_mutation(seed_file_numpy, mut_range, idx,
-                                   negative_iter_limit, considered_indices,
-                                   mutations_dir, seed_file_name, signs, False)
+                mut_range, considered_bytes
+            )
+            perform_neuzz_mutation(
+                seed_file_numpy,
+                mut_range,
+                idx,
+                positive_iter_limit,
+                considered_indices,
+                mutations_dir,
+                seed_file_name,
+                signs,
+                True,
+            )
+            perform_neuzz_mutation(
+                seed_file_numpy,
+                mut_range,
+                idx,
+                negative_iter_limit,
+                considered_indices,
+                mutations_dir,
+                seed_file_name,
+                signs,
+                False,
+            )
 
 
 def mutate_one_limited_neighborhood(
-        seed_file_numpy, ordered_indices, mutations_dir, seed_file_name,
-        num_mutations, neighborhood_max_width, arith_min, arith_max):
+    seed_file_numpy,
+    ordered_indices,
+    mutations_dir,
+    seed_file_name,
+    num_mutations,
+    neighborhood_max_width,
+    arith_min,
+    arith_max,
+):
     """
       Generates mutations by picking a random subset of the top-k indices
       from a random branch and adding/subtracting random bytes within a
@@ -236,35 +274,41 @@ def mutate_one_limited_neighborhood(
         which_indices = np.random.choice(
             ordered_indices[branch_idx],
             size=np.random.randint(1, high=len(ordered_indices[branch_idx])),
-            replace=False)
+            replace=False,
+        )
 
         # Picks randomly-sized neighborhoods around each critical location.
         if neighborhood_max_width > 0:
             widths = np.random.randint(
-                low=0, high=neighborhood_max_width + 1, size=which_indices.shape)
-            which_indices = np.concatenate([
-                list(
-                    range(
-                        max(0, crit_idx - width),
-                        min(crit_idx + width + 1, len(seed_file_copy))))
-                for (crit_idx, width) in zip(which_indices, widths)
-            ])
+                low=0, high=neighborhood_max_width + 1, size=which_indices.shape
+            )
+            which_indices = np.concatenate(
+                [
+                    list(
+                        range(
+                            max(0, crit_idx - width),
+                            min(crit_idx + width + 1, len(seed_file_copy)),
+                        )
+                    )
+                    for (crit_idx, width) in zip(which_indices, widths)
+                ]
+            )
 
         # New byte values should be uniform over [0, 255].
-        change_by = np.random.randint(
-            arith_min, arith_max + 1, size=len(which_indices))
+        change_by = np.random.randint(arith_min, arith_max + 1, size=len(which_indices))
         seed_file_copy[which_indices] = (
-            seed_file_copy[which_indices] + change_by) % constants.MAX_BYTE_VAL
+            seed_file_copy[which_indices] + change_by
+        ) % constants.MAX_BYTE_VAL
 
-        save_path = (
-            os.path.join(mutations_dir,
-                         constants.GENERIC_MUTATION_PREFIX + seed_file_name).format(
-                             branch_idx=branch_idx, num=mutation_num))
+        save_path = os.path.join(
+            mutations_dir, constants.GENERIC_MUTATION_PREFIX + seed_file_name
+        ).format(branch_idx=branch_idx, num=mutation_num)
         write_numpy_to_bytefile(seed_file_copy, save_path)
 
 
-def mutate_one_simple_random(seed_file_numpy, ordered_indices, mutations_dir,
-                             seed_file_name, num_mutations):
+def mutate_one_simple_random(
+    seed_file_numpy, ordered_indices, mutations_dir, seed_file_name, num_mutations
+):
     """
       Generates mutations by picking a random subset of the top-k indices
       from a random branch and adding/subtracting random amounts to each
@@ -290,30 +334,34 @@ def mutate_one_simple_random(seed_file_numpy, ordered_indices, mutations_dir,
         which_indices = np.random.choice(
             ordered_indices[branch_idx],
             size=np.random.randint(0, high=len(ordered_indices[branch_idx])),
-            replace=False)
+            replace=False,
+        )
 
         # New byte values should be uniform over [0, 255].
         change_by = np.random.randint(
-            constants.MIN_BYTE_VAL, constants.MAX_BYTE_VAL, size=len(which_indices))
+            constants.MIN_BYTE_VAL, constants.MAX_BYTE_VAL, size=len(which_indices)
+        )
         seed_file_copy[which_indices] = (
-            seed_file_copy[which_indices] + change_by) % constants.MAX_BYTE_VAL
+            seed_file_copy[which_indices] + change_by
+        ) % constants.MAX_BYTE_VAL
 
-        save_path = (
-            os.path.join(mutations_dir,
-                         constants.GENERIC_MUTATION_PREFIX + seed_file_name).format(
-                             branch_idx=branch_idx, num=mutation_num))
+        save_path = os.path.join(
+            mutations_dir, constants.GENERIC_MUTATION_PREFIX + seed_file_name
+        ).format(branch_idx=branch_idx, num=mutation_num)
         write_numpy_to_bytefile(seed_file_copy, save_path)
 
 
-def mutation_gen_loop(start_idx,
-                      end_idx,
-                      ordered_index_file_paths,
-                      seed_file_paths,
-                      seed_file_mapping,
-                      mutations_dir,
-                      input_length_mapping,
-                      args,
-                      first=False):
+def mutation_gen_loop(
+    start_idx,
+    end_idx,
+    ordered_index_file_paths,
+    seed_file_paths,
+    seed_file_mapping,
+    mutations_dir,
+    input_length_mapping,
+    args,
+    first=False,
+):
     """
       Iterates through each critical index file and mutates the original inputs.
 
@@ -336,8 +384,7 @@ def mutation_gen_loop(start_idx,
           N/A
       """
     this_thread_file_paths = ordered_index_file_paths[start_idx:end_idx]
-    iterator = tqdm.tqdm(
-        this_thread_file_paths) if first else this_thread_file_paths
+    iterator = tqdm.tqdm(this_thread_file_paths) if first else this_thread_file_paths
     for gradient_file_path in iterator:
         seed_file_name = os.path.basename(gradient_file_path)
 
@@ -346,28 +393,42 @@ def mutation_gen_loop(start_idx,
 
         seed_file_length = int(input_length_mapping[seed_file_name])
         seed_file_path = seed_file_paths[seed_file_mapping[seed_file_name]]
-        seed_file_numpy = libfuzzer_to_numpy.convert_input_to_numpy(
-            seed_file_path)[:seed_file_length]
+        seed_file_numpy = libfuzzer_to_numpy.convert_input_to_numpy(seed_file_path)[
+            :seed_file_length
+        ]
         ordered_indices = np.load(gradient_file_path).astype(np.int32)
-        seed_file_name = seed_file_name[:seed_file_name.rfind('.npy')]
+        seed_file_name = seed_file_name[: seed_file_name.rfind(".npy")]
 
         if args.mutation_gen_method == constants.NEUZZ_MUTATION:
-            mutate_one_like_neuzz(seed_file_numpy, ordered_indices, mutations_dir,
-                                  seed_file_name)
+            mutate_one_like_neuzz(
+                seed_file_numpy, ordered_indices, mutations_dir, seed_file_name
+            )
 
         elif args.mutation_gen_method == constants.SIMPLE_RANDOM:
-            mutate_one_simple_random(seed_file_numpy, ordered_indices, mutations_dir,
-                                     seed_file_name, args.num_mutations)
+            mutate_one_simple_random(
+                seed_file_numpy,
+                ordered_indices,
+                mutations_dir,
+                seed_file_name,
+                args.num_mutations,
+            )
 
         elif args.mutation_gen_method == constants.LIMITED_NEIGHBORHOOD:
             mutate_one_limited_neighborhood(
-                seed_file_numpy, ordered_indices, mutations_dir, seed_file_name,
-                args.num_mutations, args.neighborhood_max_width, args.arith_min,
-                args.arith_max)
+                seed_file_numpy,
+                ordered_indices,
+                mutations_dir,
+                seed_file_name,
+                args.num_mutations,
+                args.neighborhood_max_width,
+                args.arith_min,
+                args.arith_max,
+            )
 
         # Also save a copy of the original.
-        orig_save_path = (
-            os.path.join(mutations_dir, constants.ORIGINAL_PREFIX + seed_file_name))
+        orig_save_path = os.path.join(
+            mutations_dir, constants.ORIGINAL_PREFIX + seed_file_name
+        )
         write_numpy_to_bytefile(seed_file_numpy, orig_save_path)
 
 
@@ -390,30 +451,39 @@ def generate_mutations(args, gradient_metadata, gradients_dir, mutations_dir):
           N/A
       """
     seed_file_paths = list(
-        glob.glob(os.path.join(gradient_metadata['path_to_seeds'], '*')))
+        glob.glob(os.path.join(gradient_metadata["path_to_seeds"], "*"))
+    )
     seed_file_mapping = {}
     for idx, seed_path in enumerate(seed_file_paths):
         seed_file_mapping[os.path.basename(seed_path)] = idx
-    input_length_mapping = json.load(open(args.path_to_lengths, 'r'))
+    input_length_mapping = json.load(open(args.path_to_lengths, "r"))
 
-    ordered_index_file_paths = list(
-        glob.glob(os.path.join(gradients_dir, '*')))
+    ordered_index_file_paths = list(glob.glob(os.path.join(gradients_dir, "*")))
 
     # Standard multithreading to speed up mutation generation.
     num_threads = os.cpu_count()
     workers = [None] * num_threads
-    num_inputs_per_worker = math.ceil(
-        len(ordered_index_file_paths) / num_threads)
+    num_inputs_per_worker = math.ceil(len(ordered_index_file_paths) / num_threads)
 
     for worker_idx, _ in enumerate(workers):
         start_idx = worker_idx * num_inputs_per_worker
         end_idx = min(
-            len(ordered_index_file_paths), (worker_idx + 1) * num_inputs_per_worker)
+            len(ordered_index_file_paths), (worker_idx + 1) * num_inputs_per_worker
+        )
         workers[worker_idx] = threading.Thread(
             target=mutation_gen_loop,
-            args=(start_idx, end_idx, ordered_index_file_paths, seed_file_paths,
-                  seed_file_mapping, mutations_dir, input_length_mapping, args,
-                  worker_idx == 0))
+            args=(
+                start_idx,
+                end_idx,
+                ordered_index_file_paths,
+                seed_file_paths,
+                seed_file_mapping,
+                mutations_dir,
+                input_length_mapping,
+                args,
+                worker_idx == 0,
+            ),
+        )
         workers[worker_idx].start()
 
     for worker in workers:
@@ -436,30 +506,35 @@ def main():
     # Setting up directory tree and reading metadata in.
     generated_dir = os.path.join(constants.GENERATED_DIR, args.generation_name)
     if not os.path.isdir(generated_dir):
-        print(('Error: Cannot locate directory {}. ' +
-               '(Did you run gradient_gen_critical_locs.py first?)'
-               ).format(generated_dir))
+        print(
+            (
+                "Error: Cannot locate directory {}. "
+                + "(Did you run gradient_gen_critical_locs.py first?)"
+            ).format(generated_dir)
+        )
         sys.exit()
     gradients_dir = os.path.join(generated_dir, constants.GRADIENTS_DIR)
-    mutations_dir = os.path.join(generated_dir, constants.MUTATIONS_DIR,
-                                 args.mutation_name)
+    mutations_dir = os.path.join(
+        generated_dir, constants.MUTATIONS_DIR, args.mutation_name
+    )
     if os.path.isdir(mutations_dir):
-        print(('Error: {} already exists! (Did you already run gen_mutations.py ' +
-               'on {} with name {}?)').format(mutations_dir, args.generation_name,
-                                              args.mutation_name))
+        print(
+            (
+                "Error: {} already exists! (Did you already run gen_mutations.py "
+                + "on {} with name {}?)"
+            ).format(mutations_dir, args.generation_name, args.mutation_name)
+        )
         sys.exit()
     os.makedirs(mutations_dir)
-    print('Writing mutated inputs to {}'.format(mutations_dir))
+    print("Writing mutated inputs to {}".format(mutations_dir))
 
     # Gets metadata from critical location generation.
-    metadata_filepath = os.path.join(
-        gradients_dir, constants.METADATA_FILENAME)
-    gradient_metadata = json.load(open(metadata_filepath, 'r'))
+    metadata_filepath = os.path.join(gradients_dir, constants.METADATA_FILENAME)
+    gradient_metadata = json.load(open(metadata_filepath, "r"))
 
     if opts.check_gen_mutations_args(args):
-        generate_mutations(args, gradient_metadata,
-                           gradients_dir, mutations_dir)
+        generate_mutations(args, gradient_metadata, gradients_dir, mutations_dir)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

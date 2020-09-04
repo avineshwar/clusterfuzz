@@ -25,17 +25,17 @@ def get_result(testcase, end, block, days, group_by):
     """Get slots for crash stats."""
     query = crash_stats.Query()
     query.group_by = group_by
-    query.sort_by = 'total_count'
+    query.sort_by = "total_count"
     query.set_time_params(end, days, block)
 
-    query.filter('crash_type', testcase.crash_type)
-    query.filter('crash_state', testcase.crash_state)
-    query.filter('security_flag', testcase.security_flag)
+    query.filter("crash_type", testcase.crash_type)
+    query.filter("crash_state", testcase.crash_state)
+    query.filter("security_flag", testcase.security_flag)
 
     _, rows = crash_stats.get(query, crash_stats.Query(), 0, 1)
 
     if not rows:
-        return {'end': end, 'days': days, 'block': block, 'groups': []}
+        return {"end": end, "days": days, "block": block, "groups": []}
 
     return rows[0]
 
@@ -47,10 +47,10 @@ class Handler(base_handler.Handler):
     @handler.check_testcase_access
     def post(self, testcase):
         """Server crash stats."""
-        end = helpers.cast(request.get('end'), int, "'end' is not an int.")
-        days = helpers.cast(request.get('days'), int, "'days' is not an int.")
+        end = helpers.cast(request.get("end"), int, "'end' is not an int.")
+        days = helpers.cast(request.get("days"), int, "'days' is not an int.")
         group_by = helpers.cast(
-            request.get('groupBy'), str, "'groupBy' is not a string.")
-        block = helpers.cast(request.get('block'), str,
-                             "'block' is not a string.")
+            request.get("groupBy"), str, "'groupBy' is not a string."
+        )
+        block = helpers.cast(request.get("block"), str, "'block' is not a string.")
         return self.render_json(get_result(testcase, end, block, days, group_by))

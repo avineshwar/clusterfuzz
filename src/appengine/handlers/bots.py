@@ -31,17 +31,20 @@ PAGE_SIZE = 10
 MORE_LIMIT = 50 - PAGE_SIZE  # exactly 5 pages
 
 FILTERS = [
-    filters.Keyword([], 'keywords', 'q'),
+    filters.Keyword([], "keywords", "q"),
 ]
 
 
 def _get_alive_cutoff():
     """Get the time before which we consider bots to be dead."""
     seconds_to_wait_for_dead_bot = (
-        tasks.TASK_LEASE_SECONDS + tasks.TASK_COMPLETION_BUFFER +
-        data_types.HEARTBEAT_WAIT_INTERVAL)
+        tasks.TASK_LEASE_SECONDS
+        + tasks.TASK_COMPLETION_BUFFER
+        + data_types.HEARTBEAT_WAIT_INTERVAL
+    )
     alive_cutoff = utils.utcnow() - datetime.timedelta(
-        seconds=seconds_to_wait_for_dead_bot)
+        seconds=seconds_to_wait_for_dead_bot
+    )
     return alive_cutoff
 
 
@@ -50,24 +53,25 @@ def _convert_heartbeats_to_dicts(heartbeats):
     alive_cutoff = _get_alive_cutoff()
     result = []
     for heartbeat in heartbeats:
-        result.append({
-            'bot_name':
-                heartbeat.bot_name,
-            'source_version':
-                heartbeat.source_version,
-            'task_payload':
-                heartbeat.task_payload,
-            'platform_id':
-                heartbeat.platform_id,
-            'task_end_time':
-                utils.utc_datetime_to_timestamp(heartbeat.task_end_time)
-                if heartbeat.task_end_time else '',
-            'last_beat_time':
-                utils.utc_datetime_to_timestamp(heartbeat.last_beat_time)
-                if heartbeat.last_beat_time else '',
-            'alive':
-                'alive' if heartbeat.last_beat_time > alive_cutoff else 'dead'
-        })
+        result.append(
+            {
+                "bot_name": heartbeat.bot_name,
+                "source_version": heartbeat.source_version,
+                "task_payload": heartbeat.task_payload,
+                "platform_id": heartbeat.platform_id,
+                "task_end_time": utils.utc_datetime_to_timestamp(
+                    heartbeat.task_end_time
+                )
+                if heartbeat.task_end_time
+                else "",
+                "last_beat_time": utils.utc_datetime_to_timestamp(
+                    heartbeat.last_beat_time
+                )
+                if heartbeat.last_beat_time
+                else "",
+                "alive": "alive" if heartbeat.last_beat_time > alive_cutoff else "dead",
+            }
+        )
 
     return result
 
@@ -76,23 +80,24 @@ def get_results():
     """Get results for the bots page."""
     # Return bots sorted alphabetically by bot_name
     query = datastore_query.Query(data_types.Heartbeat)
-    query.order('bot_name', is_desc=False)
+    query.order("bot_name", is_desc=False)
     params = dict(request.iterparams())
     filters.add(query, params, FILTERS)
 
-    page = helpers.cast(request.get('page', 1), int, "'page' is not an int.")
+    page = helpers.cast(request.get("page", 1), int, "'page' is not an int.")
     items, total_pages, total_items, has_more = query.fetch_page(
-        page=page, page_size=PAGE_SIZE, projection=None, more_limit=MORE_LIMIT)
+        page=page, page_size=PAGE_SIZE, projection=None, more_limit=MORE_LIMIT
+    )
     items = _convert_heartbeats_to_dicts(items)
-    helpers.log('Bots', helpers.VIEW_OPERATION)
+    helpers.log("Bots", helpers.VIEW_OPERATION)
 
     result = {
-        'hasMore': has_more,
-        'items': items,
-        'page': page,
-        'pageSize': PAGE_SIZE,
-        'totalItems': total_items,
-        'totalPages': total_pages,
+        "hasMore": has_more,
+        "items": items,
+        "page": page,
+        "pageSize": PAGE_SIZE,
+        "totalItems": total_items,
+        "totalPages": total_pages,
     }
     return result, params
 
@@ -106,10 +111,7 @@ class Handler(base_handler.Handler):
     def get(self):
         """Render the bot list HTML."""
         result, params = get_results()
-        return self.render('bots.html', {
-            'result': result,
-            'params': params,
-        })
+        return self.render("bots.html", {"result": result, "params": params,})
 
 
 class JsonHandler(base_handler.Handler):
@@ -135,13 +137,12 @@ class DeadBotsHandler(base_handler.Handler):
         if utils.is_chromium():
             heartbeats = ndb_utils.get_all_from_model(data_types.Heartbeat)
         else:
-            raise helpers.EarlyExitException(
-                'Dead bots list unavailable.', 400)
+            raise helpers.EarlyExitException("Dead bots list unavailable.", 400)
 
         result = {}
         alive_cutoff = _get_alive_cutoff()
         for heartbeat in heartbeats:
             if heartbeat.last_beat_time <= alive_cutoff:
-                result[heartbeat.bot_name] = 'dead'
+                result[heartbeat.bot_name] = "dead"
 
         return self.render_json(result)

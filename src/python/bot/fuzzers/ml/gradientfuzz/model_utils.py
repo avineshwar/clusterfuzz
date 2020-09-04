@@ -37,12 +37,12 @@ class BitmapAcc(keras.metrics.Metric):
           count_true(all_matches) / len(all_matches) --> 60%
       """
 
-    def __init__(self, name='bitmap_acc', **kwargs):
+    def __init__(self, name="bitmap_acc", **kwargs):
         super(BitmapAcc, self).__init__(name=name, **kwargs)
-        self.total_correct = self.add_weight(
-            name='total_correct', initializer='zeros')
+        self.total_correct = self.add_weight(name="total_correct", initializer="zeros")
         self.total_branches = self.add_weight(
-            name='total_branches', initializer='zeros')
+            name="total_branches", initializer="zeros"
+        )
 
     def update_state(self, *args, **kwargs):
         """
@@ -54,12 +54,15 @@ class BitmapAcc(keras.metrics.Metric):
         # y_true = tf.cast(tf.round(y_true), tf.bool)
         y_pred = tf.cast(tf.round(y_pred), tf.bool)
         total_correct_branches = tf.reduce_sum(
-            tf.cast(tf.equal(y_true, y_pred), tf.float32))
+            tf.cast(tf.equal(y_true, y_pred), tf.float32)
+        )
         total_incorrect_branches = tf.reduce_sum(
-            tf.cast(tf.not_equal(y_true, y_pred), tf.float32))
+            tf.cast(tf.not_equal(y_true, y_pred), tf.float32)
+        )
         self.total_correct.assign_add(total_correct_branches)
         self.total_branches.assign_add(
-            tf.add(total_correct_branches, total_incorrect_branches))
+            tf.add(total_correct_branches, total_incorrect_branches)
+        )
 
     def result(self):
         return self.total_correct / self.total_branches
@@ -83,12 +86,12 @@ class NeuzzJaccardAcc(keras.metrics.Metric):
           count_true(positive_matches) / count_true(positive_any) --> 33.3%
       """
 
-    def __init__(self, name='neuzz_jaccard_acc', **kwargs):
+    def __init__(self, name="neuzz_jaccard_acc", **kwargs):
         super(NeuzzJaccardAcc, self).__init__(name=name, **kwargs)
         self.true_positives = self.add_weight(
-            name='true_positives', initializer='zeros')
-        self.total_errors = self.add_weight(
-            name='total_errors', initializer='zeros')
+            name="true_positives", initializer="zeros"
+        )
+        self.total_errors = self.add_weight(name="total_errors", initializer="zeros")
 
     def update_state(self, *args, **kwargs):
         """
@@ -99,9 +102,11 @@ class NeuzzJaccardAcc(keras.metrics.Metric):
         # y_true = tf.cast(tf.round(y_true), tf.bool)
         y_pred = tf.cast(tf.round(y_pred), tf.bool)
         self.true_positives.assign_add(
-            tf.reduce_sum(tf.cast(tf.logical_and(y_true, y_pred), tf.float32)))
+            tf.reduce_sum(tf.cast(tf.logical_and(y_true, y_pred), tf.float32))
+        )
         self.total_errors.assign_add(
-            tf.reduce_sum(tf.cast(tf.not_equal(y_true, y_pred), tf.float32)))
+            tf.reduce_sum(tf.cast(tf.not_equal(y_true, y_pred), tf.float32))
+        )
 
     def result(self):
         return self.true_positives / (self.true_positives + self.total_errors)
@@ -125,7 +130,8 @@ def compile_like_neuzz(model: keras.Model):
     model.compile(
         loss=keras.losses.BinaryCrossentropy,
         optimizer=optim,
-        metrics=[NeuzzJaccardAcc()])
+        metrics=[NeuzzJaccardAcc()],
+    )
     return model
 
 
@@ -140,19 +146,20 @@ def get_callbacks(config):
       Returns:
           List of keras.callbacks.Callback objects to be passed to model.fit().
       """
-    model_dir_path = utils.get_full_path(config['run_name'])
+    model_dir_path = utils.get_full_path(config["run_name"])
 
     cp_callback = keras.callbacks.ModelCheckpoint(
         filepath=os.path.join(model_dir_path, constants.CHECKPOINT_FILENAME),
-        monitor='val_neuzz_jaccard_acc',
-        mode='max',
-        save_freq='epoch',
+        monitor="val_neuzz_jaccard_acc",
+        mode="max",
+        save_freq="epoch",
         save_weights_only=True,
         save_best_only=True,
     )
 
     tb_callback = keras.callbacks.TensorBoard(
-        log_dir=os.path.join(model_dir_path, constants.TENSORBOARD_DIR))
+        log_dir=os.path.join(model_dir_path, constants.TENSORBOARD_DIR)
+    )
 
     return [cp_callback, tb_callback]
 
@@ -170,7 +177,7 @@ def print_model_summary(model, config, input_shape):
       Returns:
           N/A
       """
-    print('\n')
-    model.build((config['batch_size'], *input_shape))
+    print("\n")
+    model.build((config["batch_size"], *input_shape))
     model.summary()
     print()

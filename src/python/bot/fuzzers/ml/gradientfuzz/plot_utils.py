@@ -21,12 +21,9 @@ import seaborn as sns
 sns.set(color_codes=True)
 
 
-def plot_histogram(hist,
-                   save_path,
-                   title,
-                   x_axis_title=None,
-                   y_axis_title=None,
-                   bins=None):
+def plot_histogram(
+    hist, save_path, title, x_axis_title=None, y_axis_title=None, bins=None
+):
     """
       Basic seaborn histogram plotting wrapper with title.
 
@@ -43,7 +40,7 @@ def plot_histogram(hist,
       """
     # Get bins and plot histogram.
     if bins is None:
-        bins = plt.rcParams['hist.bins']
+        bins = plt.rcParams["hist.bins"]
     ax = sns.distplot(hist, kde=False, bins=bins)
 
     # Set axis labels.
@@ -57,4 +54,4 @@ def plot_histogram(hist,
     fig.suptitle(title)
     fig.savefig(save_path)
     plt.clf()
-    print('Saved under {}'.format(save_path))
+    print("Saved under {}".format(save_path))

@@ -19,10 +19,7 @@ import tensorflow.keras as keras
 import tensorflow.keras.layers as layers
 
 
-def make_model_from_layer(layer_class,
-                          output_dim,
-                          input_shape,
-                          hidden_layer_dim=4096):
+def make_model_from_layer(layer_class, output_dim, input_shape, hidden_layer_dim=4096):
     """
       Sad hack we have to use to get around tf's graph generation and not being
       able to successfully subclass `keras.Model`. When subclassing keras.Model,
@@ -59,9 +56,9 @@ class NEUZZModelOneHidden(keras.layers.Layer):
         self._input_shape = input_shape
         self._output_dim = output_dim
         self._first_hidden_linear = layers.Dense(
-            self._hidden_layer_dim, activation='relu')
-        self._output_layer = layers.Dense(
-            self._output_dim, activation='sigmoid')
+            self._hidden_layer_dim, activation="relu"
+        )
+        self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
 
     def call(self, inputs, **kwargs):
         x = self._first_hidden_linear(inputs)
@@ -80,13 +77,15 @@ class NEUZZModelThreeHidden(keras.layers.Layer):
         self._input_shape = input_shape
         self._output_dim = output_dim
         self._first_hidden_linear = layers.Dense(
-            self._hidden_layer_dim, activation='relu')
+            self._hidden_layer_dim, activation="relu"
+        )
         self._second_hidden_linear = layers.Dense(
-            self._hidden_layer_dim, activation='relu')
+            self._hidden_layer_dim, activation="relu"
+        )
         self._third_hidden_linear = layers.Dense(
-            self._hidden_layer_dim, activation='relu')
-        self._output_layer = layers.Dense(
-            self._output_dim, activation='sigmoid')
+            self._hidden_layer_dim, activation="relu"
+        )
+        self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
 
     def call(self, inputs, **kwargs):
         x = self._first_hidden_linear(inputs)
@@ -105,8 +104,7 @@ class SimpleLSTMModel(keras.layers.Layer):
         super(SimpleLSTMModel, self).__init__()
         self._output_dim = output_dim
         self._lstm_layer = keras.layers.LSTM(units=num_units)
-        self._output_layer = layers.Dense(
-            self._output_dim, activation='sigmoid')
+        self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
 
     def call(self, inputs, **kwargs):
         x = self._lstm_layer(inputs)
@@ -123,8 +121,7 @@ class SimpleGRUModel(keras.layers.Layer):
         super(SimpleGRUModel, self).__init__()
         self._output_dim = output_dim
         self._gru_layer = keras.layers.GRU(units=num_units)
-        self._output_layer = layers.Dense(
-            self._output_dim, activation='sigmoid')
+        self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
 
     def call(self, inputs, **kwargs):
         x = self._gru_layer(inputs)

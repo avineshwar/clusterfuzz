@@ -29,12 +29,12 @@ from libs import helpers
 from libs.issue_management import issue_tracker_utils
 from metrics import logs
 
-BUCKET_URL = 'https://oss-fuzz-build-logs.storage.googleapis.com'
-FUZZING_STATUS_URL = BUCKET_URL + '/status.json'
-COVERAGE_STATUS_URL = BUCKET_URL + '/status-coverage.json'
+BUCKET_URL = "https://oss-fuzz-build-logs.storage.googleapis.com"
+FUZZING_STATUS_URL = BUCKET_URL + "/status.json"
+COVERAGE_STATUS_URL = BUCKET_URL + "/status-coverage.json"
 
-FUZZING_BUILD_TYPE = 'fuzzing'
-COVERAGE_BUILD_TYPE = 'coverage'
+FUZZING_BUILD_TYPE = "fuzzing"
+COVERAGE_BUILD_TYPE = "coverage"
 MAIN_BUILD_TYPE = FUZZING_BUILD_TYPE
 
 # It's important not to use a dict, so that fuzzing builds get processed first.
@@ -43,8 +43,8 @@ BUILD_STATUS_MAPPINGS = [
     (COVERAGE_BUILD_TYPE, COVERAGE_STATUS_URL),
 ]
 
-TIMESTAMP_PATTERN = re.compile(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}')
-TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S'
+TIMESTAMP_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
+TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
 # Consider something wrong if we don't see builds for this many days.
 NO_BUILDS_THRESHOLD = datetime.timedelta(days=2)
@@ -64,23 +64,26 @@ class OssFuzzBuildStatusException(Exception):
 
 def _get_issue_body(project_name, build_id, build_type):
     """Return the issue body for filing new bugs."""
-    template = ('The last {num_builds} builds for {project} have been failing.\n'
-                '<b>Build log:</b> {log_link}\n'
-                'Build type: {build_type}\n\n'
-                'To reproduce locally, please see: '
-                'https://google.github.io/oss-fuzz/advanced-topics/reproducing'
-                '#reproducing-build-failures\n\n'
-                '<b>This bug tracker is not being monitored by OSS-Fuzz team.</b>'
-                ' If you have any questions, please create an issue at '
-                'https://github.com/google/oss-fuzz/issues/new.\n\n'
-                '**This bug will be automatically closed within a '
-                'day once it is fixed.**')
+    template = (
+        "The last {num_builds} builds for {project} have been failing.\n"
+        "<b>Build log:</b> {log_link}\n"
+        "Build type: {build_type}\n\n"
+        "To reproduce locally, please see: "
+        "https://google.github.io/oss-fuzz/advanced-topics/reproducing"
+        "#reproducing-build-failures\n\n"
+        "<b>This bug tracker is not being monitored by OSS-Fuzz team.</b>"
+        " If you have any questions, please create an issue at "
+        "https://github.com/google/oss-fuzz/issues/new.\n\n"
+        "**This bug will be automatically closed within a "
+        "day once it is fixed.**"
+    )
 
     return template.format(
         num_builds=MIN_CONSECUTIVE_BUILD_FAILURES,
         project=project_name,
         log_link=_get_build_link(build_id),
-        build_type=build_type)
+        build_type=build_type,
+    )
 
 
 def _get_oss_fuzz_project(project_name):
@@ -90,7 +93,7 @@ def _get_oss_fuzz_project(project_name):
 
 def _get_build_link(build_id):
     """Return a link to the build log."""
-    return BUCKET_URL + '/log-' + build_id + '.txt'
+    return BUCKET_URL + "/log-" + build_id + ".txt"
 
 
 def _get_ndb_key(project_name, build_type):
@@ -99,7 +102,7 @@ def _get_ndb_key(project_name, build_type):
         return project_name
 
     # Use build type suffix for the auxiliary build (e.g. coverage).
-    return '%s-%s' % (project_name, build_type)
+    return "%s-%s" % (project_name, build_type)
 
 
 def create_build_failure(project_name, failure, build_type):
@@ -108,13 +111,15 @@ def create_build_failure(project_name, failure, build_type):
         id=_get_ndb_key(project_name, build_type),
         project_name=project_name,
         last_checked_timestamp=get_build_time(failure),
-        build_type=build_type)
+        build_type=build_type,
+    )
 
 
 def get_build_failure(project_name, build_type):
     """Return the last build failure for the project."""
-    key = ndb.Key(data_types.OssFuzzBuildFailure,
-                  _get_ndb_key(project_name, build_type))
+    key = ndb.Key(
+        data_types.OssFuzzBuildFailure, _get_ndb_key(project_name, build_type)
+    )
     return key.get()
 
 
@@ -127,28 +132,31 @@ def get_build_time(build):
     """Return a datetime for when the build was done."""
     # Strip the nanosecond precision from the timestamp, since it's not
     # supported by Python.
-    stripped_timestamp = TIMESTAMP_PATTERN.match(build['finish_time'])
+    stripped_timestamp = TIMESTAMP_PATTERN.match(build["finish_time"])
     if not stripped_timestamp:
         logs.log_error(
-            'Invalid timestamp %s for %s.' % (build['finish_time'], build['name']))
+            "Invalid timestamp %s for %s." % (build["finish_time"], build["name"])
+        )
         return None
 
-    return datetime.datetime.strptime(
-        stripped_timestamp.group(0), TIMESTAMP_FORMAT)
+    return datetime.datetime.strptime(stripped_timestamp.group(0), TIMESTAMP_FORMAT)
 
 
 def file_bug(issue_tracker, project_name, build_id, ccs, build_type):
     """File a new bug for a build failure."""
-    logs.log('Filing bug for new build failure (project=%s, build_type=%s, '
-             'build_id=%s).' % (project_name, build_type, build_id))
+    logs.log(
+        "Filing bug for new build failure (project=%s, build_type=%s, "
+        "build_id=%s)." % (project_name, build_type, build_id)
+    )
 
     issue = issue_tracker.new_issue()
-    issue.title = '{project_name}: {build_type} build failure'.format(
-        project_name=project_name, build_type=build_type.capitalize())
+    issue.title = "{project_name}: {build_type} build failure".format(
+        project_name=project_name, build_type=build_type.capitalize()
+    )
     issue.body = _get_issue_body(project_name, build_id, build_type)
-    issue.status = 'New'
-    issue.labels.add('Type-Build-Failure')
-    issue.labels.add('Proj-' + project_name)
+    issue.status = "New"
+    issue.labels.add("Type-Build-Failure")
+    issue.labels.add("Proj-" + project_name)
 
     for cc in ccs:
         issue.ccs.add(cc)
@@ -159,24 +167,28 @@ def file_bug(issue_tracker, project_name, build_id, ccs, build_type):
 
 def close_bug(issue_tracker, issue_id, project_name):
     """Close a build failure bug."""
-    logs.log('Closing build failure bug (project=%s, issue_id=%s).' %
-             (project_name, issue_id))
+    logs.log(
+        "Closing build failure bug (project=%s, issue_id=%s)."
+        % (project_name, issue_id)
+    )
 
     issue = issue_tracker.get_original_issue(issue_id)
-    issue.status = 'Verified'
+    issue.status = "Verified"
     issue.save(
-        new_comment='The latest build has succeeded, closing this issue.',
-        notify=True)
+        new_comment="The latest build has succeeded, closing this issue.", notify=True
+    )
 
 
 def send_reminder(issue_tracker, issue_id, build_id):
     """Send a reminder about the build still failing."""
     issue = issue_tracker.get_original_issue(issue_id)
 
-    comment = ('Friendly reminder that the the build is still failing.\n'
-               'Please try to fix this failure to ensure that fuzzing '
-               'remains productive.\n'
-               'Latest build log: {log_link}\n')
+    comment = (
+        "Friendly reminder that the the build is still failing.\n"
+        "Please try to fix this failure to ensure that fuzzing "
+        "remains productive.\n"
+        "Latest build log: {log_link}\n"
+    )
     comment = comment.format(log_link=_get_build_link(build_id))
     issue.save(new_comment=comment, notify=True)
 
@@ -188,11 +200,11 @@ class Handler(base_handler.Handler):
         """Close bugs for fixed builds."""
         issue_tracker = issue_tracker_utils.get_issue_tracker()
         if not issue_tracker:
-            raise OssFuzzBuildStatusException('Failed to get issue tracker.')
+            raise OssFuzzBuildStatusException("Failed to get issue tracker.")
 
         for project in projects:
-            project_name = project['name']
-            builds = project['history']
+            project_name = project["name"]
+            builds = project["history"]
             if not builds:
                 continue
 
@@ -201,13 +213,15 @@ class Handler(base_handler.Handler):
                 continue
 
             build = builds[0]
-            if not build['success']:
+            if not build["success"]:
                 continue
 
             if build_failure.last_checked_timestamp >= get_build_time(build):
-                logs.log_error('Latest successful build time for %s in %s config is '
-                               'older than or equal to last failure time.' %
-                               (project_name, build_type))
+                logs.log_error(
+                    "Latest successful build time for %s in %s config is "
+                    "older than or equal to last failure time."
+                    % (project_name, build_type)
+                )
                 continue
 
             if build_failure.issue_id is not None:
@@ -219,25 +233,24 @@ class Handler(base_handler.Handler):
         """Process failures."""
         issue_tracker = issue_tracker_utils.get_issue_tracker()
         if not issue_tracker:
-            raise OssFuzzBuildStatusException('Failed to get issue tracker.')
+            raise OssFuzzBuildStatusException("Failed to get issue tracker.")
 
         for project in projects:
-            project_name = project['name']
-            builds = project['history']
+            project_name = project["name"]
+            builds = project["history"]
             if not builds:
                 continue
 
             build = builds[0]
-            if build['success']:
+            if build["success"]:
                 continue
 
-            project_name = project['name']
+            project_name = project["name"]
 
             # Do not file an issue for non-main build types, if there is a main build
             # failure for the same project, as the root cause might be the same.
             if build_type != MAIN_BUILD_TYPE:
-                build_failure = get_build_failure(
-                    project_name, MAIN_BUILD_TYPE)
+                build_failure = get_build_failure(project_name, MAIN_BUILD_TYPE)
                 if build_failure:
                     continue
 
@@ -249,8 +262,7 @@ class Handler(base_handler.Handler):
                     # No updates.
                     continue
             else:
-                build_failure = create_build_failure(
-                    project_name, build, build_type)
+                build_failure = create_build_failure(project_name, build, build_type)
 
             build_failure.last_checked_timestamp = build_time
             build_failure.consecutive_failures += 1
@@ -259,24 +271,32 @@ class Handler(base_handler.Handler):
                     oss_fuzz_project = _get_oss_fuzz_project(project_name)
                     if not oss_fuzz_project:
                         logs.log(
-                            'Project %s is disabled, skipping bug filing.' % project_name)
+                            "Project %s is disabled, skipping bug filing."
+                            % project_name
+                        )
                         continue
 
-                    build_failure.issue_id = file_bug(issue_tracker, project_name,
-                                                      build['build_id'],
-                                                      oss_fuzz_project.ccs, build_type)
-                elif (build_failure.consecutive_failures -
-                      MIN_CONSECUTIVE_BUILD_FAILURES) % REMINDER_INTERVAL == 0:
-                    send_reminder(issue_tracker, build_failure.issue_id,
-                                  build['build_id'])
+                    build_failure.issue_id = file_bug(
+                        issue_tracker,
+                        project_name,
+                        build["build_id"],
+                        oss_fuzz_project.ccs,
+                        build_type,
+                    )
+                elif (
+                    build_failure.consecutive_failures - MIN_CONSECUTIVE_BUILD_FAILURES
+                ) % REMINDER_INTERVAL == 0:
+                    send_reminder(
+                        issue_tracker, build_failure.issue_id, build["build_id"]
+                    )
 
             build_failure.put()
 
     def _check_last_get_build_time(self, projects, build_type):
         """Check that builds are up to date."""
         for project in projects:
-            project_name = project['name']
-            builds = project['history']
+            project_name = project["name"]
+            builds = project["history"]
             if not builds:
                 continue
 
@@ -284,8 +304,10 @@ class Handler(base_handler.Handler):
             time_since_last_build = utils.utcnow() - get_build_time(build)
             if time_since_last_build >= NO_BUILDS_THRESHOLD:
                 # Something likely went wrong with the build infrastructure, log errors.
-                logs.log_error('%s has not been built in %s config for %d days.' %
-                               (project_name, build_type, time_since_last_build.days))
+                logs.log_error(
+                    "%s has not been built in %s config for %d days."
+                    % (project_name, build_type, time_since_last_build.days)
+                )
 
     @handler.cron()
     def get(self):
@@ -298,7 +320,7 @@ class Handler(base_handler.Handler):
             except (requests.exceptions.RequestException, ValueError) as e:
                 raise helpers.EarlyExitException(str(e), response.status_code)
 
-            projects = build_status['projects']
+            projects = build_status["projects"]
 
             self._check_last_get_build_time(projects, build_type)
             self._close_fixed_builds(projects, build_type)

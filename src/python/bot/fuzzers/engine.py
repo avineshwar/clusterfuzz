@@ -118,8 +118,9 @@ class Engine(object):
         """
         raise NotImplementedError
 
-    def minimize_corpus(self, target_path, arguments, input_dirs, output_dir,
-                        reproducers_dir, max_time):
+    def minimize_corpus(
+        self, target_path, arguments, input_dirs, output_dir, reproducers_dir, max_time
+    ):
         """Optional (but recommended): run corpus minimization.
 
         Args:
@@ -140,8 +141,9 @@ class Engine(object):
         """
         raise NotImplementedError
 
-    def minimize_testcase(self, target_path, arguments, input_path, output_path,
-                          max_time):
+    def minimize_testcase(
+        self, target_path, arguments, input_path, output_path, max_time
+    ):
         """Optional (but recommended): Minimize a testcase.
 
         Args:
@@ -181,8 +183,7 @@ class Engine(object):
 def register(name, engine_class):
     """Register a fuzzing engine."""
     if name in _ENGINES:
-        raise ValueError(
-            'Engine {name} is already registered'.format(name=name))
+        raise ValueError("Engine {name} is already registered".format(name=name))
 
     _ENGINES[name] = engine_class
 

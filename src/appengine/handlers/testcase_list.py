@@ -30,22 +30,22 @@ from libs.query import datastore_query
 PAGE_SIZE = 20
 MORE_LIMIT = 100 - PAGE_SIZE  # exactly 5 pages
 FIELDS = [
-    'crash_type',
-    'crash_state',
-    'job_type',
-    'open',
-    'fixed',
-    'regression',
-    'one_time_crasher_flag',
-    'security_flag',
-    'bug_information',
-    'group_bug_information',
-    'group_id',
-    'project_name',
-    'platform',
-    'impact_stable_version',
-    'impact_beta_version',
-    'is_impact_set_flag',
+    "crash_type",
+    "crash_state",
+    "job_type",
+    "open",
+    "fixed",
+    "regression",
+    "one_time_crasher_flag",
+    "security_flag",
+    "bug_information",
+    "group_bug_information",
+    "group_id",
+    "project_name",
+    "platform",
+    "impact_stable_version",
+    "impact_beta_version",
+    "is_impact_set_flag",
 ]
 
 
@@ -53,56 +53,55 @@ class GroupFilter(filters.Filter):
     """Filter for group."""
 
     def __init__(self):
-        self.param_key = 'group'
+        self.param_key = "group"
 
     def add(self, query, params):
         """Add group filter."""
-        value = params.get(self.param_key, '')
+        value = params.get(self.param_key, "")
         if filters.is_empty(value):
-            query.filter('is_leader', True)
+            query.filter("is_leader", True)
             return
-        query.filter('group_id', helpers.cast(
-            value, int, "'group' must be int."))
+        query.filter("group_id", helpers.cast(value, int, "'group' must be int."))
 
 
 KEYWORD_FILTERS = [
     GroupFilter(),
-    filters.String('bug_indices', 'issue'),
-    filters.String('platform', 'platform'),
-    filters.String('impact_stable_version_indices', 'stable'),
-    filters.String('impact_beta_version_indices', 'beta'),
-    filters.String('fuzzer_name_indices', 'fuzzer'),
-    filters.String('job_type', 'job'),
+    filters.String("bug_indices", "issue"),
+    filters.String("platform", "platform"),
+    filters.String("impact_stable_version_indices", "stable"),
+    filters.String("impact_beta_version_indices", "beta"),
+    filters.String("fuzzer_name_indices", "fuzzer"),
+    filters.String("job_type", "job"),
 ]
 
 FILTERS = [
-    filters.String('impact_version_indices', 'impact'),
-    filters.Boolean('has_bug_flag', 'issue'),
-    filters.Boolean('open', 'open'),
-    filters.Boolean('security_flag', 'security'),
-    filters.Keyword(KEYWORD_FILTERS, 'keywords', 'q'),
-    filters.NegativeBoolean('one_time_crasher_flag', 'reproducible'),
-    filters.String('job_type', 'job'),
-    filters.String('fuzzer_name_indices', 'fuzzer'),
-    filters.String('project_name', 'project'),
-    filters.Int('crash_revision', 'revision_greater_than', operator='>')
+    filters.String("impact_version_indices", "impact"),
+    filters.Boolean("has_bug_flag", "issue"),
+    filters.Boolean("open", "open"),
+    filters.Boolean("security_flag", "security"),
+    filters.Keyword(KEYWORD_FILTERS, "keywords", "q"),
+    filters.NegativeBoolean("one_time_crasher_flag", "reproducible"),
+    filters.String("job_type", "job"),
+    filters.String("fuzzer_name_indices", "fuzzer"),
+    filters.String("project_name", "project"),
+    filters.Int("crash_revision", "revision_greater_than", operator=">"),
 ]
 
 
 def add_filters(query, params):
     """Add filters based on params."""
-    if not filters.has_params(params, FILTERS) and not params.get('showall'):
-        params['open'] = 'yes'
+    if not filters.has_params(params, FILTERS) and not params.get("showall"):
+        params["open"] = "yes"
 
-    query.filter('status', 'Processed')
-    query.filter('is_a_duplicate_flag', False)
+    query.filter("status", "Processed")
+    query.filter("is_a_duplicate_flag", False)
 
     # For queries that use inequality we need to order by that field. Otherwise,
     # use the timestamp.
-    if 'revision_greater_than' in params:
-        query.order('crash_revision', is_desc=True)
+    if "revision_greater_than" in params:
+        query.order("crash_revision", is_desc=True)
     else:
-        query.order('timestamp', is_desc=True)
+        query.order("timestamp", is_desc=True)
 
     filters.add(query, params, FILTERS)
 
@@ -110,64 +109,65 @@ def add_filters(query, params):
 def get_result():
     """Get the result for the testcase list page."""
     params = dict(request.iterparams())
-    page = helpers.cast(request.get('page') or 1, int, "'page' is not an int.")
+    page = helpers.cast(request.get("page") or 1, int, "'page' is not an int.")
 
     query = datastore_query.Query(data_types.Testcase)
-    crash_access.add_scope(query, params, 'security_flag', 'job_type',
-                           'fuzzer_name_indices')
+    crash_access.add_scope(
+        query, params, "security_flag", "job_type", "fuzzer_name_indices"
+    )
     add_filters(query, params)
 
     testcases, total_pages, total_items, has_more = query.fetch_page(
-        page=page, page_size=PAGE_SIZE, projection=FIELDS, more_limit=MORE_LIMIT)
+        page=page, page_size=PAGE_SIZE, projection=FIELDS, more_limit=MORE_LIMIT
+    )
 
     items = []
     for testcase in testcases:
-        regression_range = ''
-        fixed_range = ''
+        regression_range = ""
+        fixed_range = ""
 
-        if testcase.regression and testcase.regression != 'NA':
+        if testcase.regression and testcase.regression != "NA":
             regression_range = testcase.regression
-        if testcase.fixed and testcase.fixed != 'NA':
+        if testcase.fixed and testcase.fixed != "NA":
             fixed_range = testcase.fixed
 
         item = {
-            'id': testcase.key.id(),
-            'crashType': ' '.join(testcase.crash_type.splitlines()),
-            'crashStateLines': testcase.crash_state.strip().splitlines(),
-            'jobType': testcase.job_type,
-            'isClosed': not testcase.open,
-            'isFixed': testcase.fixed and testcase.fixed != 'NA',
-            'isReproducible': not testcase.one_time_crasher_flag,
-            'isSecurity': testcase.security_flag,
-            'isImpactSet': testcase.is_impact_set_flag,
-            'impacts': {
-                'stable': testcase.impact_stable_version,
-                'beta': testcase.impact_beta_version,
+            "id": testcase.key.id(),
+            "crashType": " ".join(testcase.crash_type.splitlines()),
+            "crashStateLines": testcase.crash_state.strip().splitlines(),
+            "jobType": testcase.job_type,
+            "isClosed": not testcase.open,
+            "isFixed": testcase.fixed and testcase.fixed != "NA",
+            "isReproducible": not testcase.one_time_crasher_flag,
+            "isSecurity": testcase.security_flag,
+            "isImpactSet": testcase.is_impact_set_flag,
+            "impacts": {
+                "stable": testcase.impact_stable_version,
+                "beta": testcase.impact_beta_version,
             },
-            'regressionRange': regression_range,
-            'fixedRange': fixed_range,
-            'groupId': testcase.group_id,
-            'projectName': testcase.project_name,
-            'platform': testcase.platform,
-            'issueId': testcase.bug_information or testcase.group_bug_information,
-            'showImpacts': testcase.has_impacts(),
-            'impactsProduction': testcase.impacts_production()
+            "regressionRange": regression_range,
+            "fixedRange": fixed_range,
+            "groupId": testcase.group_id,
+            "projectName": testcase.project_name,
+            "platform": testcase.platform,
+            "issueId": testcase.bug_information or testcase.group_bug_information,
+            "showImpacts": testcase.has_impacts(),
+            "impactsProduction": testcase.impacts_production(),
         }
         if testcase.timestamp:
-            item['timestamp'] = utils.utc_datetime_to_timestamp(
-                testcase.timestamp)
+            item["timestamp"] = utils.utc_datetime_to_timestamp(testcase.timestamp)
 
         items.append(item)
 
-    helpers.log('Testcases', helpers.VIEW_OPERATION)
+    helpers.log("Testcases", helpers.VIEW_OPERATION)
 
     result = {
-        'hasMore': has_more,
-        'items': items,
-        'page': page,
-        'pageSize': PAGE_SIZE,
-        'totalItems': total_items,
-        'totalPages': total_pages,
+        "hasMore": has_more,
+        "items": items,
+        "page": page,
+        "pageSize": PAGE_SIZE,
+        "totalItems": total_items,
+        "totalPages": total_pages,
     }
     return result, params
 
@@ -180,21 +180,17 @@ class Handler(base_handler.Handler):
         """Get and render the testcase list in HTML."""
         result, params = get_result()
         field_values = {
-            'projects':
-                data_handler.get_all_project_names(),
-            'fuzzers':
-                data_handler.get_all_fuzzer_names_including_children(
-                    include_parents=True),
-            'jobs':
-                data_handler.get_all_job_type_names(),
-            'shouldShowImpact':
-                utils.is_chromium()
+            "projects": data_handler.get_all_project_names(),
+            "fuzzers": data_handler.get_all_fuzzer_names_including_children(
+                include_parents=True
+            ),
+            "jobs": data_handler.get_all_job_type_names(),
+            "shouldShowImpact": utils.is_chromium(),
         }
-        return self.render('testcase-list.html', {
-            'fieldValues': field_values,
-            'result': result,
-            'params': params
-        })
+        return self.render(
+            "testcase-list.html",
+            {"fieldValues": field_values, "result": result, "params": params},
+        )
 
 
 class CacheHandler(base_handler.Handler):
@@ -211,9 +207,9 @@ class CacheHandler(base_handler.Handler):
 
         # Memoize both variants of get_all_fuzzer_names_including_children.
         _ = data_handler.get_all_fuzzer_names_including_children(
-            include_parents=True, __memoize_force__=True)
-        _ = data_handler.get_all_fuzzer_names_including_children(
-            __memoize_force__=True)
+            include_parents=True, __memoize_force__=True
+        )
+        _ = data_handler.get_all_fuzzer_names_including_children(__memoize_force__=True)
 
         # Memoize expensive testcase attribute calls.
         for testcase_id in data_handler.get_open_testcase_id_iterator():

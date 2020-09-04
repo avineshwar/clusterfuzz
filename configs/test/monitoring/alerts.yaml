@@ -19,17 +19,17 @@ resources:
       displayName: Bot count linux
       combiner: AND
       conditions:
-      - displayName: Under threshold
-        conditionThreshold:
-          filter: metric.type="custom.googleapis.com/bot_count"
-            resource.type="gce_instance" metric.label."region"="linux"
-          aggregations:
-            - alignmentPeriod: 600s
-              perSeriesAligner: ALIGN_MEAN
-              crossSeriesReducer: REDUCE_SUM
-          comparison: COMPARISON_LT
-          thresholdValue: BOT_COUNT:linux  # Replaced during deployment.
-          duration: 21600s
+        - displayName: Under threshold
+          conditionThreshold:
+            filter: metric.type="custom.googleapis.com/bot_count"
+              resource.type="gce_instance" metric.label."region"="linux"
+            aggregations:
+              - alignmentPeriod: 600s
+                perSeriesAligner: ALIGN_MEAN
+                crossSeriesReducer: REDUCE_SUM
+            comparison: COMPARISON_LT
+            thresholdValue: BOT_COUNT:linux # Replaced during deployment.
+            duration: 21600s
       notificationChannels:
         - $(ref.alert_channel.name)
   - name: alert_channel

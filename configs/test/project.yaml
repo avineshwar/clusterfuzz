@@ -101,22 +101,18 @@ env:
   #              %SANITIZER%, %SANITIZER_OPTIONS%, %ARGS%,
   #              which get automatically subsituted in the template.
   #              Make sure to unicode-escape the string, e.g. \n becomes \\n, etc.
-
   # Default issue tracker name unless overridden in a job definition. Current only supports monorail
   # issue tracker (disabled by default).
   # ISSUE_TRACKER: issue-tracker-name
-
   # Web tests (e.g. html, js tests) to automatically download once a day and provide a default
   # input to fuzzer as part of --input-dir argument (disabled by default).
   # WEB_TESTS_URL: 'gs://bucket/path-to-tests-archive.zip'
   # UPDATE_WEB_TESTS: true
-
   # Points to a source map json file containing component revisions for this app revision. This is
   # used to know which components changed in a particular regression range.
   # Read more about it here:
   # https://google.github.io/clusterfuzz/production-setup/build-pipeline/#providing-revisions-for-the-build-dependencies
   # REVISION_VARS_URL:
-
   # Any of the above variables can be overridden in a job definition.
 
 bisect_service:

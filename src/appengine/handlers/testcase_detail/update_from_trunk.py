@@ -20,30 +20,31 @@ from libs import helpers
 
 
 def update(testcase):
-    """Update from trunk."""
-    testcase.last_tested_crash_stacktrace = "Pending"
-    testcase.put()
+  """Update from trunk."""
+  testcase.last_tested_crash_stacktrace = "Pending"
+  testcase.put()
 
-    tasks.add_task(
-        "variant",
-        testcase.key.id(),
-        testcase.job_type,
-        queue=tasks.queue_for_testcase(testcase),
-    )
+  tasks.add_task(
+      "variant",
+      testcase.key.id(),
+      testcase.job_type,
+      queue=tasks.queue_for_testcase(testcase),
+  )
 
-    helpers.log(
-        "Marked testcase %s for last tested stacktrace update" % testcase.key.id(),
-        helpers.MODIFY_OPERATION,
-    )
+  helpers.log(
+      "Marked testcase %s for last tested stacktrace update" %
+      testcase.key.id(),
+      helpers.MODIFY_OPERATION,
+  )
 
 
 class Handler(base_handler.Handler):
-    """Handler that updates from trunk."""
+  """Handler that updates from trunk."""
 
-    @handler.post(handler.JSON, handler.JSON)
-    @handler.require_csrf_token
-    @handler.check_testcase_access
-    def post(self, testcase):
-        """Update from trunk."""
-        update(testcase)
-        return self.render_json(show.get_testcase_detail(testcase))
+  @handler.post(handler.JSON, handler.JSON)
+  @handler.require_csrf_token
+  @handler.check_testcase_access
+  def post(self, testcase):
+    """Update from trunk."""
+    update(testcase)
+    return self.render_json(show.get_testcase_detail(testcase))

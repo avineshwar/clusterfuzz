@@ -24,35 +24,34 @@ standard_library.install_aliases()
 
 
 class Handler(base_handler.Handler):
-    """Handler to configure the reproduce tool."""
+  """Handler to configure the reproduce tool."""
 
-    # Note: This handler is intentionally unauthenticated.
-    @handler.post(handler.JSON, handler.JSON)
-    def post(self):
-        """Download the reproduce tool configuration json."""
-        client_id = db_config.get_value("reproduce_tool_client_id")
-        if not client_id:
-            return self.render_json({"error": "Reproduce tool is not configured."}, 500)
+  # Note: This handler is intentionally unauthenticated.
+  @handler.post(handler.JSON, handler.JSON)
+  def post(self):
+    """Download the reproduce tool configuration json."""
+    client_id = db_config.get_value("reproduce_tool_client_id")
+    if not client_id:
+      return self.render_json({"error": "Reproduce tool is not configured."},
+                              500)
 
-        domain = data_handler.get_domain()
-        link_format = "https://{domain}/{handler}"
-        configuration = {
-            "testcase_info_url": link_format.format(
-                domain=domain, handler="reproduce-tool/testcase-info"
-            ),
-            "testcase_download_url": link_format.format(
-                domain=domain, handler="testcase-detail/download-testcase"
-            ),
-            "oauth_url": "https://accounts.google.com/o/oauth2/v2/auth?{}".format(
-                urllib.parse.urlencode(
-                    {
-                        "client_id": client_id,
-                        "scope": "email profile",
-                        "response_type": "code",
-                        "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
-                    }
-                )
-            ),
-        }
+    domain = data_handler.get_domain()
+    link_format = "https://{domain}/{handler}"
+    configuration = {
+        "testcase_info_url":
+            link_format.format(
+                domain=domain, handler="reproduce-tool/testcase-info"),
+        "testcase_download_url":
+            link_format.format(
+                domain=domain, handler="testcase-detail/download-testcase"),
+        "oauth_url":
+            "https://accounts.google.com/o/oauth2/v2/auth?{}".format(
+                urllib.parse.urlencode({
+                    "client_id": client_id,
+                    "scope": "email profile",
+                    "response_type": "code",
+                    "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+                })),
+    }
 
-        return self.render_json(configuration)
+    return self.render_json(configuration)

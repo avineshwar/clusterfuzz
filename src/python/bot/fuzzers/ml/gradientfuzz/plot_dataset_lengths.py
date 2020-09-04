@@ -31,7 +31,7 @@ def plot_lengths(
     plot_name_prefix="",
     plot_title="Input Length Distribution",
 ):
-    """
+  """
       Plots distribution of input lengths given a list of zero-padded numpy
       byte arrays. Used as a subroutine for `libfuzzer_to_numpy.py`.
 
@@ -46,48 +46,45 @@ def plot_lengths(
       Returns:
           N/A
       """
-    lengths = np.zeros(len(all_inputs))
-    for idx, _ in enumerate(all_inputs):
-        all_nonzero = np.nonzero(all_inputs[idx])
-        if len(all_nonzero[0]) == 0:
-            # This is also indicative of an input with only 0s for bytes.
-            # Our padding is all zeros (for input length consistency in
-            # feedforward models).
-            lengths[idx] = 0
-        else:
-            lengths[idx] = np.max(all_nonzero)
+  lengths = np.zeros(len(all_inputs))
+  for idx, _ in enumerate(all_inputs):
+    all_nonzero = np.nonzero(all_inputs[idx])
+    if len(all_nonzero[0]) == 0:
+      # This is also indicative of an input with only 0s for bytes.
+      # Our padding is all zeros (for input length consistency in
+      # feedforward models).
+      lengths[idx] = 0
+    else:
+      lengths[idx] = np.max(all_nonzero)
 
-    print(
-        "\nAverage input length/std: {} | {}".format(np.mean(lengths), np.std(lengths))
-    )
-    print(
-        "Input length boxplot: {} | {} | {} | {} | {}".format(
-            np.min(lengths),
-            np.percentile(lengths, 25),
-            np.median(lengths),
-            np.percentile(lengths, 75),
-            np.max(lengths),
-        )
-    )
+  print("\nAverage input length/std: {} | {}".format(
+      np.mean(lengths), np.std(lengths)))
+  print("Input length boxplot: {} | {} | {} | {} | {}".format(
+      np.min(lengths),
+      np.percentile(lengths, 25),
+      np.median(lengths),
+      np.percentile(lengths, 75),
+      np.max(lengths),
+  ))
 
-    save_path = os.path.join(
-        constants.DATASET_DIR,
-        dataset_name,
-        plot_name_prefix + constants.INPUT_LENGTH_PLOT_FILENAME,
-    )
+  save_path = os.path.join(
+      constants.DATASET_DIR,
+      dataset_name,
+      plot_name_prefix + constants.INPUT_LENGTH_PLOT_FILENAME,
+  )
 
-    plot_utils.plot_histogram(
-        lengths,
-        save_path,
-        plot_title,
-        x_axis_title=constants.HIST_INPUT_LEN_X_TITLE,
-        y_axis_title=constants.HIST_INPUT_LEN_Y_TITLE,
-        bins=constants.HIST_NUM_BINS_INPUT_LEN,
-    )
+  plot_utils.plot_histogram(
+      lengths,
+      save_path,
+      plot_title,
+      x_axis_title=constants.HIST_INPUT_LEN_X_TITLE,
+      y_axis_title=constants.HIST_INPUT_LEN_Y_TITLE,
+      bins=constants.HIST_NUM_BINS_INPUT_LEN,
+  )
 
 
 def read_and_plot(dataset_name, num_bins=None):
-    """
+  """
       Plots a single histogram and saves under data/[dataset_name].
 
       Standalone plotting utility for input lengths.
@@ -102,34 +99,32 @@ def read_and_plot(dataset_name, num_bins=None):
       Returns:
           N/A
       """
-    dataset_dir = os.path.join(
-        constants.DATASET_DIR, dataset_name, constants.STANDARD_INPUT_DIR
-    )
-    all_dataset_files = list(glob.glob(os.path.join(dataset_dir, "*")))
-    lengths = np.zeros(len(all_dataset_files))
-    for idx in tqdm.tqdm(range(len(all_dataset_files))):
-        all_nonzero = np.nonzero(np.load(all_dataset_files[idx]))
-        if len(all_nonzero[0]) == 0:
-            lengths[idx] = 0
-        else:
-            lengths[idx] = np.max(all_nonzero)
+  dataset_dir = os.path.join(constants.DATASET_DIR, dataset_name,
+                             constants.STANDARD_INPUT_DIR)
+  all_dataset_files = list(glob.glob(os.path.join(dataset_dir, "*")))
+  lengths = np.zeros(len(all_dataset_files))
+  for idx in tqdm.tqdm(range(len(all_dataset_files))):
+    all_nonzero = np.nonzero(np.load(all_dataset_files[idx]))
+    if len(all_nonzero[0]) == 0:
+      lengths[idx] = 0
+    else:
+      lengths[idx] = np.max(all_nonzero)
 
-    save_path = os.path.join(
-        constants.DATASET_DIR, dataset_name, constants.INPUT_LENGTH_PLOT_FILENAME
-    )
+  save_path = os.path.join(constants.DATASET_DIR, dataset_name,
+                           constants.INPUT_LENGTH_PLOT_FILENAME)
 
-    plot_utils.plot_histogram(
-        lengths,
-        save_path,
-        "Input Length Distribution",
-        x_axis_title=constants.HIST_INPUT_LEN_X_TITLE,
-        y_axis_title=constants.HIST_INPUT_LEN_Y_TITLE,
-        bins=num_bins,
-    )
+  plot_utils.plot_histogram(
+      lengths,
+      save_path,
+      "Input Length Distribution",
+      x_axis_title=constants.HIST_INPUT_LEN_X_TITLE,
+      y_axis_title=constants.HIST_INPUT_LEN_Y_TITLE,
+      bins=num_bins,
+  )
 
 
 def get_args():
-    """
+  """
       Returns needed arguments specifying dataset and number of histogram
       bins for manual use.
 
@@ -139,24 +134,25 @@ def get_args():
       Returns:
           argparse.Namespace object with specified args.
       """
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--dataset-name",
-        required=True,
-        help="Name of dataset (look under {}/).".format(constants.DATASET_DIR),
-    )
-    parser.add_argument("--num-bins", help="Number of bins in histogram.", type=int)
-    return parser.parse_args()
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+      "--dataset-name",
+      required=True,
+      help="Name of dataset (look under {}/).".format(constants.DATASET_DIR),
+  )
+  parser.add_argument(
+      "--num-bins", help="Number of bins in histogram.", type=int)
+  return parser.parse_args()
 
 
 def main():
-    """
+  """
       Plots distribution of inputs lengths (number of bytes) over
       all inputs in dataset.
       """
-    args = get_args()
-    read_and_plot(args.dataset_name, args.num_bins)
+  args = get_args()
+  read_and_plot(args.dataset_name, args.num_bins)
 
 
 if __name__ == "__main__":
-    main()
+  main()

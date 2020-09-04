@@ -24,47 +24,47 @@ MAX_ALLOWED_CONTENT_SIZE = 10 * 1024 * 1024
 
 
 class Handler(base_handler.Handler):
-    """Content Viewer."""
+  """Content Viewer."""
 
-    @handler.get(handler.HTML)
-    def get(self):
-        """Get the HTML page."""
-        key = request.get("key")
-        if not key:
-            raise helpers.EarlyExitException("No key provided.", 400)
+  @handler.get(handler.HTML)
+  def get(self):
+    """Get the HTML page."""
+    key = request.get("key")
+    if not key:
+      raise helpers.EarlyExitException("No key provided.", 400)
 
-        testcase_id = request.get("testcase_id")
-        if testcase_id:
-            testcase = helpers.get_testcase(testcase_id)
-            if not access.can_user_access_testcase(testcase):
-                raise helpers.AccessDeniedException()
+    testcase_id = request.get("testcase_id")
+    if testcase_id:
+      testcase = helpers.get_testcase(testcase_id)
+      if not access.can_user_access_testcase(testcase):
+        raise helpers.AccessDeniedException()
 
-            if key not in [testcase.fuzzed_keys, testcase.minimized_keys]:
-                raise helpers.AccessDeniedException()
-        else:
-            if not access.has_access():
-                raise helpers.AccessDeniedException()
+      if key not in [testcase.fuzzed_keys, testcase.minimized_keys]:
+        raise helpers.AccessDeniedException()
+    else:
+      if not access.has_access():
+        raise helpers.AccessDeniedException()
 
-        blob_size = blobs.get_blob_size(key)
-        if blob_size > MAX_ALLOWED_CONTENT_SIZE:
-            raise helpers.EarlyExitException("Content exceeds max allowed size.", 400)
+    blob_size = blobs.get_blob_size(key)
+    if blob_size > MAX_ALLOWED_CONTENT_SIZE:
+      raise helpers.EarlyExitException("Content exceeds max allowed size.", 400)
 
-        # TODO(mbarbella): Workaround for an issue in the Cloud Storage API. Remove
-        # once it is fixed properly upstream:
-        # https://github.com/googleapis/google-cloud-python/issues/6572
-        if blob_size:
-            try:
-                content = blobs.read_key(key).decode("utf-8", errors="replace")
-            except Exception:
-                raise helpers.EarlyExitException("Failed to read content.", 400)
-        else:
-            content = u""
+    # TODO(mbarbella): Workaround for an issue in the Cloud Storage API. Remove
+    # once it is fixed properly upstream:
+    # https://github.com/googleapis/google-cloud-python/issues/6572
+    if blob_size:
+      try:
+        content = blobs.read_key(key).decode("utf-8", errors="replace")
+      except Exception:
+        raise helpers.EarlyExitException("Failed to read content.", 400)
+    else:
+      content = u""
 
-        line_count = len(content.splitlines())
-        size = len(content)
-        title = "%s, %s" % (
-            utils.get_line_count_string(line_count),
-            utils.get_size_string(size),
-        )
+    line_count = len(content.splitlines())
+    size = len(content)
+    title = "%s, %s" % (
+        utils.get_line_count_string(line_count),
+        utils.get_size_string(size),
+    )
 
-        return self.render("viewer.html", {"content": content, "title": title})
+    return self.render("viewer.html", {"content": content, "title": title})

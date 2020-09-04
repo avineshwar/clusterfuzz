@@ -23,20 +23,20 @@ import bot.fuzzers.ml.gradientfuzz.models as models
 
 
 class ModelTypes(enum.Enum):
-    """
+  """
     To classify model types.
     """
 
-    FEEDFORWARD = enum.auto()
-    RNN = enum.auto()
+  FEEDFORWARD = enum.auto()
+  RNN = enum.auto()
 
 
 class ExitCodes(enum.Enum):
-    """
+  """
     For ClusterFuzz.
     """
 
-    SUCCESS = enum.auto()
+  SUCCESS = enum.auto()
 
 
 # For main directory tree.
@@ -108,13 +108,14 @@ DEFAULT_HIDDEN_SIZE = 256
 
 # Utility function defaults.
 def default_run_name():
-    now = datetime.now()
-    return "run_on_" + now.strftime("%m-%d-%y") + "_at_" + now.strftime("%H:%M:%S")
+  now = datetime.now()
+  return "run_on_" + now.strftime("%m-%d-%y") + "_at_" + now.strftime(
+      "%H:%M:%S")
 
 
 # NEUZZ configuration constants.
 def populate_with_neuzz(config):
-    """
+  """
     From
     https://github.com/Dongdongshe/neuzz/blob/2c7179557a491266ca1478e5f8c431d0b69d3e3a/nn.py.
 
@@ -122,19 +123,19 @@ def populate_with_neuzz(config):
     NEUZZ repository. Line numbers reference `nn.py` in the above link.
     """
 
-    config["architecture"] = NEUZZ_ONE_HIDDEN_LAYER_MODEL
+  config["architecture"] = NEUZZ_ONE_HIDDEN_LAYER_MODEL
 
-    # Line 353.
-    config["lr"] = 1e-4
+  # Line 353.
+  config["lr"] = 1e-4
 
-    # Line 345.
-    config["epochs"] = 50
+  # Line 345.
+  config["epochs"] = 50
 
-    # Line 353.
-    config["optimizer"] = ADAM
+  # Line 353.
+  config["optimizer"] = ADAM
 
-    # Line 343.
-    config["batch_size"] = 32
+  # Line 343.
+  config["batch_size"] = 32
 
 
 # Data processing (see libfuzzer_to_numpy.py).
@@ -162,7 +163,7 @@ SIMPLE_RANDOM = "simple_random"
 LIMITED_NEIGHBORHOOD = "limited_neighborhood"
 MUTATION_OPTS = [NEUZZ_MUTATION, SIMPLE_RANDOM, LIMITED_NEIGHBORHOOD]
 NEUZZ_NUM_MUT_RANGES = 2  # TODO(ryancao): THIS IS SET TO 14 IN NEUZZ
-NEUZZ_MUT_IDX_RANGES = [2 ** x for x in range(NEUZZ_NUM_MUT_RANGES)]
+NEUZZ_MUT_IDX_RANGES = [2**x for x in range(NEUZZ_NUM_MUT_RANGES)]
 DEFAULT_NUM_MUTATIONS = 10
 NEIGHBORHOOD_DEFAULT_MAX_WIDTH = 5
 # Source:
@@ -174,11 +175,9 @@ ARITH_DEFAULT_MAX = 35
 # Mutation generation (see gen_mutations.py).
 MAX_BYTE_VAL = 255
 MIN_BYTE_VAL = 0
-PLUS_MUTATION_PREFIX = (
-    "plus-mutation-branch-{branch_idx:03d}-" + "range-{start:04d}-num-{num:04d}-"
-)
-MINUS_MUTATION_PREFIX = (
-    "minus-mutation-branch-{branch_idx:03d}-" + "range-{start:04d}-num-{num:04d}-"
-)
+PLUS_MUTATION_PREFIX = ("plus-mutation-branch-{branch_idx:03d}-" +
+                        "range-{start:04d}-num-{num:04d}-")
+MINUS_MUTATION_PREFIX = ("minus-mutation-branch-{branch_idx:03d}-" +
+                         "range-{start:04d}-num-{num:04d}-")
 GENERIC_MUTATION_PREFIX = "mutation-branch-{branch_idx:03d}-num-{num:04d}-"
 ORIGINAL_PREFIX = "original-"

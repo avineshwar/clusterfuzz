@@ -29,31 +29,33 @@ api.env.timeout = 3
 
 
 def _get_handler_ctor(args):
-    """Get a Handler class given arguments."""
-    if "linux" in args.instance_name:
-        return linux.Handler
-    if "windows" in args.instance_name:
-        return windows.Handler
-    if "golo" in args.instance_name:
-        return mac.Handler
-    if "android-build" in args.instance_name:
-        return android_chrome_lab.Handler
-    raise NotImplementedError("Unsupported platform.")
+  """Get a Handler class given arguments."""
+  if "linux" in args.instance_name:
+    return linux.Handler
+  if "windows" in args.instance_name:
+    return windows.Handler
+  if "golo" in args.instance_name:
+    return mac.Handler
+  if "android-build" in args.instance_name:
+    return android_chrome_lab.Handler
+  raise NotImplementedError("Unsupported platform.")
 
 
 def _args_to_dict(args, method):
-    """Convert args to dict that is compatible with the method's argument."""
-    arg_names = inspect.getfullargspec(method).args[1:]
-    args_dict = {
-        k: v for k, v in six.iteritems(vars(args)) if k in arg_names and v is not None
-    }
-    return args_dict
+  """Convert args to dict that is compatible with the method's argument."""
+  arg_names = inspect.getfullargspec(method).args[1:]
+  args_dict = {
+      k: v
+      for k, v in six.iteritems(vars(args))
+      if k in arg_names and v is not None
+  }
+  return args_dict
 
 
 def execute(args):
-    """Run command-line tasks on a remote bot."""
-    handler_ctor = _get_handler_ctor(args)
-    handler = handler_ctor(**_args_to_dict(args, handler_ctor.__init__))
+  """Run command-line tasks on a remote bot."""
+  handler_ctor = _get_handler_ctor(args)
+  handler = handler_ctor(**_args_to_dict(args, handler_ctor.__init__))
 
-    method = getattr(handler, args.remote)
-    method(**_args_to_dict(args, method))
+  method = getattr(handler, args.remote)
+  method(**_args_to_dict(args, method))

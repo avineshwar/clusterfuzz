@@ -20,19 +20,19 @@ from libs import helpers
 
 
 class Handler(base_handler.Handler):
-    """Gcs redirector."""
+  """Gcs redirector."""
 
-    @handler.get(handler.HTML)
-    def get(self):
-        """Handle a get request."""
-        gcs_path = request.args.get("path", "")
-        if not gcs_path:
-            raise helpers.EarlyExitException("No path provided.", 400)
+  @handler.get(handler.HTML)
+  def get(self):
+    """Handle a get request."""
+    gcs_path = request.args.get("path", "")
+    if not gcs_path:
+      raise helpers.EarlyExitException("No path provided.", 400)
 
-        if storage.get(gcs_path):
-            host_url = storage.OBJECT_URL
-        else:
-            host_url = storage.DIRECTORY_URL
+    if storage.get(gcs_path):
+      host_url = storage.OBJECT_URL
+    else:
+      host_url = storage.DIRECTORY_URL
 
-        bucket_name, object_path = storage.get_bucket_name_and_path(gcs_path)
-        return self.redirect(host_url + "/" + bucket_name + "/" + object_path)
+    bucket_name, object_path = storage.get_bucket_name_and_path(gcs_path)
+    return self.redirect(host_url + "/" + bucket_name + "/" + object_path)

@@ -19,11 +19,10 @@ from builtins import str
 
 # Chromedriver related constants.
 CHROMEDRIVER_VERSION_URL = (
-    "https://commondatastorage.googleapis.com/chromedriver/LATEST_RELEASE_83"
-)
+    "https://commondatastorage.googleapis.com/chromedriver/LATEST_RELEASE_83")
 CHROMEDRIVER_DOWNLOAD_PATTERN = (
-    "https://commondatastorage.googleapis.com/chromedriver/{version}/" "{archive_name}"
-)
+    "https://commondatastorage.googleapis.com/chromedriver/{version}/"
+    "{archive_name}")
 
 # Local directory of deployment files.
 PACKAGE_TARGET_ZIP_DIRECTORY = "deployment"
@@ -32,25 +31,23 @@ PACKAGE_TARGET_ZIP_DIRECTORY = "deployment"
 LEGACY_ZIP_NAME = "clusterfuzz-source.zip"
 
 # File containing the source revision information.
-PACKAGE_TARGET_MANIFEST_PATH = os.path.join(
-    "src", "appengine", "resources", "clusterfuzz-source.manifest"
-)
+PACKAGE_TARGET_MANIFEST_PATH = os.path.join("src", "appengine", "resources",
+                                            "clusterfuzz-source.manifest")
 
 # Supported Platforms and ABIS (newer to older order).
-PLATFORMS = collections.OrderedDict(
-    [
-        ("windows", "win_amd64"),
-        ("macos", ("macosx_10_14_x86_64", "macosx_10_9_x86_64", "macosx_10_12_x86_64")),
-        ("linux", ("manylinux2010_x86_64", "manylinux1_x86_64")),
-    ]
-)
+PLATFORMS = collections.OrderedDict([
+    ("windows", "win_amd64"),
+    ("macos", ("macosx_10_14_x86_64", "macosx_10_9_x86_64",
+               "macosx_10_12_x86_64")),
+    ("linux", ("manylinux2010_x86_64", "manylinux1_x86_64")),
+])
 
 if sys.version_info.major == 3 and sys.version_info.minor == 7:
-    ABIS = {"linux": "cp37m", "windows": "cp37m", "macos": "cp37m"}
+  ABIS = {"linux": "cp37m", "windows": "cp37m", "macos": "cp37m"}
 elif sys.version_info.major == 3 and sys.version_info.minor == 8:
-    ABIS = {"linux": "cp38", "windows": "cp38", "macos": "cp38"}
+  ABIS = {"linux": "cp38", "windows": "cp38", "macos": "cp38"}
 else:
-    raise Exception("Only python 3.7 and 3.8 are supported.")
+  raise Exception("Only python 3.7 and 3.8 are supported.")
 
 # Config directory to use for tests.
 TEST_CONFIG_DIR = os.path.join("configs", "test")

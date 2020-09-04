@@ -20,10 +20,13 @@ import seaborn as sns
 sns.set(color_codes=True)
 
 
-def plot_histogram(
-    hist, save_path, title, x_axis_title=None, y_axis_title=None, bins=None
-):
-    """
+def plot_histogram(hist,
+                   save_path,
+                   title,
+                   x_axis_title=None,
+                   y_axis_title=None,
+                   bins=None):
+  """
       Basic seaborn histogram plotting wrapper with title.
 
       Args:
@@ -37,20 +40,20 @@ def plot_histogram(
       Returns:
           N/A (histogram image saved under save_path)
       """
-    # Get bins and plot histogram.
-    if bins is None:
-        bins = plt.rcParams["hist.bins"]
-    ax = sns.distplot(hist, kde=False, bins=bins)
+  # Get bins and plot histogram.
+  if bins is None:
+    bins = plt.rcParams["hist.bins"]
+  ax = sns.distplot(hist, kde=False, bins=bins)
 
-    # Set axis labels.
-    if x_axis_title is not None:
-        ax.set_xlabel(x_axis_title)
-    if y_axis_title is not None:
-        ax.set_ylabel(y_axis_title)
+  # Set axis labels.
+  if x_axis_title is not None:
+    ax.set_xlabel(x_axis_title)
+  if y_axis_title is not None:
+    ax.set_ylabel(y_axis_title)
 
-    # Get plot and save to save_path.
-    fig = ax.get_figure()
-    fig.suptitle(title)
-    fig.savefig(save_path)
-    plt.clf()
-    print("Saved under {}".format(save_path))
+  # Get plot and save to save_path.
+  fig = ax.get_figure()
+  fig.suptitle(title)
+  fig.savefig(save_path)
+  plt.clf()
+  print("Saved under {}".format(save_path))

@@ -28,7 +28,7 @@ def generate(
     syzhub_client=None,
     syzhub_key=None,
 ):
-    """Generates syzkaller config file.
+  """Generates syzkaller config file.
 
     Args:
       serial: (str)serial number of the device being fuzzed.
@@ -42,36 +42,36 @@ def generate(
       syzhub_client: (str) syzhub client name.
       syzhub_key: (str) syzhub key.
     """
-    devices = {}
-    devices["devices"] = [serial]
-    data = {}
-    data["target"] = "linux/arm64"
-    data["reproduce"] = reproduce
-    data["workdir"] = work_dir_path
-    data["http"] = "localhost:0"
-    data["syzkaller"] = binary_path
-    # TODO(hzawawy): consider what suppressions are best for Android.
-    data["suppressions"] = ["do_rt_sigqueueinfo", "do_rt_tgsigqueueinfo"]
-    data["vm"] = devices
-    data["kernel_obj"] = vmlinux_path
-    data["sandbox"] = "android"
-    data["ignores"] = ["WARNING:", "INFO:"]
-    data["type"] = "adb"
-    data["procs"] = 1
-    data["cover"] = kcov
+  devices = {}
+  devices["devices"] = [serial]
+  data = {}
+  data["target"] = "linux/arm64"
+  data["reproduce"] = reproduce
+  data["workdir"] = work_dir_path
+  data["http"] = "localhost:0"
+  data["syzkaller"] = binary_path
+  # TODO(hzawawy): consider what suppressions are best for Android.
+  data["suppressions"] = ["do_rt_sigqueueinfo", "do_rt_tgsigqueueinfo"]
+  data["vm"] = devices
+  data["kernel_obj"] = vmlinux_path
+  data["sandbox"] = "android"
+  data["ignores"] = ["WARNING:", "INFO:"]
+  data["type"] = "adb"
+  data["procs"] = 1
+  data["cover"] = kcov
 
-    if syzhub_address and syzhub_client and syzhub_key:
-        data["hub_addr"] = syzhub_address
-        data["hub_client"] = syzhub_client
-        data["hub_key"] = syzhub_key
-        data["name"] = "{}-{}".format(syzhub_client, serial)
+  if syzhub_address and syzhub_client and syzhub_key:
+    data["hub_addr"] = syzhub_address
+    data["hub_client"] = syzhub_client
+    data["hub_key"] = syzhub_key
+    data["name"] = "{}-{}".format(syzhub_client, serial)
 
-    ensure_dir(config_path)
-    with open(config_path, "w") as write_file:
-        json.dump(data, write_file)
+  ensure_dir(config_path)
+  with open(config_path, "w") as write_file:
+    json.dump(data, write_file)
 
 
 def ensure_dir(file_path):
-    directory = os.path.dirname(file_path)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+  directory = os.path.dirname(file_path)
+  if not os.path.exists(directory):
+    os.makedirs(directory)

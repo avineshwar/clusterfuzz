@@ -32,12 +32,11 @@ from bot.fuzzers.ml.gradientfuzz.count_prop_covered_branches import \
 from bot.fuzzers.ml.gradientfuzz.plot_dataset_lengths import plot_lengths
 
 ZLIB_FUZZER_BINARY_PATH = (
-    "~/Ryan_Summer_2020/oss-fuzz/build/out/zlib/zlib_uncompress_fuzzer"
-)
+    "~/Ryan_Summer_2020/oss-fuzz/build/out/zlib/zlib_uncompress_fuzzer")
 
 
 def get_branch_coverage(libfuzzer_out, get_branch_numbers=False):
-    """
+  """
       Returns Numpy indicator array of branches.
 
       For example, in a program with five branches, where branches 0, 2, and 3
@@ -52,38 +51,38 @@ def get_branch_coverage(libfuzzer_out, get_branch_numbers=False):
       Returns:
           coverage (np.ndarray): Coverage indicator for branches (see above).
       """
-    line_indicators = {}
-    for line in libfuzzer_out:
-        try:
-            split_line = line.split(" ")
-            covered = split_line[0] == constants.COVERED
-            for branch_num in [int(x) for x in split_line[1:]]:
-                if branch_num not in line_indicators:
-                    line_indicators[branch_num] = []
-                line_indicators[branch_num].append(covered)
+  line_indicators = {}
+  for line in libfuzzer_out:
+    try:
+      split_line = line.split(" ")
+      covered = split_line[0] == constants.COVERED
+      for branch_num in [int(x) for x in split_line[1:]]:
+        if branch_num not in line_indicators:
+          line_indicators[branch_num] = []
+        line_indicators[branch_num].append(covered)
 
-        except ValueError:
-            print('Skipping line "{}"'.format(line))
+    except ValueError:
+      print('Skipping line "{}"'.format(line))
 
-    # Populate indicator Numpy array.
-    sorted_branches = sorted(line_indicators.keys())
-    list_coverage = []
-    for line in sorted_branches:
-        list_coverage.extend(line_indicators[line])
-    coverage = np.asarray(list_coverage)
+  # Populate indicator Numpy array.
+  sorted_branches = sorted(line_indicators.keys())
+  list_coverage = []
+  for line in sorted_branches:
+    list_coverage.extend(line_indicators[line])
+  coverage = np.asarray(list_coverage)
 
-    # Returns list of branch numbers in order.
-    if get_branch_numbers:
-        branch_numbers = []
-        for branch_num in sorted_branches:
-            branch_numbers.extend([branch_num] * len(line_indicators[branch_num]))
-        return coverage, branch_numbers
+  # Returns list of branch numbers in order.
+  if get_branch_numbers:
+    branch_numbers = []
+    for branch_num in sorted_branches:
+      branch_numbers.extend([branch_num] * len(line_indicators[branch_num]))
+    return coverage, branch_numbers
 
-    return coverage
+  return coverage
 
 
 def process_one_fuzzer(test_case_path, fuzz_target_binary, first=False):
-    """
+  """
       Processes a single test case using a manually-specified fuzzer binary.
 
       Args:
@@ -95,24 +94,19 @@ def process_one_fuzzer(test_case_path, fuzz_target_binary, first=False):
           coverage (np.ndarray): See documentation for `get_branch_coverage()`
               above.
       """
-    libfuzzer_out = subprocess.getoutput(
-        " ".join(
-            [
-                fuzz_target_binary,
-                constants.PRINT_COV_FLAG,
-                constants.RUNS_FLAG,
-                test_case_path,
-            ]
-        )
-    )
-    libfuzzer_out = libfuzzer_out[
-        libfuzzer_out.find(constants.COVERAGE_MARKER) + len(constants.COVERAGE_MARKER) :
-    ].split("\n")
-    return get_branch_coverage(libfuzzer_out, first)
+  libfuzzer_out = subprocess.getoutput(" ".join([
+      fuzz_target_binary,
+      constants.PRINT_COV_FLAG,
+      constants.RUNS_FLAG,
+      test_case_path,
+  ]))
+  libfuzzer_out = libfuzzer_out[libfuzzer_out.find(constants.COVERAGE_MARKER) +
+                                len(constants.COVERAGE_MARKER):].split("\n")
+  return get_branch_coverage(libfuzzer_out, first)
 
 
 def bytes_from_file(filename, chunksize=8192):
-    """
+  """
       Reads bytes from a file as a generator. Taken straight from
       https://stackoverflow.com/questions/1035340/reading-binary-file-and-looping-over-each-byte/1035456#1035456.
 
@@ -123,18 +117,18 @@ def bytes_from_file(filename, chunksize=8192):
       Yields:
           b (byte): Next byte from file.
       """
-    with open(filename, "rb") as f:
-        while True:
-            chunk = f.read(chunksize)
-            if chunk:
-                for b in chunk:
-                    yield b
-            else:
-                break
+  with open(filename, "rb") as f:
+    while True:
+      chunk = f.read(chunksize)
+      if chunk:
+        for b in chunk:
+          yield b
+      else:
+        break
 
 
 def convert_input_to_numpy(test_case_path):
-    """
+  """
       Converts a single input file into a Numpy array of its raw bytes.
 
       Args:
@@ -143,15 +137,15 @@ def convert_input_to_numpy(test_case_path):
       Returns:
           numpy_in (np.ndarray): Numpy array of bytes from file.
       """
-    numpy_in = []
-    for byte in bytes_from_file(test_case_path):
-        numpy_in.append(byte)
-    numpy_in = np.asarray(numpy_in)
-    return numpy_in
+  numpy_in = []
+  for byte in bytes_from_file(test_case_path):
+    numpy_in.append(byte)
+  numpy_in = np.asarray(numpy_in)
+  return numpy_in
 
 
 def worker_fn(all_data, start_idx, end_idx, fuzzer_binary_path, first):
-    """
+  """
       Processes a range of inputs based on index.
 
       Should be free from race conditions, since
@@ -172,18 +166,18 @@ def worker_fn(all_data, start_idx, end_idx, fuzzer_binary_path, first):
       Returns:
           N/A
       """
-    all_coverage, all_inputs, input_file_paths, all_input_lengths = all_data
-    iterator = (
-        tqdm.tqdm(range(start_idx, end_idx)) if first else range(start_idx, end_idx)
-    )
-    for idx in iterator:
-        test_case_path = input_file_paths[idx]
-        coverage = process_one_fuzzer(test_case_path, fuzzer_binary_path)
-        all_coverage[idx] = coverage
+  all_coverage, all_inputs, input_file_paths, all_input_lengths = all_data
+  iterator = (
+      tqdm.tqdm(range(start_idx, end_idx)) if first else range(
+          start_idx, end_idx))
+  for idx in iterator:
+    test_case_path = input_file_paths[idx]
+    coverage = process_one_fuzzer(test_case_path, fuzzer_binary_path)
+    all_coverage[idx] = coverage
 
-        numpy_input = convert_input_to_numpy(test_case_path)
-        all_input_lengths[idx] = len(numpy_input)
-        all_inputs[idx] = numpy_input
+    numpy_input = convert_input_to_numpy(test_case_path)
+    all_input_lengths[idx] = len(numpy_input)
+    all_inputs[idx] = numpy_input
 
 
 def process_all(
@@ -196,7 +190,7 @@ def process_all(
     median_mult_cutoff,
     pad=True,
 ):
-    """
+  """
       Processes every file in input_dir with libFuzzer and
       saves both inputs and labels in numpy array form under
       output_dir.
@@ -220,162 +214,148 @@ def process_all(
           N/A (results saved under data/[dataset_name]/{inputs, labels})
       """
 
-    print("Processing files under {}...\n".format(input_dir))
+  print("Processing files under {}...\n".format(input_dir))
 
-    input_file_paths = list(glob.glob(os.path.join(input_dir, "*")))
-    all_input_lengths = [None] * len(input_file_paths)
-    all_coverage = [None] * len(input_file_paths)
-    all_inputs = [None] * len(input_file_paths)
+  input_file_paths = list(glob.glob(os.path.join(input_dir, "*")))
+  all_input_lengths = [None] * len(input_file_paths)
+  all_coverage = [None] * len(input_file_paths)
+  all_inputs = [None] * len(input_file_paths)
 
-    if len(input_file_paths) == 0:
-        print("No input files found under {}. Program exiting.".format(input_dir))
-        return
+  if len(input_file_paths) == 0:
+    print("No input files found under {}. Program exiting.".format(input_dir))
+    return
 
-    # Get branch numbers first.
-    _, branch_numbers = process_one_fuzzer(
-        input_file_paths[0], fuzz_target_binary, first=True
+  # Get branch numbers first.
+  _, branch_numbers = process_one_fuzzer(
+      input_file_paths[0], fuzz_target_binary, first=True)
+
+  # Divide into number of usable CPUs for parallelism.
+  workers = [None] * os.cpu_count()
+  num_inputs_per_worker = math.ceil(len(input_file_paths) / os.cpu_count())
+  for worker_idx, _ in enumerate(workers):
+    start_idx = worker_idx * num_inputs_per_worker
+    end_idx = min(
+        len(input_file_paths), (worker_idx + 1) * num_inputs_per_worker)
+    workers[worker_idx] = threading.Thread(
+        target=worker_fn,
+        args=(
+            (all_coverage, all_inputs, input_file_paths, all_input_lengths),
+            start_idx,
+            end_idx,
+            fuzz_target_binary,
+            worker_idx == 0,
+        ),
+    )
+    workers[worker_idx].start()
+
+  for worker in workers:
+    worker.join()
+
+  # Should always report on the same number of branches, regardless of
+  # coverage status.
+  for coverage in all_coverage:
+    assert coverage.shape == all_coverage[0].shape
+
+  # Plot initial dataset statistics.
+  print("Plotting initial dataset statistics...")
+  plot_coverage_distribution(dataset_name, all_coverage, "pre_truncation_",
+                             "Branch Coverage Pre-Truncation")
+  plot_lengths(dataset_name, all_inputs, "pre_truncation_",
+               "Input Lengths Pre-Truncation")
+
+  # Perform dataset pruning based on input length.
+  cutoff_len = None
+
+  # Delete inputs with length over (mean + cutoff_std * std).
+  if cutoff_std is not None:
+    input_mean_len = np.mean(all_input_lengths)
+    input_std_len = np.std(all_input_lengths)
+    cutoff_len = input_mean_len + cutoff_std * input_std_len
+
+  elif cutoff_percentile is not None:
+    cutoff_len = np.percentile(all_input_lengths, cutoff_percentile)
+
+  elif median_mult_cutoff is not None:
+    cutoff_len = np.median(all_input_lengths) * median_mult_cutoff
+
+  if cutoff_len is not None:
+    print("\nDiscarding inputs of length over {}...".format(int(cutoff_len)))
+    orig_num_files = len(all_inputs)
+
+    all_inputs, all_coverage, input_file_paths, all_input_lengths = zip(*list(
+        filter(
+            lambda x: len(x[0]) <= cutoff_len,
+            zip(all_inputs, all_coverage, input_file_paths, all_input_lengths),
+        )))
+
+    all_inputs, all_coverage = list(all_inputs), list(all_coverage)
+    input_file_paths, all_input_lengths = (
+        list(input_file_paths),
+        list(all_input_lengths),
     )
 
-    # Divide into number of usable CPUs for parallelism.
-    workers = [None] * os.cpu_count()
-    num_inputs_per_worker = math.ceil(len(input_file_paths) / os.cpu_count())
-    for worker_idx, _ in enumerate(workers):
-        start_idx = worker_idx * num_inputs_per_worker
-        end_idx = min(len(input_file_paths), (worker_idx + 1) * num_inputs_per_worker)
-        workers[worker_idx] = threading.Thread(
-            target=worker_fn,
-            args=(
-                (all_coverage, all_inputs, input_file_paths, all_input_lengths),
-                start_idx,
-                end_idx,
-                fuzz_target_binary,
-                worker_idx == 0,
-            ),
-        )
-        workers[worker_idx].start()
+    print("{} files removed due to length.".format(orig_num_files -
+                                                   len(all_inputs)))
 
-    for worker in workers:
-        worker.join()
+  # Plot dataset statistics post-truncation.
+  print("Plotting post-truncation dataset statistics...")
+  plot_coverage_distribution(
+      dataset_name,
+      all_coverage,
+      "post_truncation_",
+      "Branch Coverage Post-Truncation",
+  )
+  plot_lengths(dataset_name, all_inputs, "post_truncation_",
+               "Input Lengths Post-Truncation")
 
-    # Should always report on the same number of branches, regardless of
-    # coverage status.
-    for coverage in all_coverage:
-        assert coverage.shape == all_coverage[0].shape
+  # Pad all inputs to be same length.
+  if pad:
+    max_input_len = max(len(x) for x in all_inputs)
+    for idx, _ in enumerate(all_inputs):
+      all_inputs[idx] = np.pad(all_inputs[idx],
+                               [0, max_input_len - len(all_inputs[idx])])
 
-    # Plot initial dataset statistics.
-    print("Plotting initial dataset statistics...")
-    plot_coverage_distribution(
-        dataset_name, all_coverage, "pre_truncation_", "Branch Coverage Pre-Truncation"
+  # Save input lengths to un-pad later.
+  input_length_mapping = {}
+
+  print("\nSaving inputs under {}...".format(
+      os.path.join(output_dir, constants.STANDARD_INPUT_DIR)))
+
+  for num_input, _ in enumerate(all_inputs):
+    input_basename = constants.INPUT_FILENAME.format(num=num_input)
+    input_save_path = os.path.join(output_dir, constants.STANDARD_INPUT_DIR,
+                                   input_basename)
+    np.save(input_save_path, all_inputs[num_input])
+    input_length_mapping[input_basename] = all_input_lengths[num_input]
+
+  input_lengths_save_path = os.path.join(output_dir,
+                                         constants.INPUT_LENGTHS_FILENAME)
+  print("Saving input lengths under {}...".format(input_lengths_save_path))
+  json.dump(input_length_mapping, open(input_lengths_save_path, "w"))
+
+  print("Saving labels under {}...".format(
+      os.path.join(output_dir, constants.STANDARD_LABEL_DIR)))
+  for num_label, _ in enumerate(all_coverage):
+    label_save_path = os.path.join(
+        output_dir,
+        constants.STANDARD_LABEL_DIR,
+        constants.LABEL_FILENAME.format(num=num_label),
     )
-    plot_lengths(
-        dataset_name, all_inputs, "pre_truncation_", "Input Lengths Pre-Truncation"
-    )
+    np.save(label_save_path, all_coverage[num_label])
 
-    # Perform dataset pruning based on input length.
-    cutoff_len = None
+  input_filenames_file_name = os.path.join(
+      output_dir, constants.RAW_INPUT_FILE_NAMES_FILENAME)
+  print("Saving input filenames to {}...".format(input_filenames_file_name))
+  json.dump(input_file_paths, open(input_filenames_file_name, "w"))
 
-    # Delete inputs with length over (mean + cutoff_std * std).
-    if cutoff_std is not None:
-        input_mean_len = np.mean(all_input_lengths)
-        input_std_len = np.std(all_input_lengths)
-        cutoff_len = input_mean_len + cutoff_std * input_std_len
-
-    elif cutoff_percentile is not None:
-        cutoff_len = np.percentile(all_input_lengths, cutoff_percentile)
-
-    elif median_mult_cutoff is not None:
-        cutoff_len = np.median(all_input_lengths) * median_mult_cutoff
-
-    if cutoff_len is not None:
-        print("\nDiscarding inputs of length over {}...".format(int(cutoff_len)))
-        orig_num_files = len(all_inputs)
-
-        all_inputs, all_coverage, input_file_paths, all_input_lengths = zip(
-            *list(
-                filter(
-                    lambda x: len(x[0]) <= cutoff_len,
-                    zip(all_inputs, all_coverage, input_file_paths, all_input_lengths),
-                )
-            )
-        )
-
-        all_inputs, all_coverage = list(all_inputs), list(all_coverage)
-        input_file_paths, all_input_lengths = (
-            list(input_file_paths),
-            list(all_input_lengths),
-        )
-
-        print(
-            "{} files removed due to length.".format(orig_num_files - len(all_inputs))
-        )
-
-    # Plot dataset statistics post-truncation.
-    print("Plotting post-truncation dataset statistics...")
-    plot_coverage_distribution(
-        dataset_name,
-        all_coverage,
-        "post_truncation_",
-        "Branch Coverage Post-Truncation",
-    )
-    plot_lengths(
-        dataset_name, all_inputs, "post_truncation_", "Input Lengths Post-Truncation"
-    )
-
-    # Pad all inputs to be same length.
-    if pad:
-        max_input_len = max(len(x) for x in all_inputs)
-        for idx, _ in enumerate(all_inputs):
-            all_inputs[idx] = np.pad(
-                all_inputs[idx], [0, max_input_len - len(all_inputs[idx])]
-            )
-
-    # Save input lengths to un-pad later.
-    input_length_mapping = {}
-
-    print(
-        "\nSaving inputs under {}...".format(
-            os.path.join(output_dir, constants.STANDARD_INPUT_DIR)
-        )
-    )
-
-    for num_input, _ in enumerate(all_inputs):
-        input_basename = constants.INPUT_FILENAME.format(num=num_input)
-        input_save_path = os.path.join(
-            output_dir, constants.STANDARD_INPUT_DIR, input_basename
-        )
-        np.save(input_save_path, all_inputs[num_input])
-        input_length_mapping[input_basename] = all_input_lengths[num_input]
-
-    input_lengths_save_path = os.path.join(output_dir, constants.INPUT_LENGTHS_FILENAME)
-    print("Saving input lengths under {}...".format(input_lengths_save_path))
-    json.dump(input_length_mapping, open(input_lengths_save_path, "w"))
-
-    print(
-        "Saving labels under {}...".format(
-            os.path.join(output_dir, constants.STANDARD_LABEL_DIR)
-        )
-    )
-    for num_label, _ in enumerate(all_coverage):
-        label_save_path = os.path.join(
-            output_dir,
-            constants.STANDARD_LABEL_DIR,
-            constants.LABEL_FILENAME.format(num=num_label),
-        )
-        np.save(label_save_path, all_coverage[num_label])
-
-    input_filenames_file_name = os.path.join(
-        output_dir, constants.RAW_INPUT_FILE_NAMES_FILENAME
-    )
-    print("Saving input filenames to {}...".format(input_filenames_file_name))
-    json.dump(input_file_paths, open(input_filenames_file_name, "w"))
-
-    branch_number_save_path = os.path.join(output_dir, constants.BRANCH_LABELS_FILENAME)
-    print("Saving branch numbers to {}...".format(branch_number_save_path))
-    json.dump(branch_numbers, open(branch_number_save_path, "w"))
+  branch_number_save_path = os.path.join(output_dir,
+                                         constants.BRANCH_LABELS_FILENAME)
+  print("Saving branch numbers to {}...".format(branch_number_save_path))
+  json.dump(branch_numbers, open(branch_number_save_path, "w"))
 
 
 def parse_args():
-    """
+  """
       Returns needed args specifying raw input directory,
       dataset name, cutoff statistics, and whether to pad
       inputs to max input length.
@@ -386,47 +366,47 @@ def parse_args():
       Returns:
           argparse.Namespace object with specified args.
       """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input-dir", help="Path to corpus directory.", required=True)
-    parser.add_argument(
-        "--dataset-name",
-        help="Dataset name (outputs are saved under {}/[dataset_name]).".format(
-            constants.DATASET_DIR
-        ),
-        required=True,
-    )
-    parser.add_argument(
-        "--cutoff-std",
-        help="Remove inputs longer than (mean len) + cutoff_std * (std len).",
-        type=int,
-    )
-    parser.add_argument(
-        "--cutoff-percentile",
-        help="Remove inputs longer than the [cutoff_percentile]th percentile.",
-        type=int,
-    )
-    parser.add_argument(
-        "--median-mult-cutoff",
-        help="Remove inputs longer than [median len] * [median-mult-cutoff].",
-        type=int,
-    )
-    parser.add_argument(
-        "--pad",
-        help="Whether to pad inputs to longest input length. (Default: True)",
-        type=bool,
-        default=True,
-    )
-    parser.add_argument(
-        "--fuzz-target-binary",
-        help="Path to fuzz target executable.",
-        type=str,
-        default=ZLIB_FUZZER_BINARY_PATH,
-    )
-    return parser.parse_args()
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+      "--input-dir", help="Path to corpus directory.", required=True)
+  parser.add_argument(
+      "--dataset-name",
+      help="Dataset name (outputs are saved under {}/[dataset_name]).".format(
+          constants.DATASET_DIR),
+      required=True,
+  )
+  parser.add_argument(
+      "--cutoff-std",
+      help="Remove inputs longer than (mean len) + cutoff_std * (std len).",
+      type=int,
+  )
+  parser.add_argument(
+      "--cutoff-percentile",
+      help="Remove inputs longer than the [cutoff_percentile]th percentile.",
+      type=int,
+  )
+  parser.add_argument(
+      "--median-mult-cutoff",
+      help="Remove inputs longer than [median len] * [median-mult-cutoff].",
+      type=int,
+  )
+  parser.add_argument(
+      "--pad",
+      help="Whether to pad inputs to longest input length. (Default: True)",
+      type=bool,
+      default=True,
+  )
+  parser.add_argument(
+      "--fuzz-target-binary",
+      help="Path to fuzz target executable.",
+      type=str,
+      default=ZLIB_FUZZER_BINARY_PATH,
+  )
+  return parser.parse_args()
 
 
 def main():
-    """
+  """
     Converts all input files from [input-dir] into numpy, runs
     fuzzer binary on them to get coverage, and saves inputs and
     labels as numpy arrays in a ready-to-use format by `ProgramDataset`
@@ -442,44 +422,41 @@ def main():
         > input filenames list file (data/[dataset_name]/input_file_names.json)
         > branch numbers file (data/[dataset_name]/branches.json)
     """
-    args = parse_args()
-    output_dir = os.path.join(constants.DATASET_DIR, args.dataset_name)
+  args = parse_args()
+  output_dir = os.path.join(constants.DATASET_DIR, args.dataset_name)
 
-    # Argument error checking.
-    if os.path.isdir(output_dir):
-        print(
-            "Error: {} is already a named dataset directory (check under {}/).".format(
-                output_dir, constants.DATASET_DIR
-            )
-        )
-        sys.exit()
+  # Argument error checking.
+  if os.path.isdir(output_dir):
+    print("Error: {} is already a named dataset directory (check under {}/)."
+          .format(output_dir, constants.DATASET_DIR))
+    sys.exit()
 
-    cutoff_args = [args.cutoff_std, args.cutoff_percentile, args.median_mult_cutoff]
-    num_cutoff_args = sum(cutoff_arg is not None for cutoff_arg in cutoff_args)
-    if num_cutoff_args > 1:
-        print(
-            "Error: Only one of [--cutoff-std, --cutoff-percentile, "
-            + "--median-mult-cutoff] may be specified."
-        )
-        sys.exit()
+  cutoff_args = [
+      args.cutoff_std, args.cutoff_percentile, args.median_mult_cutoff
+  ]
+  num_cutoff_args = sum(cutoff_arg is not None for cutoff_arg in cutoff_args)
+  if num_cutoff_args > 1:
+    print("Error: Only one of [--cutoff-std, --cutoff-percentile, " +
+          "--median-mult-cutoff] may be specified.")
+    sys.exit()
 
-    if num_cutoff_args == 0:
-        print("Warning: Proceeding with no dataset pruning.")
-        print("All inputs will be kept, regardless of length.\n")
+  if num_cutoff_args == 0:
+    print("Warning: Proceeding with no dataset pruning.")
+    print("All inputs will be kept, regardless of length.\n")
 
-    os.makedirs(os.path.join(output_dir, constants.STANDARD_INPUT_DIR))
-    os.makedirs(os.path.join(output_dir, constants.STANDARD_LABEL_DIR))
-    process_all(
-        args.input_dir,
-        output_dir,
-        args.dataset_name,
-        args.fuzz_target_binary,
-        args.cutoff_std,
-        args.cutoff_percentile,
-        args.median_mult_cutoff,
-        pad=args.pad,
-    )
+  os.makedirs(os.path.join(output_dir, constants.STANDARD_INPUT_DIR))
+  os.makedirs(os.path.join(output_dir, constants.STANDARD_LABEL_DIR))
+  process_all(
+      args.input_dir,
+      output_dir,
+      args.dataset_name,
+      args.fuzz_target_binary,
+      args.cutoff_std,
+      args.cutoff_percentile,
+      args.median_mult_cutoff,
+      pad=args.pad,
+  )
 
 
 if __name__ == "__main__":
-    main()
+  main()

@@ -18,13 +18,13 @@ from libs import helpers
 
 
 class Handler(base_handler.Handler):
-    """Serve google.*.html domain verification file."""
+  """Serve google.*.html domain verification file."""
 
-    def get(self, tag=None):
-        """Handle a get request."""
-        tag = "google." + tag + ".html"
-        verification_tag = local_config.GAEConfig().get("domain_verification_tag")
-        if verification_tag != tag:
-            raise helpers.EarlyExitException("Not found.", 404)
+  def get(self, tag=None):
+    """Handle a get request."""
+    tag = "google." + tag + ".html"
+    verification_tag = local_config.GAEConfig().get("domain_verification_tag")
+    if verification_tag != tag:
+      raise helpers.EarlyExitException("Not found.", 404)
 
-        return "google-site-verification: " + verification_tag
+    return "google-site-verification: " + verification_tag

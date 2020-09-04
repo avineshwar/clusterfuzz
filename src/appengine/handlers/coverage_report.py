@@ -26,53 +26,53 @@ VALID_DATE_REGEX = re.compile(r"^([0-9\-]+|latest)$")
 
 
 def _get_project_report_url(job, date):
-    """Return url for the report requested."""
-    project = data_handler.get_project_name(job)
-    if not project:
-        return None
+  """Return url for the report requested."""
+  project = data_handler.get_project_name(job)
+  if not project:
+    return None
 
-    if date == "latest":
-        date = None
-    else:
-        try:
-            date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
-        except:
-            raise helpers.EarlyExitException("Invalid date.", 400)
+  if date == "latest":
+    date = None
+  else:
+    try:
+      date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+    except:
+      raise helpers.EarlyExitException("Invalid date.", 400)
 
-    info = fuzzer_stats.get_coverage_info(project, date)
-    if not info:
-        return None
+  info = fuzzer_stats.get_coverage_info(project, date)
+  if not info:
+    return None
 
-    return info.html_report_url
+  return info.html_report_url
 
 
 def get_report_url(report_type, argument, date):
-    """Get report url for a redirect from the coverage report handler."""
-    # It's very easy to add support for per fuzzer reports, but we don't need it.
-    if report_type != "job":
-        raise helpers.EarlyExitException("Invalid report type.", 400)
+  """Get report url for a redirect from the coverage report handler."""
+  # It's very easy to add support for per fuzzer reports, but we don't need it.
+  if report_type != "job":
+    raise helpers.EarlyExitException("Invalid report type.", 400)
 
-    job = argument
-    if not job:
-        raise helpers.EarlyExitException("Job name cannot be empty.", 400)
+  job = argument
+  if not job:
+    raise helpers.EarlyExitException("Job name cannot be empty.", 400)
 
-    if not data_types.Job.VALID_NAME_REGEX.match(job):
-        raise helpers.EarlyExitException("Invalid job name.", 400)
+  if not data_types.Job.VALID_NAME_REGEX.match(job):
+    raise helpers.EarlyExitException("Invalid job name.", 400)
 
-    if not date or not VALID_DATE_REGEX.match(date):
-        raise helpers.EarlyExitException("Invalid date.", 400)
+  if not date or not VALID_DATE_REGEX.match(date):
+    raise helpers.EarlyExitException("Invalid date.", 400)
 
-    return _get_project_report_url(job, date)
+  return _get_project_report_url(job, date)
 
 
 class Handler(base_handler.Handler):
-    """Coverage Report Handler."""
+  """Coverage Report Handler."""
 
-    # pylint: disable=unused-argument
-    @handler.get(handler.HTML)
-    def get(self, report_type=None, argument=None, date=None, extra=None):
-        """Handle a get request."""
-        report_url = get_report_url(report_type, argument, date)
-        if report_url:
-            return self.redirect(report_url)
-        raise helpers.EarlyExitException("Failed to get coverage report.", 400)
+  # pylint: disable=unused-argument
+  @handler.get(handler.HTML)
+  def get(self, report_type=None, argument=None, date=None, extra=None):
+    """Handle a get request."""
+    report_url = get_report_url(report_type, argument, date)
+    if report_url:
+      return self.redirect(report_url)
+    raise helpers.EarlyExitException("Failed to get coverage report.", 400)

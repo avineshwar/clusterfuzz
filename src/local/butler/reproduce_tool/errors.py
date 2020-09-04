@@ -15,8 +15,8 @@
 
 
 class ReproduceToolError(Exception):
-    """Base class for reproduce tool exceptions."""
+  """Base class for reproduce tool exceptions."""
 
 
 class ReproduceToolUnrecoverableError(ReproduceToolError):
-    """Unrecoverable errors."""
+  """Unrecoverable errors."""

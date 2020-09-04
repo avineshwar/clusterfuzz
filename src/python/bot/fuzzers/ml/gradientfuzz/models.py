@@ -18,8 +18,11 @@ import tensorflow.keras as keras
 import tensorflow.keras.layers as layers
 
 
-def make_model_from_layer(layer_class, output_dim, input_shape, hidden_layer_dim=4096):
-    """
+def make_model_from_layer(layer_class,
+                          output_dim,
+                          input_shape,
+                          hidden_layer_dim=4096):
+  """
       Sad hack we have to use to get around tf's graph generation and not being
       able to successfully subclass `keras.Model`. When subclassing keras.Model,
       the model is inherently unconnected, so `model.inputs` and `model.outputs`
@@ -37,92 +40,88 @@ def make_model_from_layer(layer_class, output_dim, input_shape, hidden_layer_dim
       Returns:
           An uninitialized connected keras.Model object.
       """
-    internal = layer_class(output_dim, input_shape, hidden_layer_dim)
-    model_input = keras.Input(input_shape)
-    model_output = internal(model_input)
-    model = keras.Model(inputs=model_input, outputs=model_output)
-    return model
+  internal = layer_class(output_dim, input_shape, hidden_layer_dim)
+  model_input = keras.Input(input_shape)
+  model_output = internal(model_input)
+  model = keras.Model(inputs=model_input, outputs=model_output)
+  return model
 
 
 class NEUZZModelOneHidden(keras.layers.Layer):
-    """
+  """
       See page 7 of https://arxiv.org/pdf/1807.05620.pdf.
       """
 
-    def __init__(self, output_dim, input_shape, hidden_layer_dim=4096):
-        super(NEUZZModelOneHidden, self).__init__()
-        self._hidden_layer_dim = hidden_layer_dim
-        self._input_shape = input_shape
-        self._output_dim = output_dim
-        self._first_hidden_linear = layers.Dense(
-            self._hidden_layer_dim, activation="relu"
-        )
-        self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
+  def __init__(self, output_dim, input_shape, hidden_layer_dim=4096):
+    super(NEUZZModelOneHidden, self).__init__()
+    self._hidden_layer_dim = hidden_layer_dim
+    self._input_shape = input_shape
+    self._output_dim = output_dim
+    self._first_hidden_linear = layers.Dense(
+        self._hidden_layer_dim, activation="relu")
+    self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
 
-    def call(self, inputs, **kwargs):
-        x = self._first_hidden_linear(inputs)
-        x = self._output_layer(x)
-        return x
+  def call(self, inputs, **kwargs):
+    x = self._first_hidden_linear(inputs)
+    x = self._output_layer(x)
+    return x
 
 
 class NEUZZModelThreeHidden(keras.layers.Layer):
-    """
+  """
     Three-hidden-layers feedforward model.
     """
 
-    def __init__(self, output_dim, input_shape, hidden_layer_dim=4096):
-        super(NEUZZModelThreeHidden, self).__init__()
-        self._hidden_layer_dim = hidden_layer_dim
-        self._input_shape = input_shape
-        self._output_dim = output_dim
-        self._first_hidden_linear = layers.Dense(
-            self._hidden_layer_dim, activation="relu"
-        )
-        self._second_hidden_linear = layers.Dense(
-            self._hidden_layer_dim, activation="relu"
-        )
-        self._third_hidden_linear = layers.Dense(
-            self._hidden_layer_dim, activation="relu"
-        )
-        self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
+  def __init__(self, output_dim, input_shape, hidden_layer_dim=4096):
+    super(NEUZZModelThreeHidden, self).__init__()
+    self._hidden_layer_dim = hidden_layer_dim
+    self._input_shape = input_shape
+    self._output_dim = output_dim
+    self._first_hidden_linear = layers.Dense(
+        self._hidden_layer_dim, activation="relu")
+    self._second_hidden_linear = layers.Dense(
+        self._hidden_layer_dim, activation="relu")
+    self._third_hidden_linear = layers.Dense(
+        self._hidden_layer_dim, activation="relu")
+    self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
 
-    def call(self, inputs, **kwargs):
-        x = self._first_hidden_linear(inputs)
-        x = self._second_hidden_linear(x)
-        x = self._third_hidden_linear(x)
-        x = self._output_layer(x)
-        return x
+  def call(self, inputs, **kwargs):
+    x = self._first_hidden_linear(inputs)
+    x = self._second_hidden_linear(x)
+    x = self._third_hidden_linear(x)
+    x = self._output_layer(x)
+    return x
 
 
 class SimpleLSTMModel(keras.layers.Layer):
-    """
+  """
     Takes inputs in one byte at a time via LSTM.
     """
 
-    def __init__(self, output_dim, _, num_units=512):
-        super(SimpleLSTMModel, self).__init__()
-        self._output_dim = output_dim
-        self._lstm_layer = keras.layers.LSTM(units=num_units)
-        self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
+  def __init__(self, output_dim, _, num_units=512):
+    super(SimpleLSTMModel, self).__init__()
+    self._output_dim = output_dim
+    self._lstm_layer = keras.layers.LSTM(units=num_units)
+    self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
 
-    def call(self, inputs, **kwargs):
-        x = self._lstm_layer(inputs)
-        x = self._output_layer(x)
-        return x
+  def call(self, inputs, **kwargs):
+    x = self._lstm_layer(inputs)
+    x = self._output_layer(x)
+    return x
 
 
 class SimpleGRUModel(keras.layers.Layer):
-    """
+  """
     Takes inputs in one byte at a time via GRU.
     """
 
-    def __init__(self, output_dim, _, num_units=512):
-        super(SimpleGRUModel, self).__init__()
-        self._output_dim = output_dim
-        self._gru_layer = keras.layers.GRU(units=num_units)
-        self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
+  def __init__(self, output_dim, _, num_units=512):
+    super(SimpleGRUModel, self).__init__()
+    self._output_dim = output_dim
+    self._gru_layer = keras.layers.GRU(units=num_units)
+    self._output_layer = layers.Dense(self._output_dim, activation="sigmoid")
 
-    def call(self, inputs, **kwargs):
-        x = self._gru_layer(inputs)
-        x = self._output_layer(x)
-        return x
+  def call(self, inputs, **kwargs):
+    x = self._gru_layer(inputs)
+    x = self._output_layer(x)
+    return x

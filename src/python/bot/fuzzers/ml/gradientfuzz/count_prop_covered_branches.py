@@ -31,7 +31,7 @@ def plot_coverage_distribution(
     plot_name_prefix="",
     plot_title="Distribution of Branch Coverage",
 ):
-    """
+  """
       Plots a single histogram and saves under data/[dataset_name].
 
       Plotting utility for branch coverage distribution.
@@ -48,38 +48,35 @@ def plot_coverage_distribution(
       Returns:
           N/A
       """
-    total_covered = 0
-    total_branches = 0
-    proportions_covered = []
-    for numpy_in in all_coverage:
-        total_covered += np.sum(numpy_in)
-        total_branches += len(numpy_in)
-        proportions_covered.append(total_covered / total_branches)
+  total_covered = 0
+  total_branches = 0
+  proportions_covered = []
+  for numpy_in in all_coverage:
+    total_covered += np.sum(numpy_in)
+    total_branches += len(numpy_in)
+    proportions_covered.append(total_covered / total_branches)
 
-    print(
-        "\nTotal covered/total branches: {}/{} ({}%)".format(
-            total_covered, total_branches, 100 * total_covered / total_branches
-        )
-    )
+  print("\nTotal covered/total branches: {}/{} ({}%)".format(
+      total_covered, total_branches, 100 * total_covered / total_branches))
 
-    save_path = os.path.join(
-        constants.DATASET_DIR,
-        dataset_name,
-        plot_name_prefix + constants.BRANCH_COVERAGE_PLOT_FILENAME,
-    )
+  save_path = os.path.join(
+      constants.DATASET_DIR,
+      dataset_name,
+      plot_name_prefix + constants.BRANCH_COVERAGE_PLOT_FILENAME,
+  )
 
-    plot_utils.plot_histogram(
-        proportions_covered,
-        save_path,
-        plot_title,
-        x_axis_title=constants.HIST_COVERAGE_X_TITLE,
-        y_axis_title=constants.HIST_COVERAGE_Y_TITLE,
-        bins=constants.HIST_NUM_BINS_COVERAGE,
-    )
+  plot_utils.plot_histogram(
+      proportions_covered,
+      save_path,
+      plot_title,
+      x_axis_title=constants.HIST_COVERAGE_X_TITLE,
+      y_axis_title=constants.HIST_COVERAGE_Y_TITLE,
+      bins=constants.HIST_NUM_BINS_COVERAGE,
+  )
 
 
 def count_covered_branches_from(dataset_name, num_bins=None):
-    """
+  """
       Plots a single histogram and saves under data/[dataset_name].
 
       Standalone plotting utility for branch coverage distribution.
@@ -94,43 +91,37 @@ def count_covered_branches_from(dataset_name, num_bins=None):
       Returns:
           N/A
       """
-    all_dataset_labels = glob.glob(
-        os.path.join(
-            constants.DATASET_DIR, dataset_name, constants.STANDARD_LABEL_DIR, "*"
-        )
-    )
-    total_covered = 0
-    total_branches = 0
-    proportions_covered = []
+  all_dataset_labels = glob.glob(
+      os.path.join(constants.DATASET_DIR, dataset_name,
+                   constants.STANDARD_LABEL_DIR, "*"))
+  total_covered = 0
+  total_branches = 0
+  proportions_covered = []
 
-    for dataset_input_name in tqdm.tqdm(all_dataset_labels):
-        numpy_in = np.load(dataset_input_name)
-        total_covered += np.sum(numpy_in)
-        total_branches += len(numpy_in)
-        proportions_covered.append(total_covered / total_branches)
+  for dataset_input_name in tqdm.tqdm(all_dataset_labels):
+    numpy_in = np.load(dataset_input_name)
+    total_covered += np.sum(numpy_in)
+    total_branches += len(numpy_in)
+    proportions_covered.append(total_covered / total_branches)
 
-    print(
-        "Total covered/total branches: {}/{} ({}%)".format(
-            total_covered, total_branches, 100 * total_covered / total_branches
-        )
-    )
+  print("Total covered/total branches: {}/{} ({}%)".format(
+      total_covered, total_branches, 100 * total_covered / total_branches))
 
-    save_path = os.path.join(
-        constants.DATASET_DIR, dataset_name, constants.BRANCH_COVERAGE_PLOT_FILENAME
-    )
+  save_path = os.path.join(constants.DATASET_DIR, dataset_name,
+                           constants.BRANCH_COVERAGE_PLOT_FILENAME)
 
-    plot_utils.plot_histogram(
-        proportions_covered,
-        save_path,
-        "Distribution of Branch Coverage",
-        x_axis_title=constants.HIST_COVERAGE_X_TITLE,
-        y_axis_title=constants.HIST_COVERAGE_Y_TITLE,
-        bins=num_bins,
-    )
+  plot_utils.plot_histogram(
+      proportions_covered,
+      save_path,
+      "Distribution of Branch Coverage",
+      x_axis_title=constants.HIST_COVERAGE_X_TITLE,
+      y_axis_title=constants.HIST_COVERAGE_Y_TITLE,
+      bins=num_bins,
+  )
 
 
 def get_args():
-    """
+  """
       Returns needed arguments specifying dataset and number of histogram
       bins for manual use.
 
@@ -140,24 +131,25 @@ def get_args():
       Returns:
           argparse.Namespace object with specified args.
       """
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--dataset-name",
-        required=True,
-        help="Name of dataset (look under {}/).".format(constants.DATASET_DIR),
-    )
-    parser.add_argument("--num-bins", help="Number of bins in histogram.", type=int)
-    return parser.parse_args()
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+      "--dataset-name",
+      required=True,
+      help="Name of dataset (look under {}/).".format(constants.DATASET_DIR),
+  )
+  parser.add_argument(
+      "--num-bins", help="Number of bins in histogram.", type=int)
+  return parser.parse_args()
 
 
 def main():
-    """
+  """
       Plots distribution of proportions of covered branches
       across all inputs in dataset.
       """
-    args = get_args()
-    count_covered_branches_from(args.dataset_name, args.num_bins)
+  args = get_args()
+  count_covered_branches_from(args.dataset_name, args.num_bins)
 
 
 if __name__ == "__main__":
-    main()
+  main()

@@ -27,111 +27,103 @@ from tests.test_libs import test_utils
 
 @test_utils.with_cloud_emulators("datastore")
 class BotsTest(unittest.TestCase):
-    """Jobs tests."""
+  """Jobs tests."""
 
-    def setUp(self):
-        test_helpers.patch(
-            self,
-            [
-                "libs.access.has_access",
-                "libs.access.get_access",
-                "libs.gcs.prepare_blob_upload",
-            ],
-        )
-        self.mock.prepare_blob_upload.return_value = collections.namedtuple(
-            "GcsUpload", []
-        )()
-        flaskapp = flask.Flask("testflask")
-        flaskapp.add_url_rule("/", view_func=bots.JsonHandler.as_view("/"))
-        self.app = webtest.TestApp(flaskapp)
-
-    def _create_bot(
+  def setUp(self):
+    test_helpers.patch(
         self,
-        bot_name,
-        last_beat_time=datetime.datetime(2020, 1, 25, 0, 0),
-        task_payload="",
-        task_end_time=datetime.datetime(2020, 1, 25, 0, 0),
-        source_version="",
-        platform_id="",
-    ):
-        """Create a test job."""
-        bot = data_types.Heartbeat()
-        bot.bot_name = bot_name
-        bot.last_beat_time = last_beat_time
-        bot.task_payload = task_payload
-        bot.task_end_time = task_end_time
-        bot.source_version = source_version
-        bot.platform_id = platform_id
-        bot.put()
+        [
+            "libs.access.has_access",
+            "libs.access.get_access",
+            "libs.gcs.prepare_blob_upload",
+        ],
+    )
+    self.mock.prepare_blob_upload.return_value = collections.namedtuple(
+        "GcsUpload", [])()
+    flaskapp = flask.Flask("testflask")
+    flaskapp.add_url_rule("/", view_func=bots.JsonHandler.as_view("/"))
+    self.app = webtest.TestApp(flaskapp)
 
-        return bot
+  def _create_bot(
+      self,
+      bot_name,
+      last_beat_time=datetime.datetime(2020, 1, 25, 0, 0),
+      task_payload="",
+      task_end_time=datetime.datetime(2020, 1, 25, 0, 0),
+      source_version="",
+      platform_id="",
+  ):
+    """Create a test job."""
+    bot = data_types.Heartbeat()
+    bot.bot_name = bot_name
+    bot.last_beat_time = last_beat_time
+    bot.task_payload = task_payload
+    bot.task_end_time = task_end_time
+    bot.source_version = source_version
+    bot.platform_id = platform_id
+    bot.put()
 
-    def test_pagination(self):
-        """Test bots pagination and post method."""
-        self.mock.has_access.return_value = True
-        expected_items = {1: [], 2: [], 3: []}
+    return bot
 
-        for bot_num, bot_suffix in enumerate(string.ascii_lowercase):
-            bot_name = "test_bot_" + bot_suffix
-            bot = self._create_bot(bot_name=bot_name)
-            expected_items[(bot_num // bots.PAGE_SIZE) + 1].append(bot.bot_name)
+  def test_pagination(self):
+    """Test bots pagination and post method."""
+    self.mock.has_access.return_value = True
+    expected_items = {1: [], 2: [], 3: []}
 
-        resp = self.app.post_json("/", {"page": 1})
-        self.assertListEqual(
-            expected_items[1], [item["bot_name"] for item in resp.json["items"]]
-        )
+    for bot_num, bot_suffix in enumerate(string.ascii_lowercase):
+      bot_name = "test_bot_" + bot_suffix
+      bot = self._create_bot(bot_name=bot_name)
+      expected_items[(bot_num // bots.PAGE_SIZE) + 1].append(bot.bot_name)
 
-        resp = self.app.post_json("/", {"page": 2})
-        self.assertListEqual(
-            expected_items[2], [item["bot_name"] for item in resp.json["items"]]
-        )
+    resp = self.app.post_json("/", {"page": 1})
+    self.assertListEqual(expected_items[1],
+                         [item["bot_name"] for item in resp.json["items"]])
 
-        resp = self.app.post_json("/", {"page": 3})
-        self.assertListEqual(
-            expected_items[3], [item["bot_name"] for item in resp.json["items"]]
-        )
+    resp = self.app.post_json("/", {"page": 2})
+    self.assertListEqual(expected_items[2],
+                         [item["bot_name"] for item in resp.json["items"]])
 
-        resp = self.app.post_json("/", {"page": 4})
-        self.assertListEqual([], [item["bot_name"] for item in resp.json["items"]])
+    resp = self.app.post_json("/", {"page": 3})
+    self.assertListEqual(expected_items[3],
+                         [item["bot_name"] for item in resp.json["items"]])
 
-    def test_search(self):
-        """Test bots search."""
-        self.mock.has_access.return_value = True
+    resp = self.app.post_json("/", {"page": 4})
+    self.assertListEqual([], [item["bot_name"] for item in resp.json["items"]])
 
-        bot_a = self._create_bot(bot_name="test_bot_a", task_payload="pay_x")
-        bot_b = self._create_bot(bot_name="test_bot_b", task_payload="pay_y")
+  def test_search(self):
+    """Test bots search."""
+    self.mock.has_access.return_value = True
 
-        resp = self.app.post_json("/", {"q": "a"})
-        self.assertListEqual(
-            [bot_a.bot_name], [item["bot_name"] for item in resp.json["items"]]
-        )
+    bot_a = self._create_bot(bot_name="test_bot_a", task_payload="pay_x")
+    bot_b = self._create_bot(bot_name="test_bot_b", task_payload="pay_y")
 
-        resp = self.app.post_json("/", {"q": "b"})
-        self.assertListEqual(
-            [bot_b.bot_name], [item["bot_name"] for item in resp.json["items"]]
-        )
+    resp = self.app.post_json("/", {"q": "a"})
+    self.assertListEqual([bot_a.bot_name],
+                         [item["bot_name"] for item in resp.json["items"]])
 
-        resp = self.app.post_json("/", {"q": "c"})
-        self.assertListEqual([], [item["bot_name"] for item in resp.json["items"]])
+    resp = self.app.post_json("/", {"q": "b"})
+    self.assertListEqual([bot_b.bot_name],
+                         [item["bot_name"] for item in resp.json["items"]])
 
-        resp = self.app.post_json("/", {"q": "bot"})
-        self.assertListEqual(
-            [bot_a.bot_name, bot_b.bot_name],
-            [item["bot_name"] for item in resp.json["items"]],
-        )
+    resp = self.app.post_json("/", {"q": "c"})
+    self.assertListEqual([], [item["bot_name"] for item in resp.json["items"]])
 
-        resp = self.app.post_json("/", {"q": "x"})
-        self.assertListEqual(
-            [bot_a.bot_name], [item["bot_name"] for item in resp.json["items"]]
-        )
+    resp = self.app.post_json("/", {"q": "bot"})
+    self.assertListEqual(
+        [bot_a.bot_name, bot_b.bot_name],
+        [item["bot_name"] for item in resp.json["items"]],
+    )
 
-        resp = self.app.post_json("/", {"q": "y"})
-        self.assertListEqual(
-            [bot_b.bot_name], [item["bot_name"] for item in resp.json["items"]]
-        )
+    resp = self.app.post_json("/", {"q": "x"})
+    self.assertListEqual([bot_a.bot_name],
+                         [item["bot_name"] for item in resp.json["items"]])
 
-        resp = self.app.post_json("/", {"q": "pay"})
-        self.assertListEqual(
-            [bot_a.bot_name, bot_b.bot_name],
-            [item["bot_name"] for item in resp.json["items"]],
-        )
+    resp = self.app.post_json("/", {"q": "y"})
+    self.assertListEqual([bot_b.bot_name],
+                         [item["bot_name"] for item in resp.json["items"]])
+
+    resp = self.app.post_json("/", {"q": "pay"})
+    self.assertListEqual(
+        [bot_a.bot_name, bot_b.bot_name],
+        [item["bot_name"] for item in resp.json["items"]],
+    )

@@ -20,26 +20,25 @@ from libs import helpers
 
 
 def mark(testcase):
-    """Mark the testcase as fixed."""
-    testcase.fixed = "Yes"
-    testcase.open = False
-    testcase.put()
+  """Mark the testcase as fixed."""
+  testcase.fixed = "Yes"
+  testcase.open = False
+  testcase.put()
 
-    helpers.log(
-        "Marked testcase %s as fixed" % testcase.key.id(), helpers.MODIFY_OPERATION
-    )
-    return testcase
+  helpers.log("Marked testcase %s as fixed" % testcase.key.id(),
+              helpers.MODIFY_OPERATION)
+  return testcase
 
 
 class Handler(base_handler.Handler):
-    """Handler that marks a testcase as fixed."""
+  """Handler that marks a testcase as fixed."""
 
-    @handler.post(handler.JSON, handler.JSON)
-    @handler.require_csrf_token
-    @handler.check_admin_access
-    def post(self):
-        """Mark the testcase as fixed."""
-        testcase_id = request.get("testcaseId")
-        testcase = helpers.get_testcase(testcase_id)
-        mark(testcase)
-        return self.render_json(show.get_testcase_detail(testcase))
+  @handler.post(handler.JSON, handler.JSON)
+  @handler.require_csrf_token
+  @handler.check_admin_access
+  def post(self):
+    """Mark the testcase as fixed."""
+    testcase_id = request.get("testcaseId")
+    testcase = helpers.get_testcase(testcase_id)
+    mark(testcase)
+    return self.render_json(show.get_testcase_detail(testcase))

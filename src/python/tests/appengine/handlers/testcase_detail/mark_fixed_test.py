@@ -25,44 +25,44 @@ from tests.test_libs import test_utils
 
 @test_utils.with_cloud_emulators("datastore")
 class HandlerTest(unittest.TestCase):
-    """Test Handler."""
+  """Test Handler."""
 
-    def setUp(self):
-        test_helpers.patch(
-            self,
-            [
-                "handlers.testcase_detail.show.get_testcase_detail",
-                "libs.auth.get_current_user",
-                "libs.auth.is_current_user_admin",
-            ],
-        )
-        flaskapp = flask.Flask("testflask")
-        flaskapp.add_url_rule("/", view_func=mark_fixed.Handler.as_view("/"))
-        self.app = webtest.TestApp(flaskapp)
-        self.testcase = data_types.Testcase()
-        self.testcase.put()
+  def setUp(self):
+    test_helpers.patch(
+        self,
+        [
+            "handlers.testcase_detail.show.get_testcase_detail",
+            "libs.auth.get_current_user",
+            "libs.auth.is_current_user_admin",
+        ],
+    )
+    flaskapp = flask.Flask("testflask")
+    flaskapp.add_url_rule("/", view_func=mark_fixed.Handler.as_view("/"))
+    self.app = webtest.TestApp(flaskapp)
+    self.testcase = data_types.Testcase()
+    self.testcase.put()
 
-        self.mock.get_testcase_detail.return_value = {"testcase": "yes"}
-        self.mock.is_current_user_admin = True
-        self.mock.get_current_user().email = "test@user.com"
+    self.mock.get_testcase_detail.return_value = {"testcase": "yes"}
+    self.mock.is_current_user_admin = True
+    self.mock.get_current_user().email = "test@user.com"
 
-    def test_succeed(self):
-        """Mark a testcase as fixed."""
-        self.testcase.fixed = "NA"
-        self.testcase.open = True
-        self.testcase.put()
+  def test_succeed(self):
+    """Mark a testcase as fixed."""
+    self.testcase.fixed = "NA"
+    self.testcase.open = True
+    self.testcase.put()
 
-        resp = self.app.post_json(
-            "/",
-            {
-                "testcaseId": self.testcase.key.id(),
-                "csrf_token": form.generate_csrf_token(),
-            },
-        )
+    resp = self.app.post_json(
+        "/",
+        {
+            "testcaseId": self.testcase.key.id(),
+            "csrf_token": form.generate_csrf_token(),
+        },
+    )
 
-        self.assertEqual(200, resp.status_int)
-        self.assertEqual("yes", resp.json["testcase"])
+    self.assertEqual(200, resp.status_int)
+    self.assertEqual("yes", resp.json["testcase"])
 
-        testcase = self.testcase.key.get()
-        self.assertEqual("Yes", testcase.fixed)
-        self.assertFalse(testcase.open)
+    testcase = self.testcase.key.get()
+    self.assertEqual("Yes", testcase.fixed)
+    self.assertFalse(testcase.open)

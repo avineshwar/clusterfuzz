@@ -22,32 +22,32 @@ from tests.test_libs import test_utils
 
 @test_utils.with_cloud_emulators("datastore")
 class PrepareTestcaseDictTest(unittest.TestCase):
-    """Tests for _prepare_testcase_dict."""
+  """Tests for _prepare_testcase_dict."""
 
-    def setUp(self):
-        job = data_types.Job(name="test_job", environment_string="X = 1\nY = 2\n")
-        job.put()
+  def setUp(self):
+    job = data_types.Job(name="test_job", environment_string="X = 1\nY = 2\n")
+    job.put()
 
-        testcase = data_types.Testcase()
-        testcase.status = "Pending"
-        testcase.open = True
-        testcase.job_type = "test_job"
-        testcase.put()
+    testcase = data_types.Testcase()
+    testcase.status = "Pending"
+    testcase.open = True
+    testcase.job_type = "test_job"
+    testcase.put()
 
-        self.testcase = testcase
+    self.testcase = testcase
 
-    def test_expected_properties_included(self):
-        """Ensure that a few of the common test case properties are included."""
-        result = testcase_info._prepare_testcase_dict(self.testcase)
-        self.assertEqual(result["status"], "Pending")
-        self.assertEqual(result["open"], True)
-        self.assertEqual(result["group_id"], 0)
+  def test_expected_properties_included(self):
+    """Ensure that a few of the common test case properties are included."""
+    result = testcase_info._prepare_testcase_dict(self.testcase)
+    self.assertEqual(result["status"], "Pending")
+    self.assertEqual(result["open"], True)
+    self.assertEqual(result["group_id"], 0)
 
-    def test_job_included(self):
-        """Ensure that the job definition has been included."""
-        result = testcase_info._prepare_testcase_dict(self.testcase)
-        job_definition = result["job_definition"]
+  def test_job_included(self):
+    """Ensure that the job definition has been included."""
+    result = testcase_info._prepare_testcase_dict(self.testcase)
+    job_definition = result["job_definition"]
 
-        # Order is not necessarily preserved.
-        self.assertIn("X = 1\n", job_definition)
-        self.assertIn("Y = 2\n", job_definition)
+    # Order is not necessarily preserved.
+    self.assertIn("X = 1\n", job_definition)
+    self.assertIn("Y = 2\n", job_definition)

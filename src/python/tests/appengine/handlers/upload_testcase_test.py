@@ -23,48 +23,48 @@ from tests.test_libs import test_utils
 
 @test_utils.with_cloud_emulators("datastore")
 class FindFuzzTargetTest(unittest.TestCase):
-    """Tests for find_fuzz_target."""
+  """Tests for find_fuzz_target."""
 
-    def setUp(self):
-        test_helpers.patch_environ(self)
+  def setUp(self):
+    test_helpers.patch_environ(self)
 
-        data_types.FuzzTarget(
-            engine="libFuzzer", project="test-project", binary="binary"
-        ).put()
+    data_types.FuzzTarget(
+        engine="libFuzzer", project="test-project", binary="binary").put()
 
-        data_types.FuzzTarget(engine="libFuzzer", project="proj", binary="binary").put()
+    data_types.FuzzTarget(
+        engine="libFuzzer", project="proj", binary="binary").put()
 
-    def test_without_project_prefix(self):
-        """Test find_fuzz_target with a target_name that isn't prefixed with the
+  def test_without_project_prefix(self):
+    """Test find_fuzz_target with a target_name that isn't prefixed with the
         project."""
-        data_types.Job(name="job", environment_string="PROJECT_NAME = proj\n").put()
-        self.assertEqual(
-            ("libFuzzer_proj_binary", "binary"),
-            upload_testcase.find_fuzz_target("libFuzzer", "binary", "job"),
-        )
+    data_types.Job(name="job", environment_string="PROJECT_NAME = proj\n").put()
+    self.assertEqual(
+        ("libFuzzer_proj_binary", "binary"),
+        upload_testcase.find_fuzz_target("libFuzzer", "binary", "job"),
+    )
 
-    def test_with_project_prefix(self):
-        """Test find_fuzz_target with a target_name that is prefixed with the
+  def test_with_project_prefix(self):
+    """Test find_fuzz_target with a target_name that is prefixed with the
         project."""
-        data_types.Job(name="job", environment_string="PROJECT_NAME = proj\n").put()
-        self.assertEqual(
-            ("libFuzzer_proj_binary", "binary"),
-            upload_testcase.find_fuzz_target("libFuzzer", "proj_binary", "job"),
-        )
+    data_types.Job(name="job", environment_string="PROJECT_NAME = proj\n").put()
+    self.assertEqual(
+        ("libFuzzer_proj_binary", "binary"),
+        upload_testcase.find_fuzz_target("libFuzzer", "proj_binary", "job"),
+    )
 
-    def test_with_main_project(self):
-        """Test find_fuzz_target with a target in the main project."""
-        data_types.Job(name="job", environment_string="").put()
-        self.assertEqual(
-            ("libFuzzer_binary", "binary"),
-            upload_testcase.find_fuzz_target("libFuzzer", "binary", "job"),
-        )
+  def test_with_main_project(self):
+    """Test find_fuzz_target with a target in the main project."""
+    data_types.Job(name="job", environment_string="").put()
+    self.assertEqual(
+        ("libFuzzer_binary", "binary"),
+        upload_testcase.find_fuzz_target("libFuzzer", "binary", "job"),
+    )
 
-    def test_not_found(self):
-        """Test target not found."""
-        data_types.Job(name="job", environment_string="").put()
-        with self.assertRaises(helpers.EarlyExitException):
-            self.assertEqual(
-                (None, None),
-                upload_testcase.find_fuzz_target("libFuzzer", "notfound", "job"),
-            )
+  def test_not_found(self):
+    """Test target not found."""
+    data_types.Job(name="job", environment_string="").put()
+    with self.assertRaises(helpers.EarlyExitException):
+      self.assertEqual(
+          (None, None),
+          upload_testcase.find_fuzz_target("libFuzzer", "notfound", "job"),
+      )

@@ -42,7 +42,7 @@ STDERR_FILENAME_ENV_VAR = "AFL_DRIVER_STDERR_DUPLICATE_FILENAME"
 
 CLOSE_FD_MASK_ENV_VAR = "AFL_DRIVER_CLOSE_FD_MASK"
 
-MAX_FILE_BYTES = 2 ** 20  # 1 MB
+MAX_FILE_BYTES = 2**20  # 1 MB
 
 # This should be as high as possible, otherwise AFL will restart the binary too
 # often to be competitive with pure libFuzzer. 2147483647 is the maximum signed

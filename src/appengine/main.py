@@ -24,25 +24,25 @@ sys.path.append("third_party")
 
 config_modules_path = os.path.join("config", "modules")
 if os.path.exists(config_modules_path):
-    sys.path.append(config_modules_path)
+  sys.path.append(config_modules_path)
 
 gae_env = os.environ.get("GAE_ENV")
 if gae_env:
-    import pkg_resources
+  import pkg_resources
 
-    importlib.reload(pkg_resources)
+  importlib.reload(pkg_resources)
 
-    if gae_env != "dev":
-        import firebase_admin
+  if gae_env != "dev":
+    import firebase_admin
 
-        firebase_admin.initialize_app()
+    firebase_admin.initialize_app()
 
 try:
-    # Run any module initialization code.
-    import module_init
+  # Run any module initialization code.
+  import module_init
 
-    module_init.appengine()
+  module_init.appengine()
 except ImportError:
-    pass
+  pass
 
 app = server.app

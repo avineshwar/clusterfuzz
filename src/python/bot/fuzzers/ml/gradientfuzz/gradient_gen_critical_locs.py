@@ -31,7 +31,7 @@ import bot.fuzzers.ml.gradientfuzz.utils as utils
 
 @tf.function
 def get_input_grads(model, input_tensor, is_rnn):
-    """
+  """
       Computes partial derivatives with respect to input over ALL output
           components.
 
@@ -48,19 +48,17 @@ def get_input_grads(model, input_tensor, is_rnn):
           | g_{num_output_locs, 1} ... g_{num_branches, input_len} |
           ----------------------------------------------------------
       """
-    use_pfor = not is_rnn
-    with tf.GradientTape(watch_accessed_variables=False) as gradient_tape:
-        gradient_tape.watch(input_tensor)
-        model_outputs = model(input_tensor, training=False)
-    return tf.squeeze(
-        gradient_tape.jacobian(
-            model_outputs, input_tensor, experimental_use_pfor=use_pfor
-        )
-    )
+  use_pfor = not is_rnn
+  with tf.GradientTape(watch_accessed_variables=False) as gradient_tape:
+    gradient_tape.watch(input_tensor)
+    model_outputs = model(input_tensor, training=False)
+  return tf.squeeze(
+      gradient_tape.jacobian(
+          model_outputs, input_tensor, experimental_use_pfor=use_pfor))
 
 
 def generate_all_critical_locs(args, model, config, metadata_dict):
-    """
+  """
       Generates location files under generated/[generation-name]/gradient_locs/
       as specified by `args`, using `model`.
 
@@ -87,82 +85,70 @@ def generate_all_critical_locs(args, model, config, metadata_dict):
       Returns:
           N/A
       """
-    is_rnn = (
-        constants.MODEL_TYPE_MAP[config["architecture"]] == constants.ModelTypes.RNN
-    )
-    seed_file_paths = list(glob.glob(os.path.join(args.path_to_seeds, "*")))
-    save_dir = os.path.join(
-        constants.GENERATED_DIR, args.generation_name, constants.GRADIENTS_DIR
-    )
-    print(
-        "Computing gradients... Saving all critical location files under {}".format(
-            save_dir
-        )
-    )
-    input_length_mapping = json.load(open(args.path_to_lengths, "r"))
+  is_rnn = (
+      constants.MODEL_TYPE_MAP[config["architecture"]] ==
+      constants.ModelTypes.RNN)
+  seed_file_paths = list(glob.glob(os.path.join(args.path_to_seeds, "*")))
+  save_dir = os.path.join(constants.GENERATED_DIR, args.generation_name,
+                          constants.GRADIENTS_DIR)
+  print("Computing gradients... Saving all critical location files under {}"
+        .format(save_dir))
+  input_length_mapping = json.load(open(args.path_to_lengths, "r"))
 
-    for seed_file_path in tqdm.tqdm(seed_file_paths):
+  for seed_file_path in tqdm.tqdm(seed_file_paths):
 
-        # Grab save path for generated gradient location files.
-        seed_file_name = os.path.basename(seed_file_path)
-        save_path = os.path.join(save_dir, seed_file_name)
-        input_length = input_length_mapping[seed_file_name]
+    # Grab save path for generated gradient location files.
+    seed_file_name = os.path.basename(seed_file_path)
+    save_path = os.path.join(save_dir, seed_file_name)
+    input_length = input_length_mapping[seed_file_name]
 
-        # Load seed file and get number of output locations to look at.
-        seed_file_numpy = np.load(seed_file_path)
-        num_output_locs = min(args.num_output_locs, len(seed_file_numpy))
+    # Load seed file and get number of output locations to look at.
+    seed_file_numpy = np.load(seed_file_path)
+    num_output_locs = min(args.num_output_locs, len(seed_file_numpy))
 
-        # TODO(ryancao): Implement other output-picking methods. (Not just a limited
-        # subset, e.g. non-coverage! We can even add gradients from multiple
-        # [uncovered] branches!)
-        chosen_branches = None
-        if args.gradient_gen_method == constants.NEUZZ_RANDOM_BRANCHES:
-            chosen_branches = np.random.choice(
-                range(config["output_dim"]), size=num_output_locs, replace=False
-            )
+    # TODO(ryancao): Implement other output-picking methods. (Not just a limited
+    # subset, e.g. non-coverage! We can even add gradients from multiple
+    # [uncovered] branches!)
+    chosen_branches = None
+    if args.gradient_gen_method == constants.NEUZZ_RANDOM_BRANCHES:
+      chosen_branches = np.random.choice(
+          range(config["output_dim"]), size=num_output_locs, replace=False)
 
-        # Save which branches were chosen for each file under metadata.
-        metadata_dict["files_to_branches"][seed_file_name] = list(
-            int(x) for x in chosen_branches
-        )
+    # Save which branches were chosen for each file under metadata.
+    metadata_dict["files_to_branches"][seed_file_name] = list(
+        int(x) for x in chosen_branches)
 
-        # Compute ALL gradients and record specified ones.
-        # Add extra input_len dimension to seed file if using RNN-style model.
-        processed_seed_file_numpy = (
-            np.expand_dims(seed_file_numpy, -1) if is_rnn else seed_file_numpy
-        )
-        input_tensor = tf.constant(
-            np.expand_dims(processed_seed_file_numpy, axis=0), dtype=tf.float32
-        )
-        all_gradients = get_input_grads(model, input_tensor, is_rnn)
+    # Compute ALL gradients and record specified ones.
+    # Add extra input_len dimension to seed file if using RNN-style model.
+    processed_seed_file_numpy = (
+        np.expand_dims(seed_file_numpy, -1) if is_rnn else seed_file_numpy)
+    input_tensor = tf.constant(
+        np.expand_dims(processed_seed_file_numpy, axis=0), dtype=tf.float32)
+    all_gradients = get_input_grads(model, input_tensor, is_rnn)
 
-        # Select only the chosen branches, and keep only the top-k indices
-        # within the actual original input length, in order.
-        selected_gradients = all_gradients.numpy()[chosen_branches, :]
-        all_gradient_locs = np.flip(
-            np.argsort(np.abs(selected_gradients), axis=1), axis=1
-        )
-        all_keeper_locs = []
-        for gradients_per_branch in all_gradient_locs:
-            all_valid_locs = gradients_per_branch[gradients_per_branch < input_length]
-            padding = np.zeros(len(gradients_per_branch) - len(all_valid_locs))
-            keeper_locs = np.concatenate((all_valid_locs, padding))[: args.top_k]
-            all_keeper_locs.append(keeper_locs)
-        all_keeper_locs = np.stack(all_keeper_locs)
+    # Select only the chosen branches, and keep only the top-k indices
+    # within the actual original input length, in order.
+    selected_gradients = all_gradients.numpy()[chosen_branches, :]
+    all_gradient_locs = np.flip(
+        np.argsort(np.abs(selected_gradients), axis=1), axis=1)
+    all_keeper_locs = []
+    for gradients_per_branch in all_gradient_locs:
+      all_valid_locs = gradients_per_branch[gradients_per_branch < input_length]
+      padding = np.zeros(len(gradients_per_branch) - len(all_valid_locs))
+      keeper_locs = np.concatenate((all_valid_locs, padding))[:args.top_k]
+      all_keeper_locs.append(keeper_locs)
+    all_keeper_locs = np.stack(all_keeper_locs)
 
-        np.save(save_path, all_keeper_locs)
+    np.save(save_path, all_keeper_locs)
 
-    metadata_save_path = os.path.join(save_dir, constants.METADATA_FILENAME)
-    print(
-        "Finished computing gradients + locations! Saving metadata to {}...".format(
-            metadata_save_path
-        )
-    )
-    json.dump(metadata_dict, open(metadata_save_path, "w"))
+  metadata_save_path = os.path.join(save_dir, constants.METADATA_FILENAME)
+  print("Finished computing gradients + locations! Saving metadata to {}..."
+        .format(metadata_save_path))
+  json.dump(metadata_dict, open(metadata_save_path, "w"))
 
 
 def main():
-    """
+  """
       Given a specified corpus directory and pre-trained neural net, generates
       critical locations (ripe for mutation) for each seed file in the corpus
       directory as specified by the pre-trained neural net's gradients.
@@ -173,49 +159,44 @@ def main():
       Returns:
           N/A (generated files saved to generated/[generation-name]/gradients)
       """
-    # Gets args and creates directory to save generated critical indices.
-    args = opts.get_gradient_gen_critical_locs_args()
-    generation_dir = os.path.join(constants.GENERATED_DIR, args.generation_name)
-    if os.path.isdir(generation_dir):
-        raise RuntimeError(
-            "{} already exists as a generated directory.".format(generation_dir)
-        )
-    os.makedirs(os.path.join(generation_dir, constants.GRADIENTS_DIR))
+  # Gets args and creates directory to save generated critical indices.
+  args = opts.get_gradient_gen_critical_locs_args()
+  generation_dir = os.path.join(constants.GENERATED_DIR, args.generation_name)
+  if os.path.isdir(generation_dir):
+    raise RuntimeError(
+        "{} already exists as a generated directory.".format(generation_dir))
+  os.makedirs(os.path.join(generation_dir, constants.GRADIENTS_DIR))
 
-    # Load pretrained model config.
-    if not utils.run_exists(args.run_name):
-        raise RuntimeError(
-            "That run does not exist. Check under {}/".format(constants.MODEL_DIR)
-        )
+  # Load pretrained model config.
+  if not utils.run_exists(args.run_name):
+    raise RuntimeError("That run does not exist. Check under {}/".format(
+        constants.MODEL_DIR))
 
-    config_filepath = os.path.join(
-        utils.get_full_path(args.run_name), constants.CONFIG_FILENAME
-    )
-    config = json.load(open(config_filepath, "r"))
-    print("Successfully loaded model from config {}".format(config_filepath))
+  config_filepath = os.path.join(
+      utils.get_full_path(args.run_name), constants.CONFIG_FILENAME)
+  config = json.load(open(config_filepath, "r"))
+  print("Successfully loaded model from config {}".format(config_filepath))
 
-    # Load model from pretrained weights.
-    latest_filename = tf.train.latest_checkpoint(
-        utils.get_full_path(config["run_name"])
-    )
-    print(
-        'Loading "{}" model from {}...'.format(config["architecture"], latest_filename)
-    )
-    model = models.make_model_from_layer(
-        constants.ARCHITECTURE_MAP[config["architecture"]],
-        config["output_dim"],
-        config["input_shape"],
-        hidden_layer_dim=config["num_hidden"],
-    )
-    model.load_weights(latest_filename).expect_partial()
-    model_utils.print_model_summary(model, config, config["input_shape"])
+  # Load model from pretrained weights.
+  latest_filename = tf.train.latest_checkpoint(
+      utils.get_full_path(config["run_name"]))
+  print('Loading "{}" model from {}...'.format(config["architecture"],
+                                               latest_filename))
+  model = models.make_model_from_layer(
+      constants.ARCHITECTURE_MAP[config["architecture"]],
+      config["output_dim"],
+      config["input_shape"],
+      hidden_layer_dim=config["num_hidden"],
+  )
+  model.load_weights(latest_filename).expect_partial()
+  model_utils.print_model_summary(model, config, config["input_shape"])
 
-    # Generate gradients from given args!
-    if opts.check_gradient_gen_critical_locs_args(args):
-        metadata_dict = vars(args)
-        metadata_dict["files_to_branches"] = {}
-        generate_all_critical_locs(args, model, config, metadata_dict)
+  # Generate gradients from given args!
+  if opts.check_gradient_gen_critical_locs_args(args):
+    metadata_dict = vars(args)
+    metadata_dict["files_to_branches"] = {}
+    generate_all_critical_locs(args, model, config, metadata_dict)
 
 
 if __name__ == "__main__":
-    main()
+  main()

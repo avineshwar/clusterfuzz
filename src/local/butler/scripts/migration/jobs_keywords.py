@@ -17,8 +17,8 @@ from google.cloud import ndb
 
 
 def execute(args):
-    """Build keywords for jobs."""
-    jobs = list(data_types.Job.query())
-    if args.non_dry_run:
-        ndb.put_multi(jobs)
-        print("Done building keywords for jobs.")
+  """Build keywords for jobs."""
+  jobs = list(data_types.Job.query())
+  if args.non_dry_run:
+    ndb.put_multi(jobs)
+    print("Done building keywords for jobs.")

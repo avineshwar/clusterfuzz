@@ -46,78 +46,81 @@ platform/tools/repohooks u'233b8010f7f5e3c544b47c68ffae781860156945'
 
 # pylint: disable=unused-argument
 def _mock_symbolize_stacktrace(stacktrace, enable_inline_frames=True):
-    """No-op mocked version of symbolize_stacktrace."""
-    return stacktrace
+  """No-op mocked version of symbolize_stacktrace."""
+  return stacktrace
 
 
-def _mock_fetch_artifact_get(
-    bid, target, regex, output_directory, output_filename_override=None
-):
-    if output_filename_override:
-        artifact_path = os.path.join(output_directory, output_filename_override)
-        with open(artifact_path, "w") as artifact_file:
-            artifact_file.write(KERNEL_REPRO)
+def _mock_fetch_artifact_get(bid,
+                             target,
+                             regex,
+                             output_directory,
+                             output_filename_override=None):
+  if output_filename_override:
+    artifact_path = os.path.join(output_directory, output_filename_override)
+    with open(artifact_path, "w") as artifact_file:
+      artifact_file.write(KERNEL_REPRO)
 
 
 # pylint: enable=unused-argument
 
 
 class AndroidStackAnalyzerTest(unittest.TestCase):
-    """Android specific Stack analyzer tests."""
+  """Android specific Stack analyzer tests."""
 
-    def setUp(self):
-        test_helpers.patch_environ(self)
-        test_helpers.patch(
-            self,
-            [
-                "crash_analysis.stack_parsing.stack_symbolizer.symbolize_stacktrace",
-                "metrics.logs.log_error",
-            ],
-        )
-        os.environ["JOB_NAME"] = TEST_JOB_NAME
+  def setUp(self):
+    test_helpers.patch_environ(self)
+    test_helpers.patch(
+        self,
+        [
+            "crash_analysis.stack_parsing.stack_symbolizer.symbolize_stacktrace",
+            "metrics.logs.log_error",
+        ],
+    )
+    os.environ["JOB_NAME"] = TEST_JOB_NAME
 
-        self.mock.symbolize_stacktrace.side_effect = _mock_symbolize_stacktrace
+    self.mock.symbolize_stacktrace.side_effect = _mock_symbolize_stacktrace
 
-    def _mock_read_data_from_file(self, file_path, eval_data=True, default=None):
-        if file_path.endswith("repo.prop"):
-            return self._real_read_data_from_file(file_path, eval_data, default)
+  def _mock_read_data_from_file(self, file_path, eval_data=True, default=None):
+    if file_path.endswith("repo.prop"):
+      return self._real_read_data_from_file(file_path, eval_data, default)
 
-        return None
+    return None
 
-    def _read_test_data(self, name):
-        """Helper function to read test data."""
-        with open(os.path.join(DATA_DIRECTORY, name)) as handle:
-            return handle.read()
+  def _read_test_data(self, name):
+    """Helper function to read test data."""
+    with open(os.path.join(DATA_DIRECTORY, name)) as handle:
+      return handle.read()
 
-    def test_syzkaller_kasan_android_with_env(self):
-        """Test syzkaller kasan."""
-        environment.set_value("OS_OVERRIDE", "ANDROID")
-        environment.set_bot_environment()
-        self._real_read_data_from_file = utils.read_data_from_file
-        test_helpers.patch(
-            self,
-            [
-                "platforms.android.fetch_artifact.get",
-                "platforms.android.kernel_utils.get_kernel_hash_and_build_id",
-                "platforms.android.kernel_utils.get_kernel_name",
-                "platforms.android.settings.get_product_brand",
-                "google_cloud_utils.storage.get_file_from_cache_if_exists",
-                "google_cloud_utils.storage.store_file_in_cache",
-                "base.utils.write_data_to_file",
-                "base.utils.read_data_from_file",
-            ],
-        )
-        self.mock.get.side_effect = _mock_fetch_artifact_get
-        self.mock.get_kernel_hash_and_build_id.return_value = "40e9b2ff3a2", "12345"
-        self.mock.get_kernel_name.return_value = "device_kernel"
-        self.mock.get_product_brand.return_value = "google"
-        self.mock.get_file_from_cache_if_exists.return_value = False
-        self.mock.store_file_in_cache.return_value = None
-        self.mock.write_data_to_file = None
-        self.mock.read_data_from_file.side_effect = self._mock_read_data_from_file
+  def test_syzkaller_kasan_android_with_env(self):
+    """Test syzkaller kasan."""
+    environment.set_value("OS_OVERRIDE", "ANDROID")
+    environment.set_bot_environment()
+    self._real_read_data_from_file = utils.read_data_from_file
+    test_helpers.patch(
+        self,
+        [
+            "platforms.android.fetch_artifact.get",
+            "platforms.android.kernel_utils.get_kernel_hash_and_build_id",
+            "platforms.android.kernel_utils.get_kernel_name",
+            "platforms.android.settings.get_product_brand",
+            "google_cloud_utils.storage.get_file_from_cache_if_exists",
+            "google_cloud_utils.storage.store_file_in_cache",
+            "base.utils.write_data_to_file",
+            "base.utils.read_data_from_file",
+        ],
+    )
+    self.mock.get.side_effect = _mock_fetch_artifact_get
+    self.mock.get_kernel_hash_and_build_id.return_value = "40e9b2ff3a2", "12345"
+    self.mock.get_kernel_name.return_value = "device_kernel"
+    self.mock.get_product_brand.return_value = "google"
+    self.mock.get_file_from_cache_if_exists.return_value = False
+    self.mock.store_file_in_cache.return_value = None
+    self.mock.write_data_to_file = None
+    self.mock.read_data_from_file.side_effect = self._mock_read_data_from_file
 
-        data = self._read_test_data("kasan_syzkaller_android.txt")
-        expected_stack = self._read_test_data("kasan_syzkaller_android_linkified.txt")
-        actual_state = stack_analyzer.get_crash_data(data)
+    data = self._read_test_data("kasan_syzkaller_android.txt")
+    expected_stack = self._read_test_data(
+        "kasan_syzkaller_android_linkified.txt")
+    actual_state = stack_analyzer.get_crash_data(data)
 
-        self.assertEqual(actual_state.crash_stacktrace, expected_stack)
+    self.assertEqual(actual_state.crash_stacktrace, expected_stack)

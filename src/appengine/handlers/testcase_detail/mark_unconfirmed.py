@@ -20,31 +20,31 @@ from libs import helpers
 
 
 def mark(testcase):
-    """Mark the testcase as unconfirmed."""
-    testcase.one_time_crasher_flag = True
-    if not testcase.fixed:
-        testcase.fixed = "NA"
-    if not testcase.regression:
-        testcase.regression = "NA"
-    if not testcase.minimized_keys:
-        testcase.minimized_keys = "NA"
-    testcase.put()
+  """Mark the testcase as unconfirmed."""
+  testcase.one_time_crasher_flag = True
+  if not testcase.fixed:
+    testcase.fixed = "NA"
+  if not testcase.regression:
+    testcase.regression = "NA"
+  if not testcase.minimized_keys:
+    testcase.minimized_keys = "NA"
+  testcase.put()
 
-    helpers.log(
-        "Marked testcase %s as unconfirmed" % testcase.key.id(),
-        helpers.MODIFY_OPERATION,
-    )
+  helpers.log(
+      "Marked testcase %s as unconfirmed" % testcase.key.id(),
+      helpers.MODIFY_OPERATION,
+  )
 
 
 class Handler(base_handler.Handler):
-    """Handler that marks a testcase as unconfirmed."""
+  """Handler that marks a testcase as unconfirmed."""
 
-    @handler.post(handler.JSON, handler.JSON)
-    @handler.require_csrf_token
-    @handler.check_admin_access
-    def post(self):
-        """Mark the testcase as unconfirmed."""
-        testcase_id = request.get("testcaseId")
-        testcase = helpers.get_testcase(testcase_id)
-        mark(testcase)
-        return self.render_json(show.get_testcase_detail(testcase))
+  @handler.post(handler.JSON, handler.JSON)
+  @handler.require_csrf_token
+  @handler.check_admin_access
+  def post(self):
+    """Mark the testcase as unconfirmed."""
+    testcase_id = request.get("testcaseId")
+    testcase = helpers.get_testcase(testcase_id)
+    mark(testcase)
+    return self.render_json(show.get_testcase_detail(testcase))

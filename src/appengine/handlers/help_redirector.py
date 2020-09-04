@@ -20,24 +20,24 @@ DEFAULT_BUG_REPORT_URL = "https://github.com/google/clusterfuzz/issues"
 
 
 class DocumentationHandler(base_handler.Handler):
-    """Redirect to documentation."""
+  """Redirect to documentation."""
 
-    def get(self):
-        """Get the HTML page."""
-        documentation_url = db_config.get_value("documentation_url")
-        if not documentation_url:
-            documentation_url = DEFAULT_DOCUMENTATION_URL
+  def get(self):
+    """Get the HTML page."""
+    documentation_url = db_config.get_value("documentation_url")
+    if not documentation_url:
+      documentation_url = DEFAULT_DOCUMENTATION_URL
 
-        return self.redirect(documentation_url)
+    return self.redirect(documentation_url)
 
 
 class ReportBugHandler(base_handler.Handler):
-    """Redirect to issue tracker for reporting bug."""
+  """Redirect to issue tracker for reporting bug."""
 
-    def get(self):
-        """Get the HTML page."""
-        bug_report_url = db_config.get_value("bug_report_url")
-        if not bug_report_url:
-            bug_report_url = DEFAULT_BUG_REPORT_URL
+  def get(self):
+    """Get the HTML page."""
+    bug_report_url = db_config.get_value("bug_report_url")
+    if not bug_report_url:
+      bug_report_url = DEFAULT_BUG_REPORT_URL
 
-        return self.redirect(bug_report_url)
+    return self.redirect(bug_report_url)

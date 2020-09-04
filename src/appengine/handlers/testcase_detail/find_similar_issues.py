@@ -20,50 +20,49 @@ from libs.issue_management import issue_tracker_utils
 
 
 class Handler(base_handler.Handler):
-    """Handler that finds similar issues."""
+  """Handler that finds similar issues."""
 
-    @staticmethod
-    def get_issues(issue_tracker, testcase, only_open):
-        """Get similar issues. It is used by self.process() and
+  @staticmethod
+  def get_issues(issue_tracker, testcase, only_open):
+    """Get similar issues. It is used by self.process() and
         handler.testcase_detail.FindSimilarIssuesHandler.get()"""
-        issues = issue_tracker_utils.get_similar_issues(
-            issue_tracker, testcase, only_open=only_open
-        )
+    issues = issue_tracker_utils.get_similar_issues(
+        issue_tracker, testcase, only_open=only_open)
 
-        items = []
-        for entry in issues:
-            items.append(
-                {
-                    "owner": entry.assignee,
-                    "reporter": entry.reporter,
-                    "status": entry.status,
-                    "title": entry.title,
-                    "id": entry.id,
-                }
-            )
+    items = []
+    for entry in issues:
+      items.append({
+          "owner": entry.assignee,
+          "reporter": entry.reporter,
+          "status": entry.status,
+          "title": entry.title,
+          "id": entry.id,
+      })
 
-        items = sorted(items, key=lambda k: k["id"])
-        return [
-            {"issue": item, "url": issue_tracker.issue_url(item["id"]),}
-            for item in items
-        ]
+    items = sorted(items, key=lambda k: k["id"])
+    return [{
+        "issue": item,
+        "url": issue_tracker.issue_url(item["id"]),
+    } for item in items]
 
-    @handler.get(handler.JSON)
-    @handler.check_admin_access_if_oss_fuzz
-    @handler.check_testcase_access
-    def get(self, testcase):
-        """Find similar issues."""
-        filter_type = request.get("filterType")
-        only_open = filter_type == "open"
+  @handler.get(handler.JSON)
+  @handler.check_admin_access_if_oss_fuzz
+  @handler.check_testcase_access
+  def get(self, testcase):
+    """Find similar issues."""
+    filter_type = request.get("filterType")
+    only_open = filter_type == "open"
 
-        issue_tracker = helpers.get_issue_tracker_for_testcase(testcase)
-        items = self.get_issues(issue_tracker, testcase, only_open)
+    issue_tracker = helpers.get_issue_tracker_for_testcase(testcase)
+    items = self.get_issues(issue_tracker, testcase, only_open)
 
-        response = {
-            "queryString": " ".join(issue_tracker_utils.get_search_keywords(testcase)),
-            "queryUrl": issue_tracker_utils.get_similar_issues_url(
-                issue_tracker, testcase, only_open
-            ),
-            "items": items,
-        }
-        return self.render_json(response)
+    response = {
+        "queryString":
+            " ".join(issue_tracker_utils.get_search_keywords(testcase)),
+        "queryUrl":
+            issue_tracker_utils.get_similar_issues_url(issue_tracker, testcase,
+                                                       only_open),
+        "items":
+            items,
+    }
+    return self.render_json(response)

@@ -14,7 +14,6 @@
 """Constants that are meaningful to AFL.
 Should not have any dependancies.
 """
-
 # AFL flags.
 DICT_FLAG = "-x"
 

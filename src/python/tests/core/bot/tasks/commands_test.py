@@ -23,7 +23,8 @@ from datastore import data_types
 from future import standard_library
 from google.cloud import ndb
 from system import environment
-from tests.test_libs import helpers, test_utils
+from tests.test_libs import helpers
+from tests.test_libs import test_utils
 
 from bot.tasks import commands
 

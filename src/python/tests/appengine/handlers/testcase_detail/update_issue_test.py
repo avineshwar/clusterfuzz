@@ -19,9 +19,12 @@ import mock
 import webtest
 from datastore import data_types
 from handlers.testcase_detail import update_issue
-from libs import access, form
-from libs.issue_management import issue_tracker_policy, monorail
-from libs.issue_management.monorail import issue, issue_tracker_manager
+from libs import access
+from libs import form
+from libs.issue_management import issue_tracker_policy
+from libs.issue_management import monorail
+from libs.issue_management.monorail import issue
+from libs.issue_management.monorail import issue_tracker_manager
 from tests.test_libs import helpers as test_helpers
 from tests.test_libs import test_utils
 

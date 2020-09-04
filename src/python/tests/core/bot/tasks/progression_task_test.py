@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for regression_task."""
-
 import json
 import os
 import unittest
@@ -20,7 +19,8 @@ import unittest
 from base import errors
 from datastore import data_types
 from pyfakefs import fake_filesystem_unittest
-from tests.test_libs import helpers, test_utils
+from tests.test_libs import helpers
+from tests.test_libs import test_utils
 
 from bot.tasks import progression_task
 

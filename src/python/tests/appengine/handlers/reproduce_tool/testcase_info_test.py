@@ -13,7 +13,6 @@
 # limitations under the License.
 """Tests for the reproduce tool testcase_info handler."""
 # pylint: disable=protected-access
-
 import unittest
 
 from datastore import data_types

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Handler that serves the testcase file."""
-
 import urllib.parse
 from builtins import str
 
@@ -20,7 +19,10 @@ from flask import request
 from future import standard_library
 from google_cloud_utils import blobs
 from handlers import base_handler
-from libs import access, gcs, handler, helpers
+from libs import access
+from libs import gcs
+from libs import handler
+from libs import helpers
 
 standard_library.install_aliases()
 

@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Fuzzer options."""
-
 import configparser
 import os
 import random
 import re
-from builtins import object, str
+from builtins import object
+from builtins import str
 
 import six
 from future import standard_library

@@ -13,7 +13,6 @@
 # limitations under the License.
 """Tests for honggfuzz engine."""
 # pylint: disable=unused-argument
-
 import os
 import shutil
 import unittest

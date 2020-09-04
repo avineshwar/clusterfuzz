@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for data_handler."""
-
 import datetime
 import json
 import os
@@ -20,10 +19,12 @@ import unittest
 
 import mock
 from config import local_config
-from datastore import data_handler, data_types
+from datastore import data_handler
+from datastore import data_types
 from pyfakefs import fake_filesystem_unittest
 from system import environment
-from tests.test_libs import helpers, test_utils
+from tests.test_libs import helpers
+from tests.test_libs import test_utils
 
 
 class SetInitialTestcaseMetadata(fake_filesystem_unittest.TestCase):

@@ -14,7 +14,6 @@
 #
 ################################################################################
 """libFuzzer Neural Smoothing - Plotting Functions."""
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 

@@ -14,7 +14,6 @@
 #
 ################################################################################
 """libFuzzer Neural Smoothing - Utility Functions."""
-
 import glob
 import json
 import os

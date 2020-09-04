@@ -14,7 +14,6 @@
 #
 ################################################################################
 """libFuzzer Neural Smoothing - Network Training."""
-
 import os
 
 import tensorflow as tf

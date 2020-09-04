@@ -22,9 +22,12 @@ import webtest
 import yaml
 from config import local_config
 from datastore import data_types
-from flask import Response, request
+from flask import request
+from flask import Response
 from handlers import base_handler
-from libs import auth, handler, helpers
+from libs import auth
+from libs import handler
+from libs import helpers
 from tests.test_libs import helpers as test_helpers
 
 _JSON_CONTENT_TYPE = "application/json"

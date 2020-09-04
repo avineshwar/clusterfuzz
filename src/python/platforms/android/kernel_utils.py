@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Android kernel util functions."""
-
 import os
 import re
 
 from base import utils
 from build_management import source_mapper
 from metrics import logs
-from platforms.android import constants, settings, symbols_downloader
+from platforms.android import constants
+from platforms.android import settings
+from platforms.android import symbols_downloader
 from system import environment
 
 # Linux version 3.18.0-g(8de8e79)-ab(1234567) where 8de8e79 is the hash and

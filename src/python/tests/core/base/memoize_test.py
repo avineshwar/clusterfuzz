@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """memoize tests."""
-
 import unittest
-from builtins import object, range
+from builtins import object
+from builtins import range
 
 import six
-from base import memoize, persistent_cache
+from base import memoize
+from base import persistent_cache
 from pyfakefs import fake_filesystem_unittest
 from system import environment
 from tests.test_libs import helpers as test_helpers

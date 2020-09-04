@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Domain verifier."""
-
 from config import local_config
 from handlers import base_handler
 from libs import helpers

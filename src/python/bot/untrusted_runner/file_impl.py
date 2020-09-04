@@ -16,12 +16,11 @@ from __future__ import absolute_import
 
 import os
 
+from protos import untrusted_runner_pb2
 from system import shell
 
-from bot.fuzzers import utils as fuzzers_utils
-from protos import untrusted_runner_pb2
-
 from . import file_utils
+from bot.fuzzers import utils as fuzzers_utils
 
 
 def create_directory(request, _):

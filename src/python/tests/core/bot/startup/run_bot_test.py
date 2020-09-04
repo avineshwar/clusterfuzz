@@ -17,7 +17,8 @@ import os
 import unittest
 
 import mock
-from metrics import monitor, monitoring_metrics
+from metrics import monitor
+from metrics import monitoring_metrics
 from tests.test_libs import helpers
 
 from bot.startup import run_bot

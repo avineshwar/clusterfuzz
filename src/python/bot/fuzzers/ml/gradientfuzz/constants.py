@@ -14,7 +14,6 @@
 #
 ################################################################################
 """libFuzzer Neural Smoothing - Globals."""
-
 import enum
 from datetime import datetime
 

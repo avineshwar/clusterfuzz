@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """handler.py provides decorators for POST and GET handlers."""
-
 import datetime
 import functools
 import json
@@ -21,10 +20,16 @@ from builtins import str
 
 import requests
 from base import utils
-from config import db_config, local_config
+from config import db_config
+from config import local_config
 from datastore import data_types
-from flask import g, make_response, request
-from libs import access, auth, csp, helpers
+from flask import g
+from flask import make_response
+from flask import request
+from libs import access
+from libs import auth
+from libs import csp
+from libs import helpers
 from system import environment
 
 JSON = "json"

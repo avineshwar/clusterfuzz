@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Utility functions for ml rnn model."""
-from __future__ import division, print_function
+from __future__ import division
+from __future__ import print_function
 
 import os
 import random
 import sys
-from builtins import chr, next, object, range, str
+from builtins import chr
+from builtins import next
+from builtins import object
+from builtins import range
+from builtins import str
 
 import numpy as np
 

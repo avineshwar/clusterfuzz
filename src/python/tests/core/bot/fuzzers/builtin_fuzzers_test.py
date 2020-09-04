@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests builtin_fuzzers."""
-
 import functools
 import os
 import unittest
@@ -22,10 +21,13 @@ import six
 from datastore import data_types
 from pyfakefs import fake_filesystem_unittest
 from system import environment
-from tests.test_libs import helpers, test_utils
+from tests.test_libs import helpers
+from tests.test_libs import test_utils
 
-from bot.fuzzers import builtin, builtin_fuzzers
-from bot.tasks import fuzz_task, setup
+from bot.fuzzers import builtin
+from bot.fuzzers import builtin_fuzzers
+from bot.tasks import fuzz_task
+from bot.tasks import setup
 
 
 class BuiltinFuzzersTest(unittest.TestCase):

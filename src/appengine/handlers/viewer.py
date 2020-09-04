@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Content viewer."""
-
 from base import utils
 from flask import request
 from google_cloud_utils import blobs
 from handlers import base_handler
-from libs import access, handler, helpers
+from libs import access
+from libs import handler
+from libs import helpers
 
 MAX_ALLOWED_CONTENT_SIZE = 10 * 1024 * 1024
 

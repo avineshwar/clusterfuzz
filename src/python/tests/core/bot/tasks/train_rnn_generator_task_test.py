@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for train_rnn_generator_task."""
-
 import os
 import tempfile
 import unittest
 
 import pyfakefs.fake_filesystem_unittest as fake_fs_unittest
-from system import new_process, shell
+from system import new_process
+from system import shell
 from tests.test_libs import helpers as test_helpers
 from tests.test_libs import test_utils
 

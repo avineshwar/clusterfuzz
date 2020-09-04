@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Build keyword attributes for every job."""
-
 from datastore import data_types
 from google.cloud import ndb
 

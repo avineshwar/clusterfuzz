@@ -18,19 +18,26 @@ import datetime
 import html
 import re
 import urllib.parse
-from builtins import object, str
+from builtins import object
+from builtins import str
 
 import six
 import yaml
-from base import external_users, memoize, utils
-from datastore import data_handler, data_types
+from base import external_users
+from base import memoize
+from base import utils
+from datastore import data_handler
+from datastore import data_types
 from flask import request
 from future import standard_library
 from google_cloud_utils import big_query
 from googleapiclient.errors import HttpError
 from handlers import base_handler
-from libs import access, handler, helpers
-from metrics import fuzzer_stats, logs
+from libs import access
+from libs import handler
+from libs import helpers
+from metrics import fuzzer_stats
+from metrics import logs
 
 standard_library.install_aliases()
 

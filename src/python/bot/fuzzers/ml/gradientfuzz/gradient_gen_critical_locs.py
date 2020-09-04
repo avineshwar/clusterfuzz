@@ -14,7 +14,6 @@
 #
 ################################################################################
 """libFuzzer Neural Smoothing - Location Generation."""
-
 import glob
 import json
 import os

@@ -18,11 +18,13 @@ import six
 from datastore import data_types
 from google.protobuf import wrappers_pb2
 from google.protobuf.any_pb2 import Any
+from protos import untrusted_runner_pb2
 
 from bot import testcase_manager
 from bot.fuzzers import engine
-from bot.tasks import corpus_pruning_task, fuzz_task, minimize_task
-from protos import untrusted_runner_pb2
+from bot.tasks import corpus_pruning_task
+from bot.tasks import fuzz_task
+from bot.tasks import minimize_task
 
 
 def _proto_to_fuzz_target(proto):

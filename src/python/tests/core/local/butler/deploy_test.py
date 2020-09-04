@@ -22,7 +22,8 @@ import unittest
 import mock
 import yaml
 from pyfakefs import fake_filesystem_unittest
-from tests.test_libs import helpers, test_utils
+from tests.test_libs import helpers
+from tests.test_libs import test_utils
 
 from local.butler import deploy
 

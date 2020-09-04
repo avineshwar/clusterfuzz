@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common constants."""
-
 import re
 
 CRASH_DUMPS_DIR = "/sdcard/crash-reports"

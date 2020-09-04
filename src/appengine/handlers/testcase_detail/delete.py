@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Handler for creating issue."""
-
 from flask import request
 from handlers import base_handler
-from libs import handler, helpers
+from libs import handler
+from libs import helpers
 
 
 class Handler(base_handler.Handler):

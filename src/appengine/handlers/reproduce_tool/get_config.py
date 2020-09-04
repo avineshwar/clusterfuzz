@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Allow users to configure the reproduce tool to point to this site."""
-
 import urllib.parse
 
 from config import db_config

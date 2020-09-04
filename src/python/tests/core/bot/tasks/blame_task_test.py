@@ -13,7 +13,6 @@
 # limitations under the License.
 """Tests for blame task."""
 # pylint: disable=protected-access
-
 import json
 import unittest
 

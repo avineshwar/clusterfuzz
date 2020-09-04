@@ -17,9 +17,11 @@ import sys
 import unittest
 
 from base import utils
-from metrics import monitor, monitoring_metrics
+from metrics import monitor
+from metrics import monitoring_metrics
 from pyfakefs import fake_filesystem_unittest
-from tests.test_libs import helpers, test_utils
+from tests.test_libs import helpers
+from tests.test_libs import test_utils
 
 from bot.tasks import update_task
 

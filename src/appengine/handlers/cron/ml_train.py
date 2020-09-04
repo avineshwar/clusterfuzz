@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Handler that schedules ML train jobs."""
-
-from base import tasks, utils
-from datastore import data_types, fuzz_target_utils
+from base import tasks
+from base import utils
+from datastore import data_types
+from datastore import fuzz_target_utils
 from handlers import base_handler
 from libs import handler
 

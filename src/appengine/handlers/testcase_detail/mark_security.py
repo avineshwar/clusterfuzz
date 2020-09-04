@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Handler for marking a testcase as security-related."""
-
 from flask import request
 from handlers import base_handler
 from handlers.testcase_detail import show
-from libs import handler, helpers
+from libs import handler
+from libs import helpers
 
 
 def mark(testcase):

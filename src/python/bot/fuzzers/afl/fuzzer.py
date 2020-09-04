@@ -13,7 +13,6 @@
 # limitations under the License.
 """Write arguments for launcher.py to flags file.
 """
-
 import os
 
 from base import utils

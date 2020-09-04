@@ -17,11 +17,12 @@ from __future__ import absolute_import
 import os
 import subprocess
 
-from system import new_process, process_handler
-
 from protos import untrusted_runner_pb2
+from system import new_process
+from system import process_handler
 
-from . import environment, host
+from . import environment
+from . import host
 
 
 def process_result_from_proto(process_result_proto):

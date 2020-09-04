@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """GradientFuzz training task."""
-
 from metrics import logs
 
 

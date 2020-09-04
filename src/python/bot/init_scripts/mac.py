@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The initialization script for Mac. It is run before running a task."""
-
 import os
 import re
 import shutil

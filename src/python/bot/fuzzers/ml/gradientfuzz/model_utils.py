@@ -14,7 +14,6 @@
 #
 ################################################################################
 """libFuzzer Neural Smoothing - Training Utilities."""
-
 import os
 
 import tensorflow as tf

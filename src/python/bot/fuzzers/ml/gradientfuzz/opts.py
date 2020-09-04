@@ -14,7 +14,6 @@
 #
 ################################################################################
 """libFuzzer Neural Smoothing - Argparse Options."""
-
 import argparse
 
 import bot.fuzzers.ml.gradientfuzz.constants as constants

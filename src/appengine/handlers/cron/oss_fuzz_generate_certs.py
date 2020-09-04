@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Cron to generate certs for OSS-Fuzz workers."""
-
 from base import untrusted
 from datastore import data_types
 from google.cloud import ndb

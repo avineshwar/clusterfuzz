@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Uploads test cases from blackbox fuzzers for coverage collection."""
-
 import os
 from builtins import str
 
 from base import utils
 from config import local_config
-from google_cloud_utils import gsutil, storage
+from google_cloud_utils import gsutil
+from google_cloud_utils import storage
 from metrics import logs
 from system import environment
 

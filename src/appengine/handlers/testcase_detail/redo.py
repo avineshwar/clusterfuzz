@@ -18,7 +18,8 @@ from base import tasks
 from flask import request
 from handlers import base_handler
 from handlers.testcase_detail import show
-from libs import handler, helpers
+from libs import handler
+from libs import helpers
 
 
 class Handler(base_handler.Handler):

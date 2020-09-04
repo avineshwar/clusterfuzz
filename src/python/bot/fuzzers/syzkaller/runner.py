@@ -22,7 +22,8 @@ import tempfile
 
 from base import utils
 from metrics import logs
-from system import environment, new_process
+from system import environment
+from system import new_process
 
 from bot.fuzzers import engine
 from bot.fuzzers import utils as fuzzer_utils

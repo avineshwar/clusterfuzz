@@ -14,7 +14,6 @@
 #
 ################################################################################
 """libFuzzer Neural Smoothing - Coverage Parsing."""
-
 import argparse
 import glob
 import json

@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for process."""
-
 import os
 
 import mock
 from pyfakefs import fake_filesystem_unittest
-from system import environment, minijail
+from system import environment
+from system import minijail
 from tests.test_libs import helpers as test_helpers
 
 

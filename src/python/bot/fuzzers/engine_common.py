@@ -23,13 +23,20 @@ import re
 import shutil
 import sys
 import time
-from builtins import object, range, str
+from builtins import object
+from builtins import range
+from builtins import str
 
 import six
 from base import utils
 from fuzzing import strategy
-from metrics import fuzzer_stats, logs
-from system import archive, environment, minijail, new_process, shell
+from metrics import fuzzer_stats
+from metrics import logs
+from system import archive
+from system import environment
+from system import minijail
+from system import new_process
+from system import shell
 
 from bot.fuzzers import options
 from bot.fuzzers import utils as fuzzer_utils

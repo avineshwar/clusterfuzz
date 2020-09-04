@@ -26,7 +26,8 @@ from datastore import data_types
 from pyfakefs import fake_filesystem_unittest
 from system import environment
 from tests.test_libs import helpers as test_helpers
-from tests.test_libs import test_utils, untrusted_runner_helpers
+from tests.test_libs import test_utils
+from tests.test_libs import untrusted_runner_helpers
 
 from bot import testcase_manager
 from bot.fuzzers import engine

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Runs http(s) server in the background."""
-
 import http.server
 import mimetypes
 import os

@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Handler for the regression page."""
-
 import json
 
 from flask import request
 from google_cloud_utils import big_query
 from handlers import base_handler
-from libs import crash_access, filters, handler, helpers
+from libs import crash_access
+from libs import filters
+from libs import handler
+from libs import helpers
 from libs.query import big_query_query
 
 PAGE_SIZE = 30

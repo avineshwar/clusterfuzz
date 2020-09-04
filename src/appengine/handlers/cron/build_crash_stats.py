@@ -25,7 +25,6 @@ Here's how it works:
 3. Poll the result.
 4. Store the end_hour.
 """
-
 import datetime
 import json
 import logging

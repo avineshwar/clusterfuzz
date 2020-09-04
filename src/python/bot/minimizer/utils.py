@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Minimizer helper functions."""
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import
+from __future__ import print_function
 
 import os
 import shlex
 import subprocess
 from builtins import range
 
+from . import errors
 from bot.tokenizer.antlr_tokenizer import AntlrTokenizer
 from bot.tokenizer.grammars.HTMLLexer import HTMLLexer
-
-from . import errors
 
 # TODO(mbarbella): Improve configuration of the test function.
 attempts = 1

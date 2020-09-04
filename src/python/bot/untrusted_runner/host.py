@@ -17,17 +17,21 @@ from __future__ import absolute_import
 import sys
 import threading
 import time
-from builtins import object, range
+from builtins import object
+from builtins import range
 
 import grpc
-from base import untrusted, utils
+from base import untrusted
+from base import utils
 from datastore import data_types
 from google.cloud import ndb
-from metrics import logs, monitoring_metrics
+from metrics import logs
+from metrics import monitoring_metrics
+from protos import heartbeat_pb2
+from protos import heartbeat_pb2_grpc
+from protos import untrusted_runner_pb2
+from protos import untrusted_runner_pb2_grpc
 from system import environment
-
-from protos import (heartbeat_pb2, heartbeat_pb2_grpc, untrusted_runner_pb2,
-                    untrusted_runner_pb2_grpc)
 
 from . import config
 

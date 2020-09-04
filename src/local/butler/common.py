@@ -13,7 +13,6 @@
 # limitations under the License.
 """common.py contains common methods and variables that are used by multiple
    commands."""
-
 from __future__ import print_function
 
 import datetime
@@ -26,7 +25,8 @@ import sys
 import tempfile
 import urllib.request
 import zipfile
-from builtins import object, str
+from builtins import object
+from builtins import str
 from distutils import dir_util
 
 from future import standard_library

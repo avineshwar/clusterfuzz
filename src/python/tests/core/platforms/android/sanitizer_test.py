@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for sanitizer functions."""
-
 import os
 
-from platforms.android import adb, constants, sanitizer, settings
+from platforms.android import adb
+from platforms.android import constants
+from platforms.android import sanitizer
+from platforms.android import settings
 from system import environment
 from tests.test_libs import android_helpers
 from tests.test_libs import helpers as test_helpers

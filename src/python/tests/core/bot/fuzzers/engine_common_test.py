@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests fuzzers.engine_common."""
-
 import os
 import unittest
-from builtins import range, str
+from builtins import range
+from builtins import str
 
 import parameterized
 import six

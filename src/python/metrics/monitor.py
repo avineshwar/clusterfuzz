@@ -15,7 +15,6 @@
 # pylint: disable=invalid-name
 # TODO(ochang): Remove V3 from names once all metrics are migrated to
 # stackdriver.
-
 import bisect
 import collections
 import functools
@@ -23,7 +22,9 @@ import itertools
 import re
 import threading
 import time
-from builtins import object, range, str
+from builtins import object
+from builtins import range
+from builtins import str
 
 import six
 

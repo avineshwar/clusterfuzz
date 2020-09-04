@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The superclass of all handlers."""
-
 import base64
 import cgi
 import datetime
@@ -23,19 +22,23 @@ import re
 import sys
 import traceback
 import urllib.parse
-from builtins import object, str
+from builtins import object
+from builtins import str
 
 import jinja2
 from base import utils
-from config import db_config, local_config
-from flask import Response
+from config import db_config
+from config import local_config
 from flask import redirect as flask_redirect
 from flask import request
+from flask import Response
 from flask.views import MethodView
 from future import standard_library
 from google.cloud import ndb
 from google_cloud_utils import storage
-from libs import auth, form, helpers
+from libs import auth
+from libs import form
+from libs import helpers
 from system import environment
 
 standard_library.install_aliases()

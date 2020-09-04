@@ -14,7 +14,6 @@
 #
 ################################################################################
 """libFuzzer Neural Smoothing - Mutation Generation."""
-
 import glob
 import json
 import math

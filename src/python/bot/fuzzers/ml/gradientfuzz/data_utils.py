@@ -14,7 +14,6 @@
 #
 ################################################################################
 """libFuzzer Neural Smoothing - Dataset Objects."""
-
 import glob
 import os
 

@@ -14,7 +14,6 @@
 #
 ################################################################################
 """libFuzzer Neural Smoothing - Model Architectures."""
-
 import tensorflow.keras as keras
 import tensorflow.keras.layers as layers
 

@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Coverage Report viewer."""
-
 import datetime
 import re
 
-from datastore import data_handler, data_types
+from datastore import data_handler
+from datastore import data_types
 from handlers import base_handler
-from libs import handler, helpers
+from libs import handler
+from libs import helpers
 from metrics import fuzzer_stats
 
 VALID_DATE_REGEX = re.compile(r"^([0-9\-]+|latest)$")

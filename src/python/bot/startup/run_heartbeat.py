@@ -19,14 +19,15 @@ import subprocess
 import sys
 from builtins import str
 
-from datastore import data_handler, ndb_init
+from datastore import data_handler
+from datastore import ndb_init
 from metrics import logs
-from system import environment, shell
-
+from python.base import modules
+from system import environment
+from system import shell
 # Before any other imports, we must fix the path. Some libraries might expect
 # to be able to import dependencies directly, but we must store these in
 # subdirectories of common so that they are shared with App Engine.
-from python.base import modules
 
 modules.fix_module_search_paths()
 

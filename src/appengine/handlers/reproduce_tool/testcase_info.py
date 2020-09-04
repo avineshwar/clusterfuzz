@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Handler for serving serialized test cases for the reproduce tool."""
-
-from datastore import data_handler, data_types
+from datastore import data_handler
+from datastore import data_types
 from flask import request
 from handlers import base_handler
-from libs import access, handler
+from libs import access
+from libs import handler
 
 
 def _prepare_testcase_dict(testcase):

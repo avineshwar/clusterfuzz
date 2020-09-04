@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Handler for finding similar issues."""
-
 from flask import request
 from handlers import base_handler
-from libs import handler, helpers
+from libs import handler
+from libs import helpers
 from libs.issue_management import issue_tracker_utils
 
 

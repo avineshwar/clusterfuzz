@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Security Severity analysis."""
-
 # TODO(ochang): Support other sanitizers.
-
 import re
 from builtins import object
 
-from datastore.data_types import MISSING_VALUE_STRING, SecuritySeverity
+from datastore.data_types import MISSING_VALUE_STRING
+from datastore.data_types import SecuritySeverity
 from system import environment
 
 # These should be generic within ClusterFuzz.

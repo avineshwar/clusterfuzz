@@ -13,7 +13,6 @@
 # limitations under the License.
 """Handler for redirecting to the issue url (given a testcase). See
   crbug.com/665652 on why we need it."""
-
 from handlers import base_handler
 from libs import helpers
 from libs.issue_management import issue_tracker_utils

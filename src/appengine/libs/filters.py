@@ -15,7 +15,6 @@
   There are params for filters, and there is a keyword that contains filters
   inside."""
 # pylint: disable=invalid-name
-
 import re
 import sys
 from builtins import object

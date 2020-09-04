@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Authentication helpers."""
-
 import collections
 from builtins import str
 
 import jwt
 import requests
-from base import memoize, utils
+from base import memoize
+from base import utils
 from config import local_config
 from datastore import data_types
 from firebase_admin import auth

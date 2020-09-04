@@ -16,13 +16,12 @@
 import ast
 import datetime
 import json
-import mock
 import os
 import unittest
 
 import flask
+import mock
 import webtest
-
 from datastore import data_types
 from google_cloud_utils import big_query
 from handlers import fuzzer_stats

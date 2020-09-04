@@ -15,8 +15,9 @@
 
 import unittest
 
-from bot.minimizer import html_minimizer
 from tests.test_libs import helpers
+
+from bot.minimizer import html_minimizer
 
 
 class HTMLMinimizerTest(unittest.TestCase):

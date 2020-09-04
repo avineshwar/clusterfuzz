@@ -15,9 +15,8 @@
 
 import unittest
 
-from google.cloud import ndb
-
 from datastore import data_types
+from google.cloud import ndb
 from handlers.cron import batch_fuzzer_jobs
 from tests.test_libs import test_utils
 

@@ -14,11 +14,10 @@
 """Tests for task_creation."""
 import unittest
 
-from bot.tasks import task_creation
 from datastore import data_types
-from tests.test_libs import helpers
-from tests.test_libs import mock_config
-from tests.test_libs import test_utils
+from tests.test_libs import helpers, mock_config, test_utils
+
+from bot.tasks import task_creation
 
 
 @test_utils.with_cloud_emulators("datastore")

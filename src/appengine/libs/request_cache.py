@@ -13,10 +13,10 @@
 # limitations under the License.
 """Request specific caching.."""
 
-from builtins import str
 import collections
-import flask
+from builtins import str
 
+import flask
 from base import memoize
 from metrics import logs
 

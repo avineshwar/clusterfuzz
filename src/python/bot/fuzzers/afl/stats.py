@@ -14,17 +14,17 @@
 """Statistics for the afl launcher script."""
 from __future__ import print_function
 
-from builtins import object
 import os
 import re
-import six
+from builtins import object
 
-from bot.fuzzers import dictionary_manager
-from bot.fuzzers import engine_common
-from bot.fuzzers.afl import strategies
+import six
 from fuzzing import strategy
 from metrics import logs
 from system import environment
+
+from bot.fuzzers import dictionary_manager, engine_common
+from bot.fuzzers.afl import strategies
 
 SANITIZER_START_REGEX = re.compile(r".*ERROR: [A-z]+Sanitizer:.*")
 SANITIZER_SEPERATOR_REGEX = re.compile(r"^=+$")

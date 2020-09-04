@@ -14,15 +14,14 @@
 """Heartbeat script wrapper."""
 from __future__ import print_function
 
-from system import shell
-from system import environment
-from metrics import logs
-from datastore import ndb_init
-from datastore import data_handler
-import sys
-import subprocess
 import os
+import subprocess
+import sys
 from builtins import str
+
+from datastore import data_handler, ndb_init
+from metrics import logs
+from system import environment, shell
 
 # Before any other imports, we must fix the path. Some libraries might expect
 # to be able to import dependencies directly, but we must store these in

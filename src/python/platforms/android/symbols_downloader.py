@@ -19,12 +19,8 @@ import os
 from base import utils
 from google_cloud_utils import storage
 from metrics import logs
-from platforms.android import fetch_artifact
-from platforms.android import kernel_utils
-from platforms.android import settings
-from system import archive
-from system import environment
-from system import shell
+from platforms.android import fetch_artifact, kernel_utils, settings
+from system import archive, environment, shell
 
 
 def get_symbols_archive_filename(build_id, target):

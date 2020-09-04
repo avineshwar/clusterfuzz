@@ -14,11 +14,8 @@
 """Handler for showing crash stats inside the testcase detail page."""
 
 from flask import request
-
 from handlers import base_handler
-from libs import crash_stats
-from libs import handler
-from libs import helpers
+from libs import crash_stats, handler, helpers
 
 
 def get_result(testcase, end, block, days, group_by):

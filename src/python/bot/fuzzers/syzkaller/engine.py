@@ -13,14 +13,14 @@
 # limitations under the License.
 """Fuzzing engine interface."""
 
-from bot.fuzzers import engine
-from bot.fuzzers import engine_common
-from bot.fuzzers import utils as fuzzer_utils
-from bot.fuzzers.syzkaller import constants
-from bot.fuzzers.syzkaller import runner
+import os
+
 from metrics import profiler
 from system import environment
-import os
+
+from bot.fuzzers import engine, engine_common
+from bot.fuzzers import utils as fuzzer_utils
+from bot.fuzzers.syzkaller import constants, runner
 
 BIN_FOLDER_PATH = "bin"
 REPRO_TIME = 70

@@ -13,6 +13,7 @@
 # limitations under the License.
 """syzkaller fuzzer."""
 from __future__ import absolute_import
+
 import copy
 import fnmatch
 import os
@@ -20,12 +21,12 @@ import re
 import tempfile
 
 from base import utils
+from metrics import logs
+from system import environment, new_process
+
 from bot.fuzzers import engine
 from bot.fuzzers import utils as fuzzer_utils
 from bot.fuzzers.syzkaller import config
-from metrics import logs
-from system import environment
-from system import new_process
 
 REPRODUCE_REGEX = re.compile(r"reproduced (\d+) crashes")
 

@@ -17,13 +17,12 @@ import json
 import os
 import unittest
 
-from pyfakefs import fake_filesystem_unittest
-
 from base import errors
-from bot.tasks import progression_task
 from datastore import data_types
-from tests.test_libs import helpers
-from tests.test_libs import test_utils
+from pyfakefs import fake_filesystem_unittest
+from tests.test_libs import helpers, test_utils
+
+from bot.tasks import progression_task
 
 
 class WriteToBigqueryTest(unittest.TestCase):

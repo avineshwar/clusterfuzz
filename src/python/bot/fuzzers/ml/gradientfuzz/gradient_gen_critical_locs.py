@@ -18,10 +18,10 @@
 import glob
 import json
 import os
-import tqdm
 
 import numpy as np
 import tensorflow as tf
+import tqdm
 
 import bot.fuzzers.ml.gradientfuzz.constants as constants
 import bot.fuzzers.ml.gradientfuzz.model_utils as model_utils

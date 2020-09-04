@@ -16,12 +16,13 @@ from __future__ import absolute_import
 
 import os
 import re
+
 import six
 
 try:
-    from . import file_host
-    from . import host
     from protos import untrusted_runner_pb2
+
+    from . import file_host, host
 except ImportError:
     # TODO(ochang): Fix this.
     pass

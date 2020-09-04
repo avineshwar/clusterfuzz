@@ -17,9 +17,7 @@ import os
 import unittest
 
 import parameterized
-
-from datastore import data_types
-from datastore import ndb_utils
+from datastore import data_types, ndb_utils
 from fuzzing import fuzzer_selection
 from tests.test_libs import helpers as test_helpers
 from tests.test_libs import test_utils

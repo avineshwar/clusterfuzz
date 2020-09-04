@@ -13,16 +13,14 @@
 # limitations under the License.
 """Handler for updating issue."""
 
-from flask import request
-
 from builtins import str
+
 from datastore import data_handler
+from flask import request
 from handlers import base_handler
 from handlers.testcase_detail import show
-from libs import handler
-from libs import helpers
-from libs.issue_management import issue_filer
-from libs.issue_management import issue_tracker_policy
+from libs import handler, helpers
+from libs.issue_management import issue_filer, issue_tracker_policy
 
 
 class Handler(base_handler.Handler):

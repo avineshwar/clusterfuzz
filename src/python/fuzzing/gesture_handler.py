@@ -13,9 +13,7 @@
 # limitations under the License.
 """Gestures handler."""
 
-from platforms import android
-from platforms import linux
-from platforms import windows
+from platforms import android, linux, windows
 from system import environment
 
 

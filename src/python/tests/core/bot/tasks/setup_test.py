@@ -12,19 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for setup."""
-from builtins import range
-from builtins import str
-
 import os
 import unittest
+from builtins import range, str
 
+from datastore import data_types
 from pyfakefs import fake_filesystem_unittest
+from system import environment
+from tests.test_libs import helpers, test_utils
 
 from bot.tasks import setup
-from datastore import data_types
-from system import environment
-from tests.test_libs import helpers
-from tests.test_libs import test_utils
 
 
 class IsDirectoryOnNfsTest(unittest.TestCase):

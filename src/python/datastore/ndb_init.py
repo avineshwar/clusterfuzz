@@ -18,10 +18,9 @@ import functools
 import os
 import threading
 
+from base import utils
 from google.cloud import ndb
 from google.cloud.ndb import context as context_module
-
-from base import utils
 
 _ndb_client = None
 _ndb_client_lock = threading.Lock()

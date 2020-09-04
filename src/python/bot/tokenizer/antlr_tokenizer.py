@@ -14,9 +14,10 @@
 """Antlr Tokenizer"""
 
 from builtins import object
-import antlr4
 
+import antlr4
 from base import utils
+
 from bot.minimizer import errors
 
 

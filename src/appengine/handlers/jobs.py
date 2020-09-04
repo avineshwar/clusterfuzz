@@ -14,22 +14,15 @@
 """Manage job types."""
 
 from builtins import str
+
 import six
-
-from flask import request
-from google.cloud import ndb
-
 from base import tasks
-from datastore import data_handler
-from datastore import data_types
-from datastore import ndb_utils
+from datastore import data_handler, data_types, ndb_utils
+from flask import request
 from fuzzing import fuzzer_selection
+from google.cloud import ndb
 from handlers import base_handler
-from libs import filters
-from libs import form
-from libs import gcs
-from libs import handler
-from libs import helpers
+from libs import filters, form, gcs, handler, helpers
 from libs.query import datastore_query
 
 PAGE_SIZE = 10

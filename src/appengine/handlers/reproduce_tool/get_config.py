@@ -13,12 +13,13 @@
 # limitations under the License.
 """Allow users to configure the reproduce tool to point to this site."""
 
-from libs import handler
-from handlers import base_handler
-from datastore import data_handler
-from config import db_config
 import urllib.parse
+
+from config import db_config
+from datastore import data_handler
 from future import standard_library
+from handlers import base_handler
+from libs import handler
 
 standard_library.install_aliases()
 

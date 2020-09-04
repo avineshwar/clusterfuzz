@@ -13,11 +13,12 @@
 # limitations under the License.
 """Tests for the Mac initialization script."""
 
-import mock
 import unittest
 
-from bot.init_scripts import mac
+import mock
 from tests.test_libs import helpers
+
+from bot.init_scripts import mac
 
 
 class RunTest(unittest.TestCase):

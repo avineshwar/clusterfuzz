@@ -18,11 +18,9 @@ import unittest
 import flask
 import mock
 import webtest
-
 from datastore import data_types
 from handlers.cron import recurring_tasks
-from tests.test_libs import helpers
-from tests.test_libs import test_utils
+from tests.test_libs import helpers, test_utils
 
 
 @test_utils.with_cloud_emulators("datastore")

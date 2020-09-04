@@ -17,8 +17,9 @@
 import os
 
 from base import utils
-from bot.fuzzers import builtin
 from system import environment
+
+from bot.fuzzers import builtin
 
 # The name of the file that run.py puts in the input directory so AFL doesn't
 # complain, since it needs at least one input file.

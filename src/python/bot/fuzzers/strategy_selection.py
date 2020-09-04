@@ -17,14 +17,16 @@ Decides the set strategies to be considered by the launcher. Note
 that because of compatability issues, the exact set of strategies
 generated here may be modified in the launcher before being launched."""
 from __future__ import division
+
 from builtins import object
+from collections import namedtuple
 
 from base import utils
-from bot.fuzzers import engine_common
-from collections import namedtuple
 from fuzzing import strategy
 from metrics import logs
 from system import environment
+
+from bot.fuzzers import engine_common
 
 GENERATORS = [
     strategy.CORPUS_MUTATION_RADAMSA_STRATEGY,

@@ -18,13 +18,12 @@ import tempfile
 import unittest
 
 import pyfakefs.fake_filesystem_unittest as fake_fs_unittest
+from system import new_process, shell
+from tests.test_libs import helpers as test_helpers
+from tests.test_libs import test_utils
 
 from bot.fuzzers.ml.rnn import constants
 from bot.tasks import train_rnn_generator_task
-from system import new_process
-from system import shell
-from tests.test_libs import helpers as test_helpers
-from tests.test_libs import test_utils
 
 MODEL_DIR = "/fake/model_directory"
 

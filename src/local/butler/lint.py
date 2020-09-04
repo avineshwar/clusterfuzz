@@ -17,10 +17,10 @@ from __future__ import print_function
 
 import os
 import sys
+
 import yaml
 
-from local.butler import appengine
-from local.butler import common
+from local.butler import appengine, common
 
 _GOLINT_EXCEPTIONS = [
     "types.go"  # Not all model names conform to Go naming conventions.

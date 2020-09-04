@@ -13,17 +13,17 @@
 # limitations under the License.
 """Tests for jobs."""
 import collections
-import flask
 import string
 import unittest
-import webtest
+from unittest import mock
 
+import flask
+import webtest
 from datastore import data_types
 from handlers import jobs
 from libs import form
 from tests.test_libs import helpers as test_helpers
 from tests.test_libs import test_utils
-from unittest import mock
 
 
 @test_utils.with_cloud_emulators("datastore")

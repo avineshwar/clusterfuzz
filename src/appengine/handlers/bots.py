@@ -15,16 +15,11 @@
 
 import datetime
 
+from base import tasks, utils
+from datastore import data_types, ndb_utils
 from flask import request
-
-from base import tasks
-from base import utils
-from datastore import data_types
-from datastore import ndb_utils
 from handlers import base_handler
-from libs import filters
-from libs import handler
-from libs import helpers
+from libs import filters, handler, helpers
 from libs.query import datastore_query
 
 PAGE_SIZE = 10

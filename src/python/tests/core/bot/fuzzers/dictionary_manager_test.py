@@ -17,9 +17,10 @@ import os
 import unittest
 
 from base import utils
-from bot.fuzzers import dictionary_manager
 from system import environment
 from tests.test_libs import helpers as test_helpers
+
+from bot.fuzzers import dictionary_manager
 
 DATA_DIRECTORY = os.path.join(os.path.dirname(__file__), "dictionary_manager_data")
 

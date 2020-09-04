@@ -13,20 +13,18 @@
 # limitations under the License.
 """Download files from GCS."""
 
-from libs.issue_management import issue_tracker_utils
-from libs import helpers
-from libs import gcs
-from libs import access
-from handlers import base_handler
-from google_cloud_utils import blobs
-from datastore import data_handler
-from base import utils
-from base import errors
-from flask import request
-import urllib.parse
 import os
+import urllib.parse
 from builtins import str
+
+from base import errors, utils
+from datastore import data_handler
+from flask import request
 from future import standard_library
+from google_cloud_utils import blobs
+from handlers import base_handler
+from libs import access, gcs, helpers
+from libs.issue_management import issue_tracker_utils
 
 standard_library.install_aliases()
 

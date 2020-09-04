@@ -14,15 +14,12 @@
 """Helps with remote command-line tasks (e.g. read logs, stage zip)."""
 
 import inspect
+
 import paramiko
 import six
-
 from fabric import api
 
-from local.remote.handlers import android_chrome_lab
-from local.remote.handlers import linux
-from local.remote.handlers import mac
-from local.remote.handlers import windows
+from local.remote.handlers import android_chrome_lab, linux, mac, windows
 
 paramiko.util.log_to_file("paramiko.log")
 api.env.connection_attempts = 3

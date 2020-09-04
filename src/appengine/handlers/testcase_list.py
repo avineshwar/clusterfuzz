@@ -13,18 +13,12 @@
 # limitations under the License.
 """Handler that gets the testcase list page."""
 
+from base import errors, utils
+from datastore import data_handler, data_types
 from flask import request
-
-from base import errors
-from base import utils
-from datastore import data_handler
-from datastore import data_types
 from google_cloud_utils import blobs
 from handlers import base_handler
-from libs import crash_access
-from libs import filters
-from libs import handler
-from libs import helpers
+from libs import crash_access, filters, handler, helpers
 from libs.query import datastore_query
 
 PAGE_SIZE = 20

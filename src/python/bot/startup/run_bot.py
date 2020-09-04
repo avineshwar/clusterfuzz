@@ -14,31 +14,24 @@
 """Bot startup script."""
 from __future__ import print_function
 
+import multiprocessing
+import os
+import sys
+import time
+import traceback
+from builtins import object
+
+from base import dates, errors, tasks, untrusted, utils
+from datastore import data_handler, ndb_init
+from future import standard_library
+from metrics import logs, monitor, monitoring_metrics, profiler
 # Before any other imports, we must fix the path. Some libraries might expect
 # to be able to import dependencies directly, but we must store these in
 # subdirectories of common so that they are shared with App Engine.
 from system import environment
-from metrics import profiler
-from metrics import monitoring_metrics
-from metrics import monitor
-from metrics import logs
-from datastore import ndb_init
-from datastore import data_handler
-from bot.tasks import update_task
-from bot.tasks import commands
+
 from bot.fuzzers import init as fuzzers_init
-from base import utils
-from base import untrusted
-from base import tasks
-from base import errors
-from base import dates
-import traceback
-import time
-import sys
-import os
-import multiprocessing
-from builtins import object
-from future import standard_library
+from bot.tasks import commands, update_task
 from python.base import modules
 
 modules.fix_module_search_paths()

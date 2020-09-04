@@ -15,11 +15,10 @@
 
 # TODO(ochang): Support other sanitizers.
 
-from builtins import object
 import re
+from builtins import object
 
-from datastore.data_types import MISSING_VALUE_STRING
-from datastore.data_types import SecuritySeverity
+from datastore.data_types import MISSING_VALUE_STRING, SecuritySeverity
 from system import environment
 
 # These should be generic within ClusterFuzz.

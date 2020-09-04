@@ -13,10 +13,8 @@
 # limitations under the License.
 """Schedule corpus pruning tasks."""
 
-from base import tasks
-from base import utils
-from datastore import data_types
-from datastore import fuzz_target_utils
+from base import tasks, utils
+from datastore import data_types, fuzz_target_utils
 from handlers import base_handler
 from libs import handler
 

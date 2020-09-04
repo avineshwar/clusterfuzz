@@ -14,11 +14,10 @@
 """helpers tests."""
 # pylint: disable=protected-access
 
-from builtins import str
 import unittest
+from builtins import str
 
-from libs import auth
-from libs import helpers
+from libs import auth, helpers
 from tests.test_libs import helpers as test_helpers
 
 

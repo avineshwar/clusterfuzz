@@ -16,9 +16,9 @@
   inside."""
 # pylint: disable=invalid-name
 
-from builtins import object
 import re
 import sys
+from builtins import object
 
 from datastore import search_tokenizer
 from libs import helpers

@@ -16,9 +16,9 @@ from __future__ import absolute_import
 
 import re
 
-from . import adb
-
 from metrics import logs
+
+from . import adb
 
 
 def clear_log():

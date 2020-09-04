@@ -16,32 +16,26 @@
 # TODO(ochang): Remove V3 from names once all metrics are migrated to
 # stackdriver.
 
-from builtins import object
-from builtins import range
-from builtins import str
-
 import bisect
 import collections
 import functools
 import itertools
 import re
-import six
 import threading
 import time
+from builtins import object, range, str
+
+import six
 
 try:
     from google.cloud import monitoring_v3
 except (ImportError, RuntimeError):
     monitoring_v3 = None
 
-from google.api_core import exceptions
-from google.api_core import retry
-
-from base import errors
-from base import utils
+from base import errors, utils
 from config import local_config
-from google_cloud_utils import compute_metadata
-from google_cloud_utils import credentials
+from google.api_core import exceptions, retry
+from google_cloud_utils import compute_metadata, credentials
 from metrics import logs
 from system import environment
 

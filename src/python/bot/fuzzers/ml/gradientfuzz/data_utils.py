@@ -18,9 +18,9 @@
 import glob
 import os
 
-from natsort import natsorted
 import numpy as np
 import tensorflow.keras as keras
+from natsort import natsorted
 
 import bot.fuzzers.ml.gradientfuzz.constants as constants
 

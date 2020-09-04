@@ -15,15 +15,11 @@
 
 from builtins import str
 
-from base import tasks
-from base import utils
-from build_management import build_manager
-from build_management import revisions
+from base import tasks, utils
+from build_management import build_manager, revisions
 from config import local_config
-from datastore import data_handler
-from datastore import data_types
-from google_cloud_utils import blobs
-from google_cloud_utils import pubsub
+from datastore import data_handler, data_types
+from google_cloud_utils import blobs, pubsub
 from system import environment
 
 

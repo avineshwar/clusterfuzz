@@ -13,7 +13,6 @@
 # limitations under the License.
 """Shell related functions."""
 
-from builtins import str
 import os
 import re
 import shlex
@@ -21,6 +20,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from builtins import str
 
 from base import persistent_cache
 from metrics import logs

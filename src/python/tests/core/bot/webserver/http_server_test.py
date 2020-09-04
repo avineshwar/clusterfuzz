@@ -13,16 +13,15 @@
 # limitations under the License.
 """Tests for the http_server module."""
 
-from builtins import object
 import os
-import six
 import unittest
+from builtins import object
 
+import six
 from pyfakefs import fake_filesystem_unittest
+from tests.test_libs import helpers, test_utils
 
 from bot.webserver import http_server
-from tests.test_libs import helpers
-from tests.test_libs import test_utils
 
 
 class TestRequestHandler(http_server.RequestHandler):

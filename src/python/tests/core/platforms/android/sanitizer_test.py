@@ -15,10 +15,7 @@
 
 import os
 
-from platforms.android import adb
-from platforms.android import constants
-from platforms.android import sanitizer
-from platforms.android import settings
+from platforms.android import adb, constants, sanitizer, settings
 from system import environment
 from tests.test_libs import android_helpers
 from tests.test_libs import helpers as test_helpers

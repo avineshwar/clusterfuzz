@@ -19,7 +19,6 @@ import unittest
 
 import flask
 import webtest
-
 from datastore import data_types
 from handlers import bots
 from tests.test_libs import helpers as test_helpers

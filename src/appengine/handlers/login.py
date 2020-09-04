@@ -15,13 +15,10 @@
 
 import datetime
 
-from flask import request
-
 from config import local_config
+from flask import request
 from handlers import base_handler
-from libs import auth
-from libs import handler
-from libs import helpers
+from libs import auth, handler, helpers
 from metrics import logs
 
 DEFAULT_REDIRECT = "/"

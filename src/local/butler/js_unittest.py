@@ -14,12 +14,11 @@
 """js_unittest.py runs JS tests under src/appengine"""
 from __future__ import print_function
 
-from builtins import input
-
 import os
 import re
 import sys
 import time
+from builtins import input
 
 from selenium import webdriver
 

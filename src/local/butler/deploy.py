@@ -14,8 +14,6 @@
 """deploy.py handles the deploy command"""
 from __future__ import print_function
 
-from builtins import range
-from collections import namedtuple
 import contextlib
 import datetime
 import json
@@ -24,11 +22,10 @@ import re
 import sys
 import tempfile
 import time
+from builtins import range
+from collections import namedtuple
 
-from local.butler import appengine
-from local.butler import common
-from local.butler import constants
-from local.butler import package
+from local.butler import appengine, common, constants, package
 from src.python.config import local_config
 from src.python.system import environment
 

@@ -14,22 +14,19 @@
 """Heartbeat script that monitors
    whether the bot is still running or not."""
 
+import os
+import sys
+import time
+from builtins import str
+
+from base import dates, tasks
+from datastore import data_handler, data_types, ndb_init
+from metrics import logs
 # Before any other imports, we must fix the path. Some libraries might expect
 # to be able to import dependencies directly, but we must store these in
 # subdirectories of common so that they are shared with App Engine.
-from system import shell
-from system import process_handler
-from system import environment
-from metrics import logs
-from datastore import ndb_init
-from datastore import data_types
-from datastore import data_handler
-from base import tasks
-from base import dates
-import time
-import sys
-import os
-from builtins import str
+from system import environment, process_handler, shell
+
 from python.base import modules
 
 modules.fix_module_search_paths()

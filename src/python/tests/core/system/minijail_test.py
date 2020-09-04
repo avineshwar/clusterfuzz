@@ -13,13 +13,11 @@
 # limitations under the License.
 """Tests for process."""
 
-import mock
 import os
 
+import mock
 from pyfakefs import fake_filesystem_unittest
-
-from system import environment
-from system import minijail
+from system import environment, minijail
 from tests.test_libs import helpers as test_helpers
 
 

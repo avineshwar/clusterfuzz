@@ -13,12 +13,11 @@
 # limitations under the License.
 """Tests for the base handler class."""
 
-import flask
 import unittest
+
+import flask
 import webtest
-
 from flask import request
-
 from handlers import base_handler
 from libs import helpers
 from tests.test_libs import helpers as test_helpers

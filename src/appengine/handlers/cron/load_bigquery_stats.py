@@ -13,22 +13,19 @@
 # limitations under the License.
 """Handler used for loading bigquery data."""
 
-from builtins import range
 import datetime
-import httplib2
 import random
 import time
+from builtins import range
 
-from googleapiclient.errors import HttpError
-
+import httplib2
 from base import utils
 from datastore import data_types
 from google_cloud_utils import big_query
+from googleapiclient.errors import HttpError
 from handlers import base_handler
 from libs import handler
-from metrics import fuzzer_stats
-from metrics import fuzzer_stats_schema
-from metrics import logs
+from metrics import fuzzer_stats, fuzzer_stats_schema, logs
 
 STATS_KINDS = [fuzzer_stats.JobRun, fuzzer_stats.TestcaseRun]
 

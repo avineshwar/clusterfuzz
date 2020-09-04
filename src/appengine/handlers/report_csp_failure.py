@@ -14,10 +14,8 @@
 """Log incoming reports of CSP violations."""
 
 from flask import request
-
 from handlers import base_handler
-from libs import handler
-from libs import helpers
+from libs import handler, helpers
 from metrics import logs
 
 

@@ -13,8 +13,8 @@
 # limitations under the License.
 """Helper functions for fetch source links."""
 
-from builtins import object
 import re
+from builtins import object
 
 from base import utils
 

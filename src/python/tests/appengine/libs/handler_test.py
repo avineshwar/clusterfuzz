@@ -11,25 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for Handler."""
+import json
+import os
+import unittest
 from builtins import str
 
 import flask
-import json
 import mock
-import os
-import unittest
 import webtest
 import yaml
-
-from flask import request
-from flask import Response
-
 from config import local_config
 from datastore import data_types
+from flask import Response, request
 from handlers import base_handler
-from libs import auth
-from libs import handler
-from libs import helpers
+from libs import auth, handler, helpers
 from tests.test_libs import helpers as test_helpers
 
 _JSON_CONTENT_TYPE = "application/json"

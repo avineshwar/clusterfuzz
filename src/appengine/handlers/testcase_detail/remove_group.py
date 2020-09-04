@@ -13,13 +13,11 @@
 # limitations under the License.
 """Handler for removing a testcase from a group."""
 
-from flask import request
-
 from datastore import data_handler
+from flask import request
 from handlers import base_handler
 from handlers.testcase_detail import show
-from libs import handler
-from libs import helpers
+from libs import handler, helpers
 
 
 def remove_group(testcase_id):

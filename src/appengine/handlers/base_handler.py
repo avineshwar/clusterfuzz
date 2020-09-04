@@ -13,33 +13,30 @@
 # limitations under the License.
 """The superclass of all handlers."""
 
-from system import environment
-from libs import helpers
-from libs import form
-from libs import auth
-from google_cloud_utils import storage
-from config import local_config
-from config import db_config
-from base import utils
-import jinja2
-from google.cloud import ndb
-from flask.views import MethodView
-from flask import Response
-from flask import request
-from flask import redirect as flask_redirect
-import urllib.parse
-import traceback
-import sys
-import re
-import os
-import logging
-import json
-import datetime
-import cgi
 import base64
-from builtins import object
-from builtins import str
+import cgi
+import datetime
+import json
+import logging
+import os
+import re
+import sys
+import traceback
+import urllib.parse
+from builtins import object, str
+
+import jinja2
+from base import utils
+from config import db_config, local_config
+from flask import Response
+from flask import redirect as flask_redirect
+from flask import request
+from flask.views import MethodView
 from future import standard_library
+from google.cloud import ndb
+from google_cloud_utils import storage
+from libs import auth, form, helpers
+from system import environment
 
 standard_library.install_aliases()
 

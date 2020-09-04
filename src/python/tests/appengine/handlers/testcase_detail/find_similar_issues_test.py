@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """find_similar_issues tests."""
+import unittest
+
 import flask
 import mock
-import unittest
 import webtest
-
 from datastore import data_types
 from handlers.testcase_detail import find_similar_issues
 from libs.issue_management import monorail

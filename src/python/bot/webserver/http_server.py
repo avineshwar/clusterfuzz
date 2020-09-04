@@ -13,13 +13,14 @@
 # limitations under the License.
 """Runs http(s) server in the background."""
 
-from system import environment
-import threading
-import socket
-import os
-import mimetypes
 import http.server
+import mimetypes
+import os
+import socket
+import threading
+
 from future import standard_library
+from system import environment
 
 standard_library.install_aliases()
 

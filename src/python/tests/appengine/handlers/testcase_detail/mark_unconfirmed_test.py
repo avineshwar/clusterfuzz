@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """mark_unconfirmed tests."""
-import flask
 import unittest
-import webtest
 
+import flask
+import webtest
 from datastore import data_types
 from handlers.testcase_detail import mark_unconfirmed
 from libs import form

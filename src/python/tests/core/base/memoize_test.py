@@ -13,15 +13,12 @@
 # limitations under the License.
 """memoize tests."""
 
-from builtins import object
-from builtins import range
 import unittest
+from builtins import object, range
 
-from pyfakefs import fake_filesystem_unittest
 import six
-
-from base import memoize
-from base import persistent_cache
+from base import memoize, persistent_cache
+from pyfakefs import fake_filesystem_unittest
 from system import environment
 from tests.test_libs import helpers as test_helpers
 from tests.test_libs import test_utils

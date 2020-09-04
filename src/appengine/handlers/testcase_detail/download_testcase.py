@@ -13,16 +13,14 @@
 # limitations under the License.
 """Handler that serves the testcase file."""
 
-from libs import helpers
-from libs import handler
-from libs import gcs
-from libs import access
-from handlers import base_handler
-from google_cloud_utils import blobs
-from flask import request
 import urllib.parse
 from builtins import str
+
+from flask import request
 from future import standard_library
+from google_cloud_utils import blobs
+from handlers import base_handler
+from libs import access, gcs, handler, helpers
 
 standard_library.install_aliases()
 

@@ -13,19 +13,17 @@
 # limitations under the License.
 """Authentication helpers."""
 
-from builtins import str
 import collections
-import jwt
+from builtins import str
 
+import jwt
+import requests
+from base import memoize, utils
+from config import local_config
+from datastore import data_types
 from firebase_admin import auth
 from google.cloud import ndb
 from googleapiclient.discovery import build
-import requests
-
-from base import memoize
-from base import utils
-from config import local_config
-from datastore import data_types
 from libs import request_cache
 from metrics import logs
 from system import environment

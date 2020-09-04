@@ -16,16 +16,17 @@ minor modifications, especially without any google3 specific library
 dependencies)."""
 from __future__ import division
 
-from metrics import logs
-from config import db_config
-from oauth2client.service_account import ServiceAccountCredentials
-import re
-import os
-import json
 import io
-import apiclient
+import json
+import os
+import re
 from builtins import range
+
+import apiclient
+from config import db_config
 from future import standard_library
+from metrics import logs
+from oauth2client.service_account import ServiceAccountCredentials
 
 standard_library.install_aliases()
 

@@ -13,14 +13,14 @@
 # limitations under the License.
 """Tests for remote_process."""
 
-from pyfakefs import fake_filesystem_unittest
-import mock
 import os
 
-from bot.untrusted_runner import config
-from bot.untrusted_runner import file_impl
-from protos import untrusted_runner_pb2
+import mock
+from pyfakefs import fake_filesystem_unittest
 from tests.test_libs import test_utils
+
+from bot.untrusted_runner import config, file_impl
+from protos import untrusted_runner_pb2
 
 
 class FileImplTest(fake_filesystem_unittest.TestCase):

@@ -15,8 +15,8 @@
 ################################################################################
 """libFuzzer Neural Smoothing - Globals."""
 
-from datetime import datetime
 import enum
+from datetime import datetime
 
 import tensorflow.keras as keras
 

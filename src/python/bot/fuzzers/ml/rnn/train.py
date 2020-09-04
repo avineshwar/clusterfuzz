@@ -14,20 +14,17 @@
 """Train ml rnn model."""
 from __future__ import print_function
 
-from builtins import next
-from builtins import range
-from builtins import str
-
 import argparse
 import math
-import numpy as np
 import os
 import sys
-import tensorflow as tf
 import time
+from builtins import next, range, str
 
-from bot.fuzzers.ml.rnn import constants
-from bot.fuzzers.ml.rnn import utils
+import numpy as np
+import tensorflow as tf
+
+from bot.fuzzers.ml.rnn import constants, utils
 
 # Training suggestions
 #

@@ -20,24 +20,24 @@ from config import db_config
 
 
 class CredentialStorage(Storage):
-  """Instead of reading a file, just parse a config entry."""
+    """Instead of reading a file, just parse a config entry."""
 
-  def locked_get(self):
-    """Return Credentials."""
-    content = db_config.get_value('client_credentials')
-    if not content:
-      return None
+    def locked_get(self):
+        """Return Credentials."""
+        content = db_config.get_value('client_credentials')
+        if not content:
+            return None
 
-    try:
-      credentials = Credentials.new_from_json(content)
-      credentials.set_store(self)
-    except ValueError:
-      return None
+        try:
+            credentials = Credentials.new_from_json(content)
+            credentials.set_store(self)
+        except ValueError:
+            return None
 
-    return credentials
+        return credentials
 
-  def locked_put(self, credentials):  # pylint: disable=unused-argument
-    pass
+    def locked_put(self, credentials):  # pylint: disable=unused-argument
+        pass
 
-  def locked_delete(self):
-    pass
+    def locked_delete(self):
+        pass

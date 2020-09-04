@@ -88,19 +88,19 @@ ndb_client = ndb.Client()
 
 
 def ndb_wsgi_middleware(wsgi_app):
-  """WSGI middleware for ndb_datastore context allocation to the app."""
+    """WSGI middleware for ndb_datastore context allocation to the app."""
 
-  def middleware(environ, start_response):
-    with ndb_client.context():
-      return wsgi_app(environ, start_response)
+    def middleware(environ, start_response):
+        with ndb_client.context():
+            return wsgi_app(environ, start_response)
 
-  return middleware
+    return middleware
 
 
 def register_routes(flask_app, routes):
-  """Utility function to register all routes to the flask app."""
-  for route, handler in routes:
-    flask_app.add_url_rule(route, view_func=handler.as_view(route))
+    """Utility function to register all routes to the flask app."""
+    for route, handler in routes:
+        flask_app.add_url_rule(route, view_func=handler.as_view(route))
 
 
 # Add item to the navigation menu. Order is important.
@@ -113,12 +113,12 @@ _is_chromium = utils.is_chromium()
 _is_oss_fuzz = utils.is_oss_fuzz()
 
 if _is_chromium:
-  base_handler.add_menu('Crashes by range', '/commit-range')
+    base_handler.add_menu('Crashes by range', '/commit-range')
 
 if not _is_oss_fuzz:
-  base_handler.add_menu('Fuzzers', '/fuzzers')
-  base_handler.add_menu('Corpora', '/corpora')
-  base_handler.add_menu('Bots', '/bots')
+    base_handler.add_menu('Fuzzers', '/fuzzers')
+    base_handler.add_menu('Corpora', '/corpora')
+    base_handler.add_menu('Bots', '/bots')
 
 base_handler.add_menu('Jobs', '/jobs')
 base_handler.add_menu('Configuration', '/configuration')
@@ -246,14 +246,14 @@ redirect_domains = config.get('domains.redirects')
 
 
 def redirect_handler():
-  """Redirection handler."""
-  if not redirect_domains:
+    """Redirection handler."""
+    if not redirect_domains:
+        return None
+
+    if request.host in redirect_domains:
+        return redirect('https://' + main_domain + request.full_path)
+
     return None
-
-  if request.host in redirect_domains:
-    return redirect('https://' + main_domain + request.full_path)
-
-  return None
 
 
 app = Flask(__name__)
@@ -262,11 +262,11 @@ app.url_map.strict_slashes = False
 app.before_request(redirect_handler)
 
 if not environment.get_value('PY_UNITTESTS'):
-  # Adding ndb context middleware when not running tests.
-  app.wsgi_app = ndb_wsgi_middleware(app.wsgi_app)
+    # Adding ndb context middleware when not running tests.
+    app.wsgi_app = ndb_wsgi_middleware(app.wsgi_app)
 
 register_routes(app, handlers)
 register_routes(app, cron_routes)
 
 if __name__ == '__main__':
-  app.run(host=main_domain)
+    app.run(host=main_domain)

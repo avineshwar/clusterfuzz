@@ -24,18 +24,18 @@ import bot.fuzzers.ml.gradientfuzz.models as models
 
 
 class ModelTypes(enum.Enum):
-  """
-  To classify model types.
-  """
-  FEEDFORWARD = enum.auto()
-  RNN = enum.auto()
+    """
+    To classify model types.
+    """
+    FEEDFORWARD = enum.auto()
+    RNN = enum.auto()
 
 
 class ExitCodes(enum.Enum):
-  """
-  For ClusterFuzz.
-  """
-  SUCCESS = enum.auto()
+    """
+    For ClusterFuzz.
+    """
+    SUCCESS = enum.auto()
 
 
 # For main directory tree.
@@ -107,34 +107,34 @@ DEFAULT_HIDDEN_SIZE = 256
 
 # Utility function defaults.
 def default_run_name():
-  now = datetime.now()
-  return (
-      'run_on_' + now.strftime('%m-%d-%y') + '_at_' + now.strftime('%H:%M:%S'))
+    now = datetime.now()
+    return (
+        'run_on_' + now.strftime('%m-%d-%y') + '_at_' + now.strftime('%H:%M:%S'))
 
 
 # NEUZZ configuration constants.
 def populate_with_neuzz(config):
-  """
-  From
-  https://github.com/Dongdongshe/neuzz/blob/2c7179557a491266ca1478e5f8c431d0b69d3e3a/nn.py.
+    """
+    From
+    https://github.com/Dongdongshe/neuzz/blob/2c7179557a491266ca1478e5f8c431d0b69d3e3a/nn.py.
 
-  The values given below are exactly those found in the original
-  NEUZZ repository. Line numbers reference `nn.py` in the above link.
-  """
+    The values given below are exactly those found in the original
+    NEUZZ repository. Line numbers reference `nn.py` in the above link.
+    """
 
-  config['architecture'] = NEUZZ_ONE_HIDDEN_LAYER_MODEL
+    config['architecture'] = NEUZZ_ONE_HIDDEN_LAYER_MODEL
 
-  # Line 353.
-  config['lr'] = 1e-4
+    # Line 353.
+    config['lr'] = 1e-4
 
-  # Line 345.
-  config['epochs'] = 50
+    # Line 345.
+    config['epochs'] = 50
 
-  # Line 353.
-  config['optimizer'] = ADAM
+    # Line 353.
+    config['optimizer'] = ADAM
 
-  # Line 343.
-  config['batch_size'] = 32
+    # Line 343.
+    config['batch_size'] = 32
 
 
 # Data processing (see libfuzzer_to_numpy.py).

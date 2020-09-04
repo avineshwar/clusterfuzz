@@ -74,111 +74,111 @@ GROUP BY
 
 
 class TooEarlyException(Exception):
-  """The end hour is too early according to BIGQUERY_INSERTION_DELAY."""
+    """The end hour is too early according to BIGQUERY_INSERTION_DELAY."""
 
 
 def get_start_hour():
-  """Get the start hour from the first crash."""
-  client = big_query.Client()
+    """Get the start hour from the first crash."""
+    client = big_query.Client()
 
-  sql = """
+    sql = """
 SELECT min(CAST(FLOOR(UNIX_SECONDS(created_at) / 3600) AS INT64)) as min_hour
 FROM main.crashes
 """
 
-  result = client.query(query=sql)
-  if result and result.rows:
-    return result.rows[0]['min_hour']
+    result = client.query(query=sql)
+    if result and result.rows:
+        return result.rows[0]['min_hour']
 
-  return 0
+    return 0
 
 
 def get_last_successful_hour_or_start_hour():
-  """Get the last hour that ran successfully or the start hour."""
-  last_hour = crash_stats.get_last_successful_hour()
-  if last_hour:
-    return last_hour
+    """Get the last hour that ran successfully or the start hour."""
+    last_hour = crash_stats.get_last_successful_hour()
+    if last_hour:
+        return last_hour
 
-  return get_start_hour()
+    return get_start_hour()
 
 
 def get_next_end_hour():
-  """Get the next end hour. If it's too early to compute data for the next end
-    hour, return None."""
-  last_successful_hour = get_last_successful_hour_or_start_hour()
-  if not last_successful_hour:
-    # No crashes seen, too early to start building stats.
-    raise TooEarlyException()
+    """Get the next end hour. If it's too early to compute data for the next end
+      hour, return None."""
+    last_successful_hour = get_last_successful_hour_or_start_hour()
+    if not last_successful_hour:
+        # No crashes seen, too early to start building stats.
+        raise TooEarlyException()
 
-  next_end_hour = last_successful_hour + 1
+    next_end_hour = last_successful_hour + 1
 
-  next_datetime = crash_stats.get_datetime(next_end_hour)
-  if (utils.utcnow() - next_datetime) <= BIGQUERY_INSERTION_DELAY:
-    raise TooEarlyException()
+    next_datetime = crash_stats.get_datetime(next_end_hour)
+    if (utils.utcnow() - next_datetime) <= BIGQUERY_INSERTION_DELAY:
+        raise TooEarlyException()
 
-  return next_end_hour
+    return next_end_hour
 
 
 def make_request(client, job_id, end_hour):
-  """Make a request to BigQuery to build crash stats."""
-  table_id = (
-      'crash_stats$%s' % crash_stats.get_datetime(end_hour).strftime('%Y%m%d'))
+    """Make a request to BigQuery to build crash stats."""
+    table_id = (
+        'crash_stats$%s' % crash_stats.get_datetime(end_hour).strftime('%Y%m%d'))
 
-  sql = SQL.format(
-      end_hour=end_hour,
-      end_date=(crash_stats.get_datetime(end_hour).strftime('%Y-%m-%d')))
-  logging.info('TableID: %s\nJobID: %s\nSQL: %s', table_id, job_id, sql)
+    sql = SQL.format(
+        end_hour=end_hour,
+        end_date=(crash_stats.get_datetime(end_hour).strftime('%Y-%m-%d')))
+    logging.info('TableID: %s\nJobID: %s\nSQL: %s', table_id, job_id, sql)
 
-  client.insert_from_query(
-      dataset_id='main', table_id=table_id, job_id=job_id, query=sql)
+    client.insert_from_query(
+        dataset_id='main', table_id=table_id, job_id=job_id, query=sql)
 
 
 def build(end_hour):
-  """Build crash stats for the end hour."""
-  logging.info('Started building crash stats for %s.',
-               crash_stats.get_datetime(end_hour))
-  job_id = JOB_ID_TEMPLATE.format(unique_number=int(time.time()))
+    """Build crash stats for the end hour."""
+    logging.info('Started building crash stats for %s.',
+                 crash_stats.get_datetime(end_hour))
+    job_id = JOB_ID_TEMPLATE.format(unique_number=int(time.time()))
 
-  client = big_query.Client()
-  make_request(client, job_id, end_hour)
+    client = big_query.Client()
+    make_request(client, job_id, end_hour)
 
-  start_time = time.time()
-  while (time.time() - start_time) < TIMEOUT:
-    time.sleep(10)
+    start_time = time.time()
+    while (time.time() - start_time) < TIMEOUT:
+        time.sleep(10)
 
-    result = client.get_job(job_id)
-    logging.info('Checking %s', json.dumps(result))
+        result = client.get_job(job_id)
+        logging.info('Checking %s', json.dumps(result))
 
-    if result['status']['state'] == 'DONE':
-      if result['status'].get('errors'):
-        raise Exception(json.dumps(result))
-      return
+        if result['status']['state'] == 'DONE':
+            if result['status'].get('errors'):
+                raise Exception(json.dumps(result))
+            return
 
-  raise Exception('Building crash stats exceeded %d seconds.' % TIMEOUT)
+    raise Exception('Building crash stats exceeded %d seconds.' % TIMEOUT)
 
 
 def build_if_needed():
-  """Get the next end hour and decide whether to execute build(). If build()
-    succeeds, then record the next end hour."""
-  try:
-    end_hour = get_next_end_hour()
-    build(end_hour)
+    """Get the next end hour and decide whether to execute build(). If build()
+      succeeds, then record the next end hour."""
+    try:
+        end_hour = get_next_end_hour()
+        build(end_hour)
 
-    job_history = data_types.BuildCrashStatsJobHistory()
-    job_history.end_time_in_hours = end_hour
-    job_history.put()
-    logging.info('CrashStatistics for end_hour=%s is built successfully',
-                 crash_stats.get_datetime(end_hour))
-    return end_hour
-  except TooEarlyException:
-    logging.info("Skip building crash stats because it's too early.")
+        job_history = data_types.BuildCrashStatsJobHistory()
+        job_history.end_time_in_hours = end_hour
+        job_history.put()
+        logging.info('CrashStatistics for end_hour=%s is built successfully',
+                     crash_stats.get_datetime(end_hour))
+        return end_hour
+    except TooEarlyException:
+        logging.info("Skip building crash stats because it's too early.")
 
 
 class Handler(base_handler.Handler):
-  """Handler for building data_types.CrashsStats2."""
+    """Handler for building data_types.CrashsStats2."""
 
-  @handler.cron()
-  def get(self):
-    """Process a GET request from a cronjob."""
-    end_hour = build_if_needed()
-    return 'OK (end_hour=%s)' % end_hour
+    @handler.cron()
+    def get(self):
+        """Process a GET request from a cronjob."""
+        end_hour = build_if_needed()
+        return 'OK (end_hour=%s)' % end_hour

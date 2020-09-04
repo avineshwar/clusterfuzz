@@ -22,24 +22,24 @@ from libs import helpers
 
 
 def remove(testcase):
-  """Remove duplicate status from a test case."""
-  testcase.status = 'Processed'
-  testcase.duplicate_of = None
-  testcase.put()
+    """Remove duplicate status from a test case."""
+    testcase.status = 'Processed'
+    testcase.duplicate_of = None
+    testcase.put()
 
-  helpers.log('Removed duplicate status for testcase %s' % testcase.key.id(),
-              helpers.MODIFY_OPERATION)
+    helpers.log('Removed duplicate status for testcase %s' % testcase.key.id(),
+                helpers.MODIFY_OPERATION)
 
 
 class Handler(base_handler.Handler):
-  """Handler that removes duplicate_of of a testcase."""
+    """Handler that removes duplicate_of of a testcase."""
 
-  @handler.post(handler.JSON, handler.JSON)
-  @handler.require_csrf_token
-  @handler.check_admin_access
-  def post(self):
-    """Remove duplicate status from a test case."""
-    testcase_id = request.get('testcaseId')
-    testcase = helpers.get_testcase(testcase_id)
-    remove(testcase)
-    return self.render_json(show.get_testcase_detail(testcase))
+    @handler.post(handler.JSON, handler.JSON)
+    @handler.require_csrf_token
+    @handler.check_admin_access
+    def post(self):
+        """Remove duplicate status from a test case."""
+        testcase_id = request.get('testcaseId')
+        testcase = helpers.get_testcase(testcase_id)
+        remove(testcase)
+        return self.render_json(show.get_testcase_detail(testcase))

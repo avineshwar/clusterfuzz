@@ -20,14 +20,14 @@ from libs.issue_management import issue_tracker_utils
 
 
 class Handler(base_handler.Handler):
-  """Handler that redirects user to the issue URL."""
+    """Handler that redirects user to the issue URL."""
 
-  def get(self, testcase_id=None):
-    """Redirect user to the correct URL."""
-    testcase = helpers.get_testcase(testcase_id)
-    issue_url = helpers.get_or_exit(
-        lambda: issue_tracker_utils.get_issue_url(testcase),
-        'Issue tracker for testcase (id=%s) is not found.' % testcase_id,
-        'Failed to get the issue tracker URL.')
+    def get(self, testcase_id=None):
+        """Redirect user to the correct URL."""
+        testcase = helpers.get_testcase(testcase_id)
+        issue_url = helpers.get_or_exit(
+            lambda: issue_tracker_utils.get_issue_url(testcase),
+            'Issue tracker for testcase (id=%s) is not found.' % testcase_id,
+            'Failed to get the issue tracker URL.')
 
-    return self.redirect(issue_url)
+        return self.redirect(issue_url)

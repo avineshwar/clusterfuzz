@@ -50,18 +50,19 @@ FIELDS = [
 
 
 class GroupFilter(filters.Filter):
-  """Filter for group."""
+    """Filter for group."""
 
-  def __init__(self):
-    self.param_key = 'group'
+    def __init__(self):
+        self.param_key = 'group'
 
-  def add(self, query, params):
-    """Add group filter."""
-    value = params.get(self.param_key, '')
-    if filters.is_empty(value):
-      query.filter('is_leader', True)
-      return
-    query.filter('group_id', helpers.cast(value, int, "'group' must be int."))
+    def add(self, query, params):
+        """Add group filter."""
+        value = params.get(self.param_key, '')
+        if filters.is_empty(value):
+            query.filter('is_leader', True)
+            return
+        query.filter('group_id', helpers.cast(
+            value, int, "'group' must be int."))
 
 
 KEYWORD_FILTERS = [
@@ -89,148 +90,149 @@ FILTERS = [
 
 
 def add_filters(query, params):
-  """Add filters based on params."""
-  if not filters.has_params(params, FILTERS) and not params.get('showall'):
-    params['open'] = 'yes'
+    """Add filters based on params."""
+    if not filters.has_params(params, FILTERS) and not params.get('showall'):
+        params['open'] = 'yes'
 
-  query.filter('status', 'Processed')
-  query.filter('is_a_duplicate_flag', False)
+    query.filter('status', 'Processed')
+    query.filter('is_a_duplicate_flag', False)
 
-  # For queries that use inequality we need to order by that field. Otherwise,
-  # use the timestamp.
-  if 'revision_greater_than' in params:
-    query.order('crash_revision', is_desc=True)
-  else:
-    query.order('timestamp', is_desc=True)
+    # For queries that use inequality we need to order by that field. Otherwise,
+    # use the timestamp.
+    if 'revision_greater_than' in params:
+        query.order('crash_revision', is_desc=True)
+    else:
+        query.order('timestamp', is_desc=True)
 
-  filters.add(query, params, FILTERS)
+    filters.add(query, params, FILTERS)
 
 
 def get_result():
-  """Get the result for the testcase list page."""
-  params = dict(request.iterparams())
-  page = helpers.cast(request.get('page') or 1, int, "'page' is not an int.")
+    """Get the result for the testcase list page."""
+    params = dict(request.iterparams())
+    page = helpers.cast(request.get('page') or 1, int, "'page' is not an int.")
 
-  query = datastore_query.Query(data_types.Testcase)
-  crash_access.add_scope(query, params, 'security_flag', 'job_type',
-                         'fuzzer_name_indices')
-  add_filters(query, params)
+    query = datastore_query.Query(data_types.Testcase)
+    crash_access.add_scope(query, params, 'security_flag', 'job_type',
+                           'fuzzer_name_indices')
+    add_filters(query, params)
 
-  testcases, total_pages, total_items, has_more = query.fetch_page(
-      page=page, page_size=PAGE_SIZE, projection=FIELDS, more_limit=MORE_LIMIT)
+    testcases, total_pages, total_items, has_more = query.fetch_page(
+        page=page, page_size=PAGE_SIZE, projection=FIELDS, more_limit=MORE_LIMIT)
 
-  items = []
-  for testcase in testcases:
-    regression_range = ''
-    fixed_range = ''
+    items = []
+    for testcase in testcases:
+        regression_range = ''
+        fixed_range = ''
 
-    if testcase.regression and testcase.regression != 'NA':
-      regression_range = testcase.regression
-    if testcase.fixed and testcase.fixed != 'NA':
-      fixed_range = testcase.fixed
+        if testcase.regression and testcase.regression != 'NA':
+            regression_range = testcase.regression
+        if testcase.fixed and testcase.fixed != 'NA':
+            fixed_range = testcase.fixed
 
-    item = {
-        'id': testcase.key.id(),
-        'crashType': ' '.join(testcase.crash_type.splitlines()),
-        'crashStateLines': testcase.crash_state.strip().splitlines(),
-        'jobType': testcase.job_type,
-        'isClosed': not testcase.open,
-        'isFixed': testcase.fixed and testcase.fixed != 'NA',
-        'isReproducible': not testcase.one_time_crasher_flag,
-        'isSecurity': testcase.security_flag,
-        'isImpactSet': testcase.is_impact_set_flag,
-        'impacts': {
-            'stable': testcase.impact_stable_version,
-            'beta': testcase.impact_beta_version,
-        },
-        'regressionRange': regression_range,
-        'fixedRange': fixed_range,
-        'groupId': testcase.group_id,
-        'projectName': testcase.project_name,
-        'platform': testcase.platform,
-        'issueId': testcase.bug_information or testcase.group_bug_information,
-        'showImpacts': testcase.has_impacts(),
-        'impactsProduction': testcase.impacts_production()
+        item = {
+            'id': testcase.key.id(),
+            'crashType': ' '.join(testcase.crash_type.splitlines()),
+            'crashStateLines': testcase.crash_state.strip().splitlines(),
+            'jobType': testcase.job_type,
+            'isClosed': not testcase.open,
+            'isFixed': testcase.fixed and testcase.fixed != 'NA',
+            'isReproducible': not testcase.one_time_crasher_flag,
+            'isSecurity': testcase.security_flag,
+            'isImpactSet': testcase.is_impact_set_flag,
+            'impacts': {
+                'stable': testcase.impact_stable_version,
+                'beta': testcase.impact_beta_version,
+            },
+            'regressionRange': regression_range,
+            'fixedRange': fixed_range,
+            'groupId': testcase.group_id,
+            'projectName': testcase.project_name,
+            'platform': testcase.platform,
+            'issueId': testcase.bug_information or testcase.group_bug_information,
+            'showImpacts': testcase.has_impacts(),
+            'impactsProduction': testcase.impacts_production()
+        }
+        if testcase.timestamp:
+            item['timestamp'] = utils.utc_datetime_to_timestamp(
+                testcase.timestamp)
+
+        items.append(item)
+
+    helpers.log('Testcases', helpers.VIEW_OPERATION)
+
+    result = {
+        'hasMore': has_more,
+        'items': items,
+        'page': page,
+        'pageSize': PAGE_SIZE,
+        'totalItems': total_items,
+        'totalPages': total_pages,
     }
-    if testcase.timestamp:
-      item['timestamp'] = utils.utc_datetime_to_timestamp(testcase.timestamp)
-
-    items.append(item)
-
-  helpers.log('Testcases', helpers.VIEW_OPERATION)
-
-  result = {
-      'hasMore': has_more,
-      'items': items,
-      'page': page,
-      'pageSize': PAGE_SIZE,
-      'totalItems': total_items,
-      'totalPages': total_pages,
-  }
-  return result, params
+    return result, params
 
 
 class Handler(base_handler.Handler):
-  """Handler that gets the testcase list when user first lands on the page."""
+    """Handler that gets the testcase list when user first lands on the page."""
 
-  @handler.get(handler.HTML)
-  def get(self):
-    """Get and render the testcase list in HTML."""
-    result, params = get_result()
-    field_values = {
-        'projects':
-            data_handler.get_all_project_names(),
-        'fuzzers':
-            data_handler.get_all_fuzzer_names_including_children(
-                include_parents=True),
-        'jobs':
-            data_handler.get_all_job_type_names(),
-        'shouldShowImpact':
-            utils.is_chromium()
-    }
-    return self.render('testcase-list.html', {
-        'fieldValues': field_values,
-        'result': result,
-        'params': params
-    })
+    @handler.get(handler.HTML)
+    def get(self):
+        """Get and render the testcase list in HTML."""
+        result, params = get_result()
+        field_values = {
+            'projects':
+                data_handler.get_all_project_names(),
+            'fuzzers':
+                data_handler.get_all_fuzzer_names_including_children(
+                    include_parents=True),
+            'jobs':
+                data_handler.get_all_job_type_names(),
+            'shouldShowImpact':
+                utils.is_chromium()
+        }
+        return self.render('testcase-list.html', {
+            'fieldValues': field_values,
+            'result': result,
+            'params': params
+        })
 
 
 class CacheHandler(base_handler.Handler):
-  """Handler for exercising cache."""
+    """Handler for exercising cache."""
 
-  @handler.cron()
-  def get(self):
-    """Handle a GET request."""
-    # pylint: disable=unexpected-keyword-arg
+    @handler.cron()
+    def get(self):
+        """Handle a GET request."""
+        # pylint: disable=unexpected-keyword-arg
 
-    # Memoize all project and job names.
-    _ = data_handler.get_all_project_names(__memoize_force__=True)
-    _ = data_handler.get_all_job_type_names(__memoize_force__=True)
+        # Memoize all project and job names.
+        _ = data_handler.get_all_project_names(__memoize_force__=True)
+        _ = data_handler.get_all_job_type_names(__memoize_force__=True)
 
-    # Memoize both variants of get_all_fuzzer_names_including_children.
-    _ = data_handler.get_all_fuzzer_names_including_children(
-        include_parents=True, __memoize_force__=True)
-    _ = data_handler.get_all_fuzzer_names_including_children(
-        __memoize_force__=True)
+        # Memoize both variants of get_all_fuzzer_names_including_children.
+        _ = data_handler.get_all_fuzzer_names_including_children(
+            include_parents=True, __memoize_force__=True)
+        _ = data_handler.get_all_fuzzer_names_including_children(
+            __memoize_force__=True)
 
-    # Memoize expensive testcase attribute calls.
-    for testcase_id in data_handler.get_open_testcase_id_iterator():
-      try:
-        testcase = data_handler.get_testcase_by_id(testcase_id)
-      except errors.InvalidTestcaseError:
-        # Already deleted.
-        continue
+        # Memoize expensive testcase attribute calls.
+        for testcase_id in data_handler.get_open_testcase_id_iterator():
+            try:
+                testcase = data_handler.get_testcase_by_id(testcase_id)
+            except errors.InvalidTestcaseError:
+                # Already deleted.
+                continue
 
-      blobs.get_blob_size(testcase.fuzzed_keys)
-      blobs.get_blob_size(testcase.minimized_keys)
+            blobs.get_blob_size(testcase.fuzzed_keys)
+            blobs.get_blob_size(testcase.minimized_keys)
 
 
 class JsonHandler(base_handler.Handler):
-  """Handler that gets the testcase list when user clicks on next page."""
+    """Handler that gets the testcase list when user clicks on next page."""
 
-  @handler.post(handler.JSON, handler.JSON)
-  @handler.oauth
-  def post(self):
-    """Get and render the testcase list in JSON."""
-    result, _ = get_result()
-    return self.render_json(result)
+    @handler.post(handler.JSON, handler.JSON)
+    @handler.oauth
+    def post(self):
+        """Get and render the testcase list in JSON."""
+        result, _ = get_result()
+        return self.render_json(result)

@@ -23,28 +23,28 @@ from libs import helpers
 
 
 def remove_group(testcase_id):
-  """Remove the testcase from a group."""
-  testcase = helpers.get_testcase(testcase_id)
-  group_id = testcase.group_id
+    """Remove the testcase from a group."""
+    testcase = helpers.get_testcase(testcase_id)
+    group_id = testcase.group_id
 
-  data_handler.remove_testcase_from_group(testcase)
+    data_handler.remove_testcase_from_group(testcase)
 
-  helpers.log(
-      'Removed the testcase %s from the group %s' %
-      (testcase.key.id(), group_id), helpers.MODIFY_OPERATION)
+    helpers.log(
+        'Removed the testcase %s from the group %s' %
+        (testcase.key.id(), group_id), helpers.MODIFY_OPERATION)
 
-  return testcase
+    return testcase
 
 
 class Handler(base_handler.Handler):
-  """Handler that removes a testcase from a group."""
+    """Handler that removes a testcase from a group."""
 
-  @handler.post(handler.JSON, handler.JSON)
-  @handler.require_csrf_token
-  @handler.check_admin_access
-  def post(self):
-    """Remove the issue from the testcase."""
-    testcase_id = request.get('testcaseId')
+    @handler.post(handler.JSON, handler.JSON)
+    @handler.require_csrf_token
+    @handler.check_admin_access
+    def post(self):
+        """Remove the issue from the testcase."""
+        testcase_id = request.get('testcaseId')
 
-    updated_testcase = remove_group(testcase_id)
-    return self.render_json(show.get_testcase_detail(updated_testcase))
+        updated_testcase = remove_group(testcase_id)
+        return self.render_json(show.get_testcase_detail(updated_testcase))

@@ -29,135 +29,135 @@ import bot.fuzzers.ml.gradientfuzz.utils as utils
 
 
 def load_existing_model_from(config):
-  """
-    Loads the latest version of a PREVIOUSLY compiled model from arguments.
-
-    Args:
-        config (dict): Run configuration dictionary (usually from
-            parser.parse_args()).
-
-    Returns:
-        model (keras.Model): loaded model from config.
     """
-  latest_filename = tf.train.latest_checkpoint(
-      utils.get_full_path(config['run_name']))
+      Loads the latest version of a PREVIOUSLY compiled model from arguments.
 
-  print('Loading \"{}\" model from {}...'.format(config['architecture'],
-                                                 latest_filename))
-  model = models.make_model_from_layer(
-      constants.ARCHITECTURE_MAP[config['architecture']],
-      config['output_dim'],
-      config['input_shape'],
-      hidden_layer_dim=config['num_hidden'])
-  model.load_weights(latest_filename).expect_partial()
+      Args:
+          config (dict): Run configuration dictionary (usually from
+              parser.parse_args()).
 
-  # Update 'cur_epoch' in config, since training loop doesn't do it.
-  config['cur_epoch'] = int(
-      latest_filename[-constants.CP_EPOCH_NUM_DIGITS + 1:])
-  print('Last saved epoch: {}.'.format(config['cur_epoch']))
-  utils.save_model_config(config)
+      Returns:
+          model (keras.Model): loaded model from config.
+      """
+    latest_filename = tf.train.latest_checkpoint(
+        utils.get_full_path(config['run_name']))
 
-  # Training options.
-  model.compile(
-      optimizer=constants.OPTIMIZER_MAP[config['optimizer']](
-          learning_rate=config['lr']),
-      loss=keras.losses.BinaryCrossentropy(from_logits=False),
-      metrics=[model_utils.BitmapAcc(),
-               model_utils.NeuzzJaccardAcc()])
+    print('Loading \"{}\" model from {}...'.format(config['architecture'],
+                                                   latest_filename))
+    model = models.make_model_from_layer(
+        constants.ARCHITECTURE_MAP[config['architecture']],
+        config['output_dim'],
+        config['input_shape'],
+        hidden_layer_dim=config['num_hidden'])
+    model.load_weights(latest_filename).expect_partial()
 
-  return model
+    # Update 'cur_epoch' in config, since training loop doesn't do it.
+    config['cur_epoch'] = int(
+        latest_filename[-constants.CP_EPOCH_NUM_DIGITS + 1:])
+    print('Last saved epoch: {}.'.format(config['cur_epoch']))
+    utils.save_model_config(config)
+
+    # Training options.
+    model.compile(
+        optimizer=constants.OPTIMIZER_MAP[config['optimizer']](
+            learning_rate=config['lr']),
+        loss=keras.losses.BinaryCrossentropy(from_logits=False),
+        metrics=[model_utils.BitmapAcc(),
+                 model_utils.NeuzzJaccardAcc()])
+
+    return model
 
 
 def get_new_model_from(config):
-  """
-    Creates and returns a NEW compiled model from arguments.
-    Assumes NOT using a pre-determined config (e.g. --neuzz-config),
-    and assumes the model doesn't already exist.
-
-    Args:
-        config (dict): Run configuration dictionary (usually from
-            parser.parse_args()).
-
-    Returns:
-        model (keras.Model): new model constructed from config.
     """
+      Creates and returns a NEW compiled model from arguments.
+      Assumes NOT using a pre-determined config (e.g. --neuzz-config),
+      and assumes the model doesn't already exist.
 
-  # Model options.
-  model = models.make_model_from_layer(
-      constants.ARCHITECTURE_MAP[config['architecture']],
-      config['output_dim'],
-      config['input_shape'],
-      hidden_layer_dim=config['num_hidden'])
+      Args:
+          config (dict): Run configuration dictionary (usually from
+              parser.parse_args()).
 
-  # Training options.
-  model.compile(
-      optimizer=constants.OPTIMIZER_MAP[config['optimizer']](
-          learning_rate=config['lr']),
-      loss=keras.losses.BinaryCrossentropy(from_logits=False),
-      metrics=[model_utils.BitmapAcc(),
-               model_utils.NeuzzJaccardAcc()])
+      Returns:
+          model (keras.Model): new model constructed from config.
+      """
 
-  return model
+    # Model options.
+    model = models.make_model_from_layer(
+        constants.ARCHITECTURE_MAP[config['architecture']],
+        config['output_dim'],
+        config['input_shape'],
+        hidden_layer_dim=config['num_hidden'])
+
+    # Training options.
+    model.compile(
+        optimizer=constants.OPTIMIZER_MAP[config['optimizer']](
+            learning_rate=config['lr']),
+        loss=keras.losses.BinaryCrossentropy(from_logits=False),
+        metrics=[model_utils.BitmapAcc(),
+                 model_utils.NeuzzJaccardAcc()])
+
+    return model
 
 
 def train_model(model, config, train_dataset, val_dataset):
-  """
-    Constructs keras.Callbacks to save model progress and runs model.fit().
-
-    Args:
-        model (keras.Model): Model to train.
-        config (dict): Configuration as constructed by `config_from_args()`
-            in `utils.py`.
-        train_dataset (ProgramDataset): Training set for model.
-        val_dataset (ProgramDatset): Val set for model (backprop doesn't
-            happen on these).
-
-    Returns:
-        tf.callbacks.History object documenting training history.
     """
-  utils.save_model_config(config)
-  callback_list = model_utils.get_callbacks(config)
-  model.fit(
-      train_dataset,
-      batch_size=config['batch_size'],
-      epochs=config['epochs'],
-      verbose=1,
-      callbacks=callback_list,
-      validation_data=val_dataset,
-      shuffle=True,
-      initial_epoch=config['cur_epoch'],
-      validation_batch_size=config['val_batch_size'],
-      validation_freq=1,
-      workers=os.cpu_count(),
-      use_multiprocessing=False)
-  return constants.ExitCodes.SUCCESS
+      Constructs keras.Callbacks to save model progress and runs model.fit().
+
+      Args:
+          model (keras.Model): Model to train.
+          config (dict): Configuration as constructed by `config_from_args()`
+              in `utils.py`.
+          train_dataset (ProgramDataset): Training set for model.
+          val_dataset (ProgramDatset): Val set for model (backprop doesn't
+              happen on these).
+
+      Returns:
+          tf.callbacks.History object documenting training history.
+      """
+    utils.save_model_config(config)
+    callback_list = model_utils.get_callbacks(config)
+    model.fit(
+        train_dataset,
+        batch_size=config['batch_size'],
+        epochs=config['epochs'],
+        verbose=1,
+        callbacks=callback_list,
+        validation_data=val_dataset,
+        shuffle=True,
+        initial_epoch=config['cur_epoch'],
+        validation_batch_size=config['val_batch_size'],
+        validation_freq=1,
+        workers=os.cpu_count(),
+        use_multiprocessing=False)
+    return constants.ExitCodes.SUCCESS
 
 
 def main():
-  """
-    Takes configuration as specified by arguments in `get_train_args()` in
-    `opts.py` and trains a model, saving every five epochs.
-
-    Args:
-        N/A
-
-    Returns:
-        N/A (model weights saved under models/[architecture]/[run-name])
     """
-  utils.make_required_dirs()
-  config, new_model = utils.config_from_args(opts.get_train_args())
-  utils.pretty_print(config)
+      Takes configuration as specified by arguments in `get_train_args()` in
+      `opts.py` and trains a model, saving every five epochs.
 
-  # Grab dataset and model from config.
-  train_dataset, val_dataset = data_utils.get_dataset_from(config)
-  if new_model:
-    model = get_new_model_from(config)
-  else:
-    model = load_existing_model_from(config)
+      Args:
+          N/A
 
-  model_utils.print_model_summary(model, config, config['input_shape'])
-  train_model(model, config, train_dataset, val_dataset)
+      Returns:
+          N/A (model weights saved under models/[architecture]/[run-name])
+      """
+    utils.make_required_dirs()
+    config, new_model = utils.config_from_args(opts.get_train_args())
+    utils.pretty_print(config)
+
+    # Grab dataset and model from config.
+    train_dataset, val_dataset = data_utils.get_dataset_from(config)
+    if new_model:
+        model = get_new_model_from(config)
+    else:
+        model = load_existing_model_from(config)
+
+    model_utils.print_model_summary(model, config, config['input_shape'])
+    train_model(model, config, train_dataset, val_dataset)
 
 
 if __name__ == '__main__':
-  main()
+    main()

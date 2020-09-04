@@ -22,47 +22,47 @@ from metrics import logs
 
 
 def get_current_request():
-  """Get the current request."""
-  return flask.request
+    """Get the current request."""
+    return flask.request
 
 
 def get_cache_backing():
-  """Get the cache backing for saving current context data."""
-  return flask.g
+    """Get the cache backing for saving current context data."""
+    return flask.g
 
 
 class _FifoRequestCache(memoize.FifoInMemory):
-  """In memory caching engine scoped to a request."""
+    """In memory caching engine scoped to a request."""
 
-  def __init__(self, cache_key, capacity):
-    super(_FifoRequestCache, self).__init__(capacity)
-    self._cache_key = str(cache_key)
+    def __init__(self, cache_key, capacity):
+        super(_FifoRequestCache, self).__init__(capacity)
+        self._cache_key = str(cache_key)
 
-  @property
-  def cache(self):
-    """Get the cache backing."""
-    cache_backing = get_cache_backing()
-    if not cache_backing:
-      # Not a cache (e.g. in a unit test). Should not happen in production.
-      logs.log_error('No container found for cache.')
-      return None
+    @property
+    def cache(self):
+        """Get the cache backing."""
+        cache_backing = get_cache_backing()
+        if not cache_backing:
+            # Not a cache (e.g. in a unit test). Should not happen in production.
+            logs.log_error('No container found for cache.')
+            return None
 
-    key = '__cache:' + self._cache_key
+        key = '__cache:' + self._cache_key
 
-    backing = getattr(cache_backing, key, None)
-    if backing is None:
-      backing = collections.OrderedDict()
-      setattr(cache_backing, key, backing)
+        backing = getattr(cache_backing, key, None)
+        if backing is None:
+            backing = collections.OrderedDict()
+            setattr(cache_backing, key, backing)
 
-    return backing
+        return backing
 
 
 def wrap(capacity):
-  """Wraps a function to use the per request cache."""
+    """Wraps a function to use the per request cache."""
 
-  def decorator(func):
-    """Decorator function."""
-    engine = _FifoRequestCache(id(func), capacity)
-    return memoize.wrap(engine)(func)
+    def decorator(func):
+        """Decorator function."""
+        engine = _FifoRequestCache(id(func), capacity)
+        return memoize.wrap(engine)(func)
 
-  return decorator
+    return decorator

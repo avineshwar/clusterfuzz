@@ -29,57 +29,58 @@ SESSION_EXPIRY_DAYS = 14
 
 
 class Handler(base_handler.Handler):
-  """Login page."""
+    """Login page."""
 
-  @handler.get(handler.HTML)
-  @handler.unsupported_on_local_server
-  def get(self):
-    """Handle a get request."""
-    dest = request.get('dest', DEFAULT_REDIRECT)
-    base_handler.check_redirect_url(dest)
+    @handler.get(handler.HTML)
+    @handler.unsupported_on_local_server
+    def get(self):
+        """Handle a get request."""
+        dest = request.get('dest', DEFAULT_REDIRECT)
+        base_handler.check_redirect_url(dest)
 
-    return self.render(
-        'login.html', {
-            'apiKey': local_config.ProjectConfig().get('firebase.api_key'),
-            'authDomain': auth.auth_domain(),
-            'dest': dest,
-        })
+        return self.render(
+            'login.html', {
+                'apiKey': local_config.ProjectConfig().get('firebase.api_key'),
+                'authDomain': auth.auth_domain(),
+                'dest': dest,
+            })
 
 
 class SessionLoginHandler(base_handler.Handler):
-  """Session login handler."""
+    """Session login handler."""
 
-  @handler.post(handler.JSON, handler.JSON)
-  def post(self):
-    """Handle a post request."""
-    id_token = request.get('idToken')
-    expires_in = datetime.timedelta(days=SESSION_EXPIRY_DAYS)
-    try:
-      session_cookie = auth.create_session_cookie(id_token, expires_in)
-    except auth.AuthError:
-      raise helpers.EarlyExitException('Failed to create session cookie.', 401)
+    @handler.post(handler.JSON, handler.JSON)
+    def post(self):
+        """Handle a post request."""
+        id_token = request.get('idToken')
+        expires_in = datetime.timedelta(days=SESSION_EXPIRY_DAYS)
+        try:
+            session_cookie = auth.create_session_cookie(id_token, expires_in)
+        except auth.AuthError:
+            raise helpers.EarlyExitException(
+                'Failed to create session cookie.', 401)
 
-    expires = datetime.datetime.now() + expires_in
-    response = self.render_json({'status': 'success'})
-    response.set_cookie(
-        'session', session_cookie, expires=expires, httponly=True, secure=True)
-    return response
+        expires = datetime.datetime.now() + expires_in
+        response = self.render_json({'status': 'success'})
+        response.set_cookie(
+            'session', session_cookie, expires=expires, httponly=True, secure=True)
+        return response
 
 
 class LogoutHandler(base_handler.Handler):
-  """Log out handler."""
+    """Log out handler."""
 
-  @handler.get(handler.HTML)
-  @handler.unsupported_on_local_server
-  @handler.require_csrf_token
-  def get(self):
-    """Handle a get request."""
-    try:
-      auth.revoke_session_cookie(auth.get_session_cookie())
-    except auth.AuthError:
-      # Even if the revoke failed, remove the cookie.
-      logs.log_error('Failed to revoke session cookie.')
+    @handler.get(handler.HTML)
+    @handler.unsupported_on_local_server
+    @handler.require_csrf_token
+    def get(self):
+        """Handle a get request."""
+        try:
+            auth.revoke_session_cookie(auth.get_session_cookie())
+        except auth.AuthError:
+            # Even if the revoke failed, remove the cookie.
+            logs.log_error('Failed to revoke session cookie.')
 
-    response = self.redirect(request.get('dest', DEFAULT_REDIRECT))
-    response.delete_cookie('session')
-    return response
+        response = self.redirect(request.get('dest', DEFAULT_REDIRECT))
+        response.delete_cookie('session')
+        return response

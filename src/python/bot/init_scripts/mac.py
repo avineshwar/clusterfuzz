@@ -29,40 +29,40 @@ LSREGISTER_CMD = ('/System/Library/Frameworks/CoreServices.framework'
 
 
 def _execute(cmd):
-  """Execute command and return output as an iterator."""
-  proc = subprocess.Popen(
-      cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  try:
-    for line in iter(proc.stdout.readline, b''):
-      yield line.decode('utf-8')
-  finally:
-    proc.kill()
+    """Execute command and return output as an iterator."""
+    proc = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    try:
+        for line in iter(proc.stdout.readline, b''):
+            yield line.decode('utf-8')
+    finally:
+        proc.kill()
 
 
 def get_launch_service_path():
-  """Get launch service path from lsregister."""
-  for line in _execute(LSREGISTER_CMD):
-    m = LAUNCH_SERVICE_PATH_REGEX.match(line)
-    if not m:
-      continue
+    """Get launch service path from lsregister."""
+    for line in _execute(LSREGISTER_CMD):
+        m = LAUNCH_SERVICE_PATH_REGEX.match(line)
+        if not m:
+            continue
 
-    return '/'.join(m.group(1).split('/')[:5])
+        return '/'.join(m.group(1).split('/')[:5])
 
-  return None
+    return None
 
 
 def clear_launch_service_data():
-  """See crbug.com/661221 for more info."""
-  path = get_launch_service_path()
-  if not path or not os.path.exists(path):
-    return
-  # Best effort removal. We use shutil instead of shell.remove_directory since
-  # it's too noisy and there are many files that cannot be removed.
-  shutil.rmtree(os.path.join(path, '0'), ignore_errors=True)
-  shutil.rmtree(os.path.join(path, 'T'), ignore_errors=True)
+    """See crbug.com/661221 for more info."""
+    path = get_launch_service_path()
+    if not path or not os.path.exists(path):
+        return
+    # Best effort removal. We use shutil instead of shell.remove_directory since
+    # it's too noisy and there are many files that cannot be removed.
+    shutil.rmtree(os.path.join(path, '0'), ignore_errors=True)
+    shutil.rmtree(os.path.join(path, 'T'), ignore_errors=True)
 
 
 def run():
-  """Run the initialization for Mac."""
-  init_runner.run()
-  clear_launch_service_data()
+    """Run the initialization for Mac."""
+    init_runner.run()
+    clear_launch_service_data()

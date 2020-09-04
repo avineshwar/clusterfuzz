@@ -27,34 +27,34 @@ def plot_histogram(hist,
                    x_axis_title=None,
                    y_axis_title=None,
                    bins=None):
-  """
-    Basic seaborn histogram plotting wrapper with title.
-
-    Args:
-        hist (list(int)): List of numbers to construct histogram over.
-        save_path (str): Save histogram image to this path.
-        title (str): Title at top of histogram.
-        x_axis_title (str): Title along x-axis.
-        y_axis_title (str): Title along y-axis.
-        bins (int): Number of histogram bins.
-
-    Returns:
-        N/A (histogram image saved under save_path)
     """
-  # Get bins and plot histogram.
-  if bins is None:
-    bins = plt.rcParams['hist.bins']
-  ax = sns.distplot(hist, kde=False, bins=bins)
+      Basic seaborn histogram plotting wrapper with title.
 
-  # Set axis labels.
-  if x_axis_title is not None:
-    ax.set_xlabel(x_axis_title)
-  if y_axis_title is not None:
-    ax.set_ylabel(y_axis_title)
+      Args:
+          hist (list(int)): List of numbers to construct histogram over.
+          save_path (str): Save histogram image to this path.
+          title (str): Title at top of histogram.
+          x_axis_title (str): Title along x-axis.
+          y_axis_title (str): Title along y-axis.
+          bins (int): Number of histogram bins.
 
-  # Get plot and save to save_path.
-  fig = ax.get_figure()
-  fig.suptitle(title)
-  fig.savefig(save_path)
-  plt.clf()
-  print('Saved under {}'.format(save_path))
+      Returns:
+          N/A (histogram image saved under save_path)
+      """
+    # Get bins and plot histogram.
+    if bins is None:
+        bins = plt.rcParams['hist.bins']
+    ax = sns.distplot(hist, kde=False, bins=bins)
+
+    # Set axis labels.
+    if x_axis_title is not None:
+        ax.set_xlabel(x_axis_title)
+    if y_axis_title is not None:
+        ax.set_ylabel(y_axis_title)
+
+    # Get plot and save to save_path.
+    fig = ax.get_figure()
+    fig.suptitle(title)
+    fig.savefig(save_path)
+    plt.clf()
+    print('Saved under {}'.format(save_path))

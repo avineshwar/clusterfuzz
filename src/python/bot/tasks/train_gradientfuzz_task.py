@@ -17,5 +17,5 @@ from metrics import logs
 
 
 def execute_task(fuzzer_name, job_type):
-  logs.log('Got a gradientfuzzer task with fuzzer name: {} and job type: {}.'
-           .format(fuzzer_name, job_type))
+    logs.log('Got a gradientfuzzer task with fuzzer name: {} and job type: {}.'
+             .format(fuzzer_name, job_type))

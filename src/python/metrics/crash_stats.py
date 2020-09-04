@@ -112,162 +112,162 @@ ORDER BY {sort_by} DESC, total_count DESC
 
 
 def get_remainder_for_index(true_end, time_span):
-  """Get remainder. This should be tested together with
-    convert_index_to_hour."""
-  # The remainder needs +1 because the cut-off is at the end of true_end.
-  # For example, if the true_end is 49, the 1st day is 2 to 25 and the
-  # 2nd day is 26, to 49.
-  return (true_end % time_span) + 1
+    """Get remainder. This should be tested together with
+      convert_index_to_hour."""
+    # The remainder needs +1 because the cut-off is at the end of true_end.
+    # For example, if the true_end is 49, the 1st day is 2 to 25 and the
+    # 2nd day is 26, to 49.
+    return (true_end % time_span) + 1
 
 
 def convert_index_to_hour(index, time_span, remainder):
-  """Convert index to hour."""
-  # This needs -1 because the end hour is inclusive. For example, if the period
-  # represents [2, 26), the end hour is 25.
-  #
-  # Index is added 1 because, in our SQL, we subtract the remainder, divide,
-  # and floor. So, in order to get the original hour, we need to add 1 to the
-  # index.
-  return ((index + 1) * time_span) + remainder - 1
+    """Convert index to hour."""
+    # This needs -1 because the end hour is inclusive. For example, if the period
+    # represents [2, 26), the end hour is 25.
+    #
+    # Index is added 1 because, in our SQL, we subtract the remainder, divide,
+    # and floor. So, in order to get the original hour, we need to add 1 to the
+    # index.
+    return ((index + 1) * time_span) + remainder - 1
 
 
 def get(end, days, block, group_by, where_clause, group_having_clause, sort_by,
         offset, limit):
-  """Query from BigQuery given the params."""
-  if where_clause:
-    where_clause = '(%s) AND ' % where_clause
+    """Query from BigQuery given the params."""
+    if where_clause:
+        where_clause = '(%s) AND ' % where_clause
 
-  start = end - (days * 24) + 1
+    start = end - (days * 24) + 1
 
-  where_clause += '(hour BETWEEN %d AND %d) AND ' % (start, end)
-  where_clause += ('(_PARTITIONTIME BETWEEN TIMESTAMP_TRUNC("%s", DAY) '
-                   'AND TIMESTAMP_TRUNC("%s", DAY))' %
-                   (get_datetime(start).strftime('%Y-%m-%d'),
-                    get_datetime(end).strftime('%Y-%m-%d')))
+    where_clause += '(hour BETWEEN %d AND %d) AND ' % (start, end)
+    where_clause += ('(_PARTITIONTIME BETWEEN TIMESTAMP_TRUNC("%s", DAY) '
+                     'AND TIMESTAMP_TRUNC("%s", DAY))' %
+                     (get_datetime(start).strftime('%Y-%m-%d'),
+                      get_datetime(end).strftime('%Y-%m-%d')))
 
-  time_span = 1 if block == 'hour' else 24
-  remainder = get_remainder_for_index(end, time_span)
+    time_span = 1 if block == 'hour' else 24
+    remainder = get_remainder_for_index(end, time_span)
 
-  if group_having_clause:
-    group_having_clause = 'HAVING ' + group_having_clause
+    if group_having_clause:
+        group_having_clause = 'HAVING ' + group_having_clause
 
-  if (not big_query.VALID_FIELD_NAME_REGEX.match(group_by) or
-      not big_query.VALID_FIELD_NAME_REGEX.match(sort_by)):
-    raise ValueError('Invalid group_by or sort_by')
+    if (not big_query.VALID_FIELD_NAME_REGEX.match(group_by) or
+            not big_query.VALID_FIELD_NAME_REGEX.match(sort_by)):
+        raise ValueError('Invalid group_by or sort_by')
 
-  sql = SQL.format(
-      time_span=time_span,
-      remainder=remainder,
-      group_by=group_by,
-      where_clause=where_clause,
-      group_having_clause=group_having_clause,
-      sort_by=sort_by)
+    sql = SQL.format(
+        time_span=time_span,
+        remainder=remainder,
+        group_by=group_by,
+        where_clause=where_clause,
+        group_having_clause=group_having_clause,
+        sort_by=sort_by)
 
-  client = big_query.Client()
-  result = client.query(query=sql, offset=offset, limit=limit)
+    client = big_query.Client()
+    result = client.query(query=sql, offset=offset, limit=limit)
 
-  items = []
-  for row in result.rows:
-    avg_crash_time_in_ms = row['sum_crash_time_in_ms'] // row['total_count']
+    items = []
+    for row in result.rows:
+        avg_crash_time_in_ms = row['sum_crash_time_in_ms'] // row['total_count']
 
-    for group in row['groups']:
-      for index in group['indices']:
-        index['hour'] = convert_index_to_hour(index['index'], time_span,
-                                              remainder)
+        for group in row['groups']:
+            for index in group['indices']:
+                index['hour'] = convert_index_to_hour(index['index'], time_span,
+                                                      remainder)
 
-    items.append({
-        'projectName': row['project'],
-        'crashType': row['crash_type'],
-        'crashState': row['crash_state'],
-        'isSecurity': row['security_flag'],
-        'isReproducible': row['is_reproducible'],
-        'isNew': row['is_new'],
-        'totalCount': row['total_count'],
-        'crashTime': {
-            'min':
-                row['min_crash_time_in_ms'],
-            'max':
-                row['max_crash_time_in_ms'],
-            'avg':
-                avg_crash_time_in_ms,
-            'std':
-                math.sqrt(
-                    (row['sum_square_crash_time_in_ms'] // row['total_count']) -
-                    (avg_crash_time_in_ms * avg_crash_time_in_ms))
-        },
-        'groups': row['groups'],
-        'days': days,
-        'block': block,
-        'end': end + 1  # Convert to UI's end.
-    })
-  return result.total_count, items
+        items.append({
+            'projectName': row['project'],
+            'crashType': row['crash_type'],
+            'crashState': row['crash_state'],
+            'isSecurity': row['security_flag'],
+            'isReproducible': row['is_reproducible'],
+            'isNew': row['is_new'],
+            'totalCount': row['total_count'],
+            'crashTime': {
+                'min':
+                    row['min_crash_time_in_ms'],
+                'max':
+                    row['max_crash_time_in_ms'],
+                'avg':
+                    avg_crash_time_in_ms,
+                'std':
+                    math.sqrt(
+                        (row['sum_square_crash_time_in_ms'] // row['total_count']) -
+                        (avg_crash_time_in_ms * avg_crash_time_in_ms))
+            },
+            'groups': row['groups'],
+            'days': days,
+            'block': block,
+            'end': end + 1  # Convert to UI's end.
+        })
+    return result.total_count, items
 
 
 def get_datetime(hours):
-  """Get datetime obj from hours from epoch."""
-  return datetime.datetime.utcfromtimestamp(hours * 60 * 60)
+    """Get datetime obj from hours from epoch."""
+    return datetime.datetime.utcfromtimestamp(hours * 60 * 60)
 
 
 def _get_first_or_last_successful_hour(is_last):
-  """Get the first successful hour."""
-  order = data_types.BuildCrashStatsJobHistory.end_time_in_hours
-  if is_last:
-    order = -order
+    """Get the first successful hour."""
+    order = data_types.BuildCrashStatsJobHistory.end_time_in_hours
+    if is_last:
+        order = -order
 
-  item = data_types.BuildCrashStatsJobHistory.query().order(order).get()
-  if not item:
-    return None
+    item = data_types.BuildCrashStatsJobHistory.query().order(order).get()
+    if not item:
+        return None
 
-  return item.end_time_in_hours
+    return item.end_time_in_hours
 
 
 def get_last_successful_hour():
-  """Get the last hour that ran successfully. We want to run the next hour."""
-  return _get_first_or_last_successful_hour(is_last=True)
+    """Get the last hour that ran successfully. We want to run the next hour."""
+    return _get_first_or_last_successful_hour(is_last=True)
 
 
 def get_min_hour():
-  """Get the first hour that ran successfully (for the date-time picker)."""
-  hour = _get_first_or_last_successful_hour(is_last=False)
+    """Get the first hour that ran successfully (for the date-time picker)."""
+    hour = _get_first_or_last_successful_hour(is_last=False)
 
-  # `hour` is None when we haven't run build_crash_stats at all.
-  # Therefore, there's no crash stats data.
-  #
-  # On the UI, the date-time picker choose a point of time. Therefore,
-  # if we choose, say, 3pm, this means we want the crash stats until 2:59pm.
-  # Therefore, we need to increment by 1.
-  return (hour or 0) + 1
+    # `hour` is None when we haven't run build_crash_stats at all.
+    # Therefore, there's no crash stats data.
+    #
+    # On the UI, the date-time picker choose a point of time. Therefore,
+    # if we choose, say, 3pm, this means we want the crash stats until 2:59pm.
+    # Therefore, we need to increment by 1.
+    return (hour or 0) + 1
 
 
 def get_max_hour():
-  """Get the last hour that can be selected by the date-time picker."""
-  hour = get_last_successful_hour()
+    """Get the last hour that can be selected by the date-time picker."""
+    hour = get_last_successful_hour()
 
-  # `hour` is None when we haven't run build_crash_stats at all.
-  # Therefore, there's no crash stats data.
-  #
-  # On the UI, the date-time picker choose a point of time. Therefore,
-  # if we choose, say, 3pm, this means we want the crash stats until 2:59pm.
-  # Therefore, we need to increment by 1.
-  return (hour or 0) + 1
+    # `hour` is None when we haven't run build_crash_stats at all.
+    # Therefore, there's no crash stats data.
+    #
+    # On the UI, the date-time picker choose a point of time. Therefore,
+    # if we choose, say, 3pm, this means we want the crash stats until 2:59pm.
+    # Therefore, we need to increment by 1.
+    return (hour or 0) + 1
 
 
 @environment.local_noop
 def get_last_crash_time(testcase):
-  """Return timestamp for last crash with same crash params as testcase."""
-  client = big_query.Client()
+    """Return timestamp for last crash with same crash params as testcase."""
+    client = big_query.Client()
 
-  where_clause = ('crash_type = {crash_type} AND '
-                  'crash_state = {crash_state} AND '
-                  'security_flag = {security_flag} AND '
-                  'project = {project}').format(
-                      crash_type=json.dumps(testcase.crash_type),
-                      crash_state=json.dumps(testcase.crash_state),
-                      security_flag=json.dumps(testcase.security_flag),
-                      project=json.dumps(testcase.project_name),
-                  )
+    where_clause = ('crash_type = {crash_type} AND '
+                    'crash_state = {crash_state} AND '
+                    'security_flag = {security_flag} AND '
+                    'project = {project}').format(
+                        crash_type=json.dumps(testcase.crash_type),
+                        crash_state=json.dumps(testcase.crash_state),
+                        security_flag=json.dumps(testcase.security_flag),
+                        project=json.dumps(testcase.project_name),
+    )
 
-  sql = """
+    sql = """
 SELECT hour
 FROM main.crash_stats
 WHERE {where_clause}
@@ -275,8 +275,8 @@ ORDER by hour DESC
 LIMIT 1
 """.format(where_clause=where_clause)
 
-  result = client.query(query=sql)
-  if result and result.rows:
-    return get_datetime(result.rows[0]['hour'])
+    result = client.query(query=sql)
+    if result and result.rows:
+        return get_datetime(result.rows[0]['hour'])
 
-  return None
+    return None

@@ -25,43 +25,43 @@ from tests.test_libs import test_utils
 
 @test_utils.with_cloud_emulators('datastore')
 class HandlerTest(unittest.TestCase):
-  """Test HandlerTest."""
+    """Test HandlerTest."""
 
-  def setUp(self):
-    test_helpers.patch(self, [
-        'libs.auth.get_current_user',
-        'libs.auth.is_current_user_admin',
-    ])
-    self.mock.is_current_user_admin.return_value = True
-    self.mock.get_current_user().email = 'test@user.com'
-    flaskapp = flask.Flask('testflask')
-    flaskapp.add_url_rule('/', view_func=delete.Handler.as_view('/'))
-    self.app = webtest.TestApp(flaskapp)
+    def setUp(self):
+        test_helpers.patch(self, [
+            'libs.auth.get_current_user',
+            'libs.auth.is_current_user_admin',
+        ])
+        self.mock.is_current_user_admin.return_value = True
+        self.mock.get_current_user().email = 'test@user.com'
+        flaskapp = flask.Flask('testflask')
+        flaskapp.add_url_rule('/', view_func=delete.Handler.as_view('/'))
+        self.app = webtest.TestApp(flaskapp)
 
-  def test_assigned_issue(self):
-    """The testcase is assigned an issue."""
-    testcase = data_types.Testcase()
-    testcase.bug_information = '1234'
-    testcase.put()
+    def test_assigned_issue(self):
+        """The testcase is assigned an issue."""
+        testcase = data_types.Testcase()
+        testcase.bug_information = '1234'
+        testcase.put()
 
-    resp = self.app.post_json(
-        '/', {
+        resp = self.app.post_json(
+            '/', {
+                'testcaseId': testcase.key.id(),
+                'csrf_token': form.generate_csrf_token()
+            },
+            expect_errors=True)
+        self.assertEqual(400, resp.status_int)
+        self.assertIsNotNone(testcase.key.get())
+
+    def test_succeed(self):
+        """Delete."""
+        testcase = data_types.Testcase()
+        testcase.bug_information = None
+        testcase.put()
+
+        resp = self.app.post_json('/', {
             'testcaseId': testcase.key.id(),
             'csrf_token': form.generate_csrf_token()
-        },
-        expect_errors=True)
-    self.assertEqual(400, resp.status_int)
-    self.assertIsNotNone(testcase.key.get())
-
-  def test_succeed(self):
-    """Delete."""
-    testcase = data_types.Testcase()
-    testcase.bug_information = None
-    testcase.put()
-
-    resp = self.app.post_json('/', {
-        'testcaseId': testcase.key.id(),
-        'csrf_token': form.generate_csrf_token()
-    })
-    self.assertEqual(200, resp.status_int)
-    self.assertIsNone(testcase.key.get())
+        })
+        self.assertEqual(200, resp.status_int)
+        self.assertIsNone(testcase.key.get())

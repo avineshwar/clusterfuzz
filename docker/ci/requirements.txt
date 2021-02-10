@@ -20,3 +20,4 @@ unittest2==1.1.0
 waitress==1.4.3
 WebTest==2.0.23
 yapf==0.22.0
+httplib2>=0.19.0 # not directly required, pinned by Snyk to avoid a vulnerability
